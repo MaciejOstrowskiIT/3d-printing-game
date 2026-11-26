@@ -18,10 +18,17 @@ More than one agent works on this repo in parallel (Claude, Codex). Read this be
 ## In flight
 | PR / branch | Agent | Touches |
 |---|---|---|
-| #8 `feat/analytics` | Claude | `platform/analytics.ts`, `ui/analytics.ts` (new); `ui/store.ts` event listeners; `main.tsx`; `vite.config.ts` (`__BUILD__`); `GameState.play` + tick in `core/game.ts`; deploy workflow |
-| #9 `feat/portal-assets` | Claude | `promo/` (new); `index.html` (boot screen, favicon); `main.tsx`; `src/fonts.css`; `styles.css`; `tests/bot.ts` (observer arg) |
-| #10 `feat/market-events` | Claude | `content/events.ts`, `systems/marketEvents.ts` (new); `GameState.mev/mevT/mfx`; `formulas.ts` (`marketMul` in `demand` and `spoolPrice`); `GameEvent` `market`; actions `mevyes/mevno`; i18n `L.mev*`, `mevExp`, `fx*`; `Workshop.tsx` Events; `tests/bot.ts` |
-| (local) cheat-proofing | Codex | please fill in |
+| #10 `feat/market-events` | Claude | `content/events.ts`, `systems/marketEvents.ts` (new); `GameState.mev/mevT/mfx`; `formulas.ts` (`marketMul` in `demand` and `spoolPrice`); `GameEvent` `market`; actions `mevyes/mevno`; i18n `L.mev*`, `mevExp`, `fx*`; `Workshop.tsx` Events; `ui/store.ts` (one `track` line); `tests/bot.ts` |
+| `feat/offline-mobile` (incl. `feat/workshop-discovery`) | Codex | `core/saveValidation.ts` (new), `save.ts` (`migrate` validates, rebuilds research multipliers), `catchUp` return value, `GameState.serverThrough`, `ui/store.ts`, `ui/workshopClock.ts`, `Research.tsx`, `Side.tsx`, `App.tsx`, `styles.css` |
+
+Merged: #8 analytics, #9 portal assets.
+
+Cross-branch notes:
+- `feat/offline-mobile` + `feat/market-events` merge cleanly (checked locally: typecheck OK, 46 tests pass).
+- **For `saveValidation.ts`:** call `validMarketState(s)` from `systems/marketEvents.ts` in `validSave()`. The generic
+  number/boolean check does not cover `mev` (object or null) or `mfx` (array); a tampered `mev.cost < 0` would pay out
+  on accept (acceptance now refuses non-positive prices too, but the save should be rejected).
+- `GameState.play` (from #8) is a plain number: active seconds on the current line.
 
 Waiting for the cheat-proofing work: rewarded "double offline earnings" and CrazyGames account saves (both touch
 `save.ts`, offline catch-up and the platform save API).
