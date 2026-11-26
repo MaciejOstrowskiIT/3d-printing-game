@@ -1,6 +1,7 @@
 import { BAL } from '../content/balance';
 import { log, pick, sfx, type Ctx } from '../core/ctx';
 import { has, type GameState } from '../core/state';
+import { mod } from '../core/mods';
 
 const BED_ADHESION = 1;
 const SPAGHETTI = 5;
@@ -10,7 +11,7 @@ const BASE_CAUSES = 5;
 export function repair(s: GameState, ctx: Ctx) {
   if (s.brk <= 0) return;
   s.brk = 0;
-  s.brkT = pick(ctx, BAL.breakdownEvery);
+  s.brkT = pick(ctx, BAL.breakdownEvery) / mod(s, 'breakdown');
   log(s, ctx, 'fix');
 }
 
@@ -24,13 +25,13 @@ export function breakdownsSystem(s: GameState, dt: number, ctx: Ctx) {
       const cause = Math.floor(ctx.rng() * causeCount);
       if ((s.bedCalibrated && (cause === BED_ADHESION || cause === SPAGHETTI)) ||
           (s.dryerInstalled && cause === WET_FILAMENT)) {
-        s.brkT = pick(ctx, BAL.breakdownEvery);
+        s.brkT = pick(ctx, BAL.breakdownEvery) / mod(s, 'breakdown');
         return;
       }
       s.brk = share;
       s.brkC = cause;
       s.fails++;
-      s.fixT = BAL.cameraFix;
+      s.fixT = BAL.cameraFix * mod(s, 'repair');
       log(s, ctx, 'brk', '%' + s.brkC);
       sfx(ctx, 'alert');
     }

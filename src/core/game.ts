@@ -23,6 +23,7 @@ import { log, sfx, type Ctx, type GameEvent } from './ctx';
 import { autoCost, farmCost, mktCost, model, panelCost } from './formulas';
 import { buyPatent, prestige } from './prestige';
 import { createState, type GameState, type LogEntry } from './state';
+import { mod } from './mods';
 
 export type System = (s: GameState, dt: number, ctx: Ctx) => void;
 
@@ -131,7 +132,7 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
     catchUp(seconds) {
       if (s.end || !Number.isFinite(seconds) || seconds <= 0) return;
       const before = { total: s.total, sold: s.sold };
-      const elapsed = Math.min(seconds, s.slow > 1 ? BAL.realisticOfflineMax : BAL.offlineMaxSeconds);
+      const elapsed = Math.min(seconds, (s.slow > 1 ? BAL.realisticOfflineMax : BAL.offlineMaxSeconds) * mod(s, 'offline'));
       ctx.offline = true;
       let rem = elapsed, revenue = 0, idle = 0;
       while (rem > 0) {

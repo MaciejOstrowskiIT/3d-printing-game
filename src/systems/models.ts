@@ -2,10 +2,11 @@ import { bookCash } from './workshopStats';
 import { BAL } from '../content/balance';
 import { MODEL, MODELS, type PrintModel } from '../content/models';
 import { log, sfx, type Ctx } from '../core/ctx';
-import { clickCost, clickPower, model } from '../core/formulas';
+import { clickCost, clickPower, demand, model, rate1, unitCost } from '../core/formulas';
 import type { GameState } from '../core/state';
 import { modelStock } from './inventory';
 import { printWork } from './production';
+import { mod } from '../core/mods';
 
 /** Print models: buying designs, switching the fleet to another model, manual printing with click tools.
  *  All model numbers come from content/models.ts; nothing here is specific to one model. */
@@ -13,12 +14,14 @@ import { printWork } from './production';
 /** A design shows up in the shop once enough figurines have been printed. */
 export const designVisible = (s: GameState, m: PrintModel) => s.total >= m.unlockAt;
 export const owns = (s: GameState, id: string) => s.mdls.includes(id);
+/** Price of a design after research discounts. */
+export const designCost = (s: GameState, m: PrintModel) => Math.round(m.design * mod(s, 'design'));
 
 export function buyDesign(s: GameState, ctx: Ctx, id: string): boolean {
   if (!Object.hasOwn(MODEL, id)) return false;
   const m = MODEL[id];
-  if (!m || s.ph !== 1 || owns(s, id) || !designVisible(s, m) || s.zl < m.design) return false;
-  bookCash(s, 'other', m.design);
+  if (!m || s.ph !== 1 || owns(s, id) || !designVisible(s, m) || s.zl < designCost(s, m)) return false;
+  bookCash(s, 'other', designCost(s, m));
   s.mdls = [...s.mdls, id];
   log(s, ctx, 'mdlBuy', '*' + id);
   ctx.emit({ type: 'model', id, action: 'bought' });
@@ -70,3 +73,20 @@ export function validModelState(s: GameState): boolean {
   return Number.isInteger(s.clk) && s.clk >= 0 && s.clk <= BAL.clickMaxLevel &&
     typeof s.mp === 'number' && s.mp >= 0 && s.mp <= maxSeconds;
 }
+
+/** Owned model with the best profit per second if the price clears the market at the current production rate.
+ *  Used by the production planner automation (and the balance bot). */
+export function bestModel(s: GameState): string {
+  const R = Math.max(rate1(s), 1e-6);
+  let best = s.mdl, bestProfit = -Infinity;
+  for (const id of s.mdls) {
+    const m = MODEL[id];
+    if (!m) continue;
+    const t = { ...s, mdl: id, price: s.price * (m.value / (MODEL[s.mdl]?.value ?? 1)) };
+    const clearing = t.price * (demand(t) / R) ** (1 / BAL.demandElasticity);
+    const profit = R * (Math.min(clearing, 500 / m.seconds) - unitCost(t));
+    if (profit > bestProfit) { bestProfit = profit; best = id; }
+  }
+  return best;
+}
+

@@ -79,6 +79,8 @@ export interface GameState {
   orderStock: Record<string, number>;
   financeTime: number;
   finance: CashPeriod[];
+  /** Production planner automation: seconds since its last check. */
+  planT: number;
 }
 
 export const SAVE_VERSION = 6;
@@ -116,6 +118,7 @@ export const createState = (): GameState => ({
   lowFil: false, matHint: false, autoMat: false,
   modelStock: {}, orderStock: {},
   financeTime: 0, finance: [],
+  planT: 0,
 });
 
 export const has = (s: GameState, id: string) => s.done.includes(id);
