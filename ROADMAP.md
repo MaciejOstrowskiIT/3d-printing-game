@@ -12,7 +12,7 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 
 | Card | PR | Notes |
 |---|---|---|
-| Research visibility: next research in the Workshop, collapsed finished nodes, pulsing tab count | (this PR) | |
+| Research visibility: next research in the Workshop, collapsed finished nodes, pulsing tab count | #30 | |
 | Filament run-out: early warning, switch to a material in stock, idle time in the away report | #28 | |
 
 ## 🚦 Next up
