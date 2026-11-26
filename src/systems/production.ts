@@ -1,3 +1,4 @@
+import { bookCash } from './workshopStats';
 import { BAL } from '../content/balance';
 import { modelStock, putPieces } from './inventory';
 import { log, sfx, type Ctx } from '../core/ctx';
@@ -19,7 +20,7 @@ export function make(s: GameState, ctx: Ctx, n: number, premium = s.precision ? 
     o.got += k;
     n -= k;
     if (o.got >= o.n) {
-      s.zl += o.pay;
+      bookCash(s, 'orders', o.pay);
       s.ordDone++;
       log(s, ctx, 'oOk', '$' + o.pay);
       ctx.emit({ type: 'order', result: 'delivered' });
@@ -35,7 +36,7 @@ export function make(s: GameState, ctx: Ctx, n: number, premium = s.precision ? 
 export function buySpool(s: GameState): boolean {
   const c = spoolPrice(s);
   if (s.zl < c) return false;
-  s.zl -= c;
+  bookCash(s, 'filament', c);
   s.fil += s.spoolG;
   s.warn = false;
   return true;
@@ -77,7 +78,7 @@ export function productionSystem(s: GameState, dt: number, ctx: Ctx) {
   // Soft-lock guard: with no filament (not even another material in stock), no stock and no money,
   // the supplier gives a spool on credit.
   if (s.fil < g && s.inv < 1 && s.zl < spoolPrice(s) && s.zl > -spoolPrice(s) * 4 && s.total > 0 && !(s.ord && s.ord.acc) && !stockedAlternative(s)) {
-    s.zl -= spoolPrice(s);
+    bookCash(s, 'filament', spoolPrice(s));
     s.fil += s.spoolG;
     log(s, ctx, 'credit');
   }

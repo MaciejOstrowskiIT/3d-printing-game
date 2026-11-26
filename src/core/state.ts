@@ -1,3 +1,4 @@
+import type { CashPeriod } from '../systems/workshopStats';
 import type { ModelStock } from '../systems/inventory';
 import { DEFAULT_MATERIAL } from '../content/materials';
 import type { DailyOrder } from '../systems/dailyOrder';
@@ -76,6 +77,8 @@ export interface GameState {
   lowFil: boolean; matHint: boolean; autoMat: boolean;
   modelStock: Record<string, ModelStock>;
   orderStock: Record<string, number>;
+  financeTime: number;
+  finance: CashPeriod[];
 }
 
 export const SAVE_VERSION = 6;
@@ -112,6 +115,7 @@ export const createState = (): GameState => ({
   materialId: DEFAULT_MATERIAL.id, materialStock: {},
   lowFil: false, matHint: false, autoMat: false,
   modelStock: {}, orderStock: {},
+  financeTime: 0, finance: [],
 });
 
 export const has = (s: GameState, id: string) => s.done.includes(id);

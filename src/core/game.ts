@@ -1,3 +1,4 @@
+import { bookCash } from '../systems/workshopStats';
 import { BAL } from '../content/balance';
 import { achievementsSystem } from '../systems/achievements';
 import { automationSystem } from '../systems/automation';
@@ -72,9 +73,9 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
   const ctx: Ctx = { rng: opts.rng ?? Math.random, offline: false, emit: e => listeners.forEach(fn => fn(e)) };
   if (!s.log.length) log(s, ctx, 'start');
 
-  const spend = (cost: number, apply: () => void) => {
+  const spend = (cost: number, apply: () => void, kind: 'equipment' | 'other' = 'equipment') => {
     if (s.zl < cost) return false;
-    s.zl -= cost;
+    bookCash(s, kind, cost);
     apply();
     sfx(ctx, 'buy');
     return true;
@@ -85,6 +86,7 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
     tick(dt) {
       if (s.end) return;
       if (!ctx.offline) s.play += dt;
+      if (s.ph === 1) s.financeTime += dt;
       for (const sys of SYSTEMS) sys(s, dt, ctx);
     },
     act(a) {
@@ -94,7 +96,7 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
       if (a === 'auto') return spend(autoCost(s), () => { s.auto++; if (s.auto === 1) log(s, ctx, 'firstPr'); });
       if (a === 'farm') return spend(farmCost(s), () => { s.farm++; log(s, ctx, 'farm', s.farm); });
       if (a === 'panel') return spend(panelCost(s), () => { s.panels++; });
-      if (a === 'mkt') return spend(mktCost(s), () => { s.mkt++; log(s, ctx, 'mkt', s.mkt); });
+      if (a === 'mkt') return spend(mktCost(s), () => { s.mkt++; log(s, ctx, 'mkt', s.mkt); }, 'other');
       if (a === 'drone') { const ok = buyDrone(s); if (ok) sfx(ctx, 'buy'); return ok; }
       if (a === 'fab') { const ok = buyFab(s); if (ok) sfx(ctx, 'buy'); return ok; }
       if (a === 'pminus') { changePrice(s, -0.1 / model(s).seconds); return true; }

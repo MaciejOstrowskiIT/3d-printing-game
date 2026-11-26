@@ -10,6 +10,7 @@ import { validModelState } from '../systems/models';
 import { validOfflineBonus } from '../systems/offlineBonus';
 import { validDailyState } from '../systems/dailyOrder';
 import { validStoryState } from '../systems/story';
+import { validWorkshopStats } from '../systems/workshopStats';
 import type { GameState } from './state';
 
 const record = (v: unknown): v is Record<string, unknown> =>
@@ -54,6 +55,7 @@ export function validSave(s: GameState, defaults: GameState) {
   const kept = KEPT_AUTOMATION[s.meta.pat.keep ?? 0];
   if (s.done.some(id => !kept.includes(id) && NODE[id].req?.some(req => !s.done.includes(req)))) return false;
   if (!validMarketState(s) || !validModelState(s) || !validInventory(s) || !validMaterialState(s) || !validOfflineBonus(s) || ![1, BAL.realisticSlow].includes(s.slow) || !validDailyState(s) || !validStoryState(s) || s.play < 0) return false;
+  if (!validWorkshopStats(s)) return false;
   if (s.stockPremium < 0 || s.stockPremium > BAL.precisionPremium + 1e-9) return false;
   return s.boostT >= 0 && s.boostT <= BAL.boostSeconds &&
     s.boostCd >= s.boostT && s.boostCd <= BAL.boostCooldown;

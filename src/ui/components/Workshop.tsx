@@ -23,6 +23,7 @@ import { platform } from '../platform';
 import { act, adPending, useS, watchAdForBoost } from '../store';
 import { clock, colorName, dict, dur, fmt, li, money, nf, t } from '../i18n';
 import { BuyButton, CardHead, Item, Meter, Tile, useHold } from './common';
+import { WorkshopStats } from './WorkshopStats';
 import { PrestigeCard } from './Prestige';
 
 /** A market event offer (content/events.ts) with its price, countdown and a take-it-or-leave-it choice. */
@@ -462,6 +463,7 @@ export function Workshop() {
       <div class="grid">
         {!v.sp && <Production />}
         {!v.sp && v.g >= 1 && <Sales />}
+        {!v.sp && v.g >= 1 && <WorkshopStats />}
         {!v.sp && <Models />}
         {!v.sp && <Materials />}
         {!v.sp && <PrintQuality />}

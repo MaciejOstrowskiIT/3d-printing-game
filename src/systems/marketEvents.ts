@@ -1,3 +1,4 @@
+import { bookCash } from './workshopStats';
 import { DEFAULT_MATERIAL } from '../content/materials';
 import { addMaterial } from './materials';
 import { BAL } from '../content/balance';
@@ -68,7 +69,7 @@ function spawn(s: GameState, ctx: Ctx) {
 export function acceptMarketEvent(s: GameState, ctx: Ctx): boolean {
   const e = s.mev && MARKET_EVENT[s.mev.id];
   if (!s.mev || !e?.offer || !canAfford(s)) return false;
-  s.zl -= s.mev.cost;
+  bookCash(s, e.spools ? 'filament' : 'other', s.mev.cost);
   if (e.counter) s.mfx = s.mfx.filter(f => f.id !== e.id);
   else if (e.spools) addMaterial(s, DEFAULT_MATERIAL.id, e.spools * s.spoolG);
   else startEffect(s, e);

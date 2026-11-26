@@ -1,3 +1,4 @@
+import { bookCash } from './workshopStats';
 import { MODELS } from '../content/models';
 import { demand, realizedPrice } from '../core/formulas';
 import type { GameState } from '../core/state';
@@ -21,7 +22,7 @@ export function salesSystem(s: GameState, dt: number) {
 
     const count = Math.min(wanted, stock);
     if (!count) continue;
-    s.zl += count * m.seconds * realizedPrice(s, m.id);
+    bookCash(s, 'sales', count * m.seconds * realizedPrice(s, m.id), { modelId: m.id, pieces: count });
     s.sold += count;
     takePieces(s, m.id, count);
   }

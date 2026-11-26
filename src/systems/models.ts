@@ -1,3 +1,4 @@
+import { bookCash } from './workshopStats';
 import { BAL } from '../content/balance';
 import { MODEL, MODELS, type PrintModel } from '../content/models';
 import { log, sfx, type Ctx } from '../core/ctx';
@@ -17,7 +18,7 @@ export function buyDesign(s: GameState, ctx: Ctx, id: string): boolean {
   if (!Object.hasOwn(MODEL, id)) return false;
   const m = MODEL[id];
   if (!m || s.ph !== 1 || owns(s, id) || !designVisible(s, m) || s.zl < m.design) return false;
-  s.zl -= m.design;
+  bookCash(s, 'other', m.design);
   s.mdls = [...s.mdls, id];
   log(s, ctx, 'mdlBuy', '*' + id);
   ctx.emit({ type: 'model', id, action: 'bought' });
@@ -43,7 +44,7 @@ export function selectModel(s: GameState, ctx: Ctx, id: string): boolean {
 export function buyClickTool(s: GameState): boolean {
   const c = clickCost(s);
   if (s.ph !== 1 || s.zl < c) return false;
-  s.zl -= c;
+  bookCash(s, 'equipment', c);
   s.clk++;
   return true;
 }

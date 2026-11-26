@@ -1,3 +1,4 @@
+import { bookCash } from './workshopStats';
 import { BAL } from '../content/balance';
 import { TREE } from '../content/tree';
 import type { Ctx } from '../core/ctx';
@@ -35,12 +36,12 @@ export function automationSystem(s: GameState, dt: number, ctx: Ctx) {
 
       // Once liftoff is within reach, the agencies stop buying so the player can save up for it.
       const saving = has(s, 'slicer') && !has(s, 'replik') && s.farm >= 5;
-      if (on(s, 'automkt') && !saving && mktCost(s) < free * 0.2) { s.zl -= mktCost(s); s.mkt++; }
+      if (on(s, 'automkt') && !saving && mktCost(s) < free * 0.2) { bookCash(s, 'other', mktCost(s)); s.mkt++; }
 
       if (on(s, 'autodruk') && free > 0 && !saving) {
-        if (s.farmOn && supply(s) < drawP(s) + 20 && panelCost(s) < free * 0.25) { s.zl -= panelCost(s); s.panels++; }
-        else if (s.farmOn && farmCost(s) < free * 0.25 && supply(s) >= drawP(s) + 20) { s.zl -= farmCost(s); s.farm++; }
-        else if (autoCost(s) < free * 0.25) { s.zl -= autoCost(s); s.auto++; }
+        if (s.farmOn && supply(s) < drawP(s) + 20 && panelCost(s) < free * 0.25) { bookCash(s, 'equipment', panelCost(s)); s.panels++; }
+        else if (s.farmOn && farmCost(s) < free * 0.25 && supply(s) >= drawP(s) + 20) { bookCash(s, 'equipment', farmCost(s)); s.farm++; }
+        else if (autoCost(s) < free * 0.25) { bookCash(s, 'equipment', autoCost(s)); s.auto++; }
       }
     }
     if (on(s, 'b2b') && s.ord && !s.ord.acc) acceptOrder(s);

@@ -1,3 +1,4 @@
+import { bookCash } from './workshopStats';
 import { takeStockWork } from './inventory';
 import { BAL } from '../content/balance';
 import { log, sfx, type Ctx } from '../core/ctx';
@@ -44,7 +45,7 @@ export function deliverDaily(s: GameState, ctx: Ctx): boolean {
   const o = s.dord;
   if (!o || o.done || o.day !== s.dday || s.ph !== 1 || s.inv < o.n) return false;
   takeStockWork(s, o.n);
-  s.zl += o.pay;
+  bookCash(s, 'orders', o.pay);
   o.done = true;
   s.dstreak += 1;
   s.dbest = Math.max(s.dbest, s.dstreak);
