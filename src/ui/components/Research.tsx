@@ -5,6 +5,7 @@ import { has } from '../../core/state';
 import { nodeStatus } from '../../systems/research';
 import { fmt, li, money, nodeName, prefs, t } from '../i18n';
 import { act, ui, useS } from '../store';
+import { AchievementsCard } from './Achievements';
 import { CardHead, Meter } from './common';
 
 function Computer() {
@@ -118,5 +119,5 @@ function Tree() {
 }
 
 export function Research() {
-  return (<div><Computer /><Tree /></div>);
+  return (<div><Computer /><Tree /><AchievementsCard /></div>);
 }

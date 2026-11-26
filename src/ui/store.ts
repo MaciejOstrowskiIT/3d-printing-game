@@ -35,6 +35,15 @@ export function act(a: Action) { const ok = game.act(a); bump(); return ok; }
 export function ui(fn: (s: GameState) => void) { fn(game.s); bump(); }
 export function resetGame(logKey?: string) { game.reset(logKey); save(); bump(); }
 
+/** Achievement toasts currently on screen. */
+export const toasts = signal<{ id: string; key: number }[]>([]);
+let toastKey = 0;
+function pushToast(id: string) {
+  const key = ++toastKey;
+  toasts.value = [...toasts.value, { id, key }].slice(-3);
+  setTimeout(() => { toasts.value = toasts.value.filter(x => x.key !== key); }, 4200);
+}
+
 /** True while a rewarded ad is being requested or shown. */
 export const adPending = signal(false);
 
@@ -59,6 +68,7 @@ game.on(e => {
   if (e.type === 'phase') platform.track('liftoff');
   if (e.type === 'order') platform.track('order', { result: e.result });
   if (e.type === 'end') platform.track('end', { total: game.s.total });
+  if (e.type === 'achievement') { pushToast(e.id); platform.track('achievement', { id: e.id }); }
 });
 
 let lastT = performance.now(), sinceSave = 0;

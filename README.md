@@ -74,6 +74,7 @@ tests/         system tests and the balance bot
 - 17 goals guiding the player through the whole game.
 - Space phase: drones, orbital factories, asteroid belt.
 - Isometric scene (garage → workshop → factory floor → orbit) with a printer close-up inset and layer-by-layer animation.
+- 18 achievements (one hidden) with toasts; older saves unlock earned ones silently.
 - PL / EN, sound (WebAudio), offline progress up to 8 h.
 
 ## Balance

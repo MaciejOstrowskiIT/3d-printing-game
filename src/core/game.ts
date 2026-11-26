@@ -1,4 +1,5 @@
 import { BAL } from '../content/balance';
+import { achievementsSystem } from '../systems/achievements';
 import { automationSystem } from '../systems/automation';
 import { activateBoost, boostSystem } from '../systems/boost';
 import { breakdownsSystem, repair } from '../systems/breakdowns';
@@ -29,6 +30,7 @@ export const SYSTEMS: System[] = [
   automationSystem,
   reputationSystem,
   goalsSystem,
+  achievementsSystem,
 ];
 
 /** Player actions. The UI only sends these strings and never mutates game state itself. */

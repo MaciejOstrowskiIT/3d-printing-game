@@ -80,7 +80,7 @@ describe('save', () => {
     const s = migrate({ total: 1234, zl: 50, auto: 3, done: ['dysza'] });
     expect(s.total).toBe(1234);
     expect(s.auto).toBe(3);
-    expect(s.v).toBe(4);
+    expect(s.v).toBe(5);
     expect(s.ordFail).toBe(0);
     expect(s.col).toBe(0);
   });
@@ -122,5 +122,28 @@ describe('rewarded boost', () => {
   it('is not available before the player automates production', () => {
     const g = newGame();
     expect(g.act('boost')).toBe(false);
+  });
+});
+
+describe('achievements', () => {
+  it('unlocks on the first print and logs it once', () => {
+    const g = newGame();
+    g.act('print');
+    g.tick(0.6);
+    g.tick(0.6);
+    expect(g.s.ach).toContain('first');
+    expect(g.s.ach.filter(id => id === 'first')).toHaveLength(1);
+  });
+
+  it('tracks every colour used for the rainbow achievement', () => {
+    const g = newGame();
+    for (let i = 0; i < 6; i++) { g.s.col = i; g.tick(0.6); }
+    expect(g.s.ach).toContain('rainbow');
+  });
+
+  it('grants earned achievements silently when loading an older save', () => {
+    const s = migrate({ v: 4, total: 2e6, auto: 60, farm: 1 });
+    expect(s.ach).toEqual(expect.arrayContaining(['first', 'k1', 'm1', 'auto1', 'auto50', 'farm1']));
+    expect(s.ach).not.toContain('b1');
   });
 });
