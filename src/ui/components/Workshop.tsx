@@ -1,3 +1,4 @@
+import { stockGrowth } from '../../systems/workshopStats';
 import { piecesInStock, premiumFor, stockPrice } from '../../systems/inventory';
 import { BAL } from '../../content/balance';
 import { MATERIAL, MATERIALS, materialDemand } from '../../content/materials';
@@ -272,10 +273,10 @@ function PrintQuality() {
 function Sales() {
   const v = useS(s => ({
     sold: s.sold, inv: piecesInStock(s, s.mdl), name: model(s).name[li()], piecesPerSecond: demand(s) / model(s).seconds, uc: unitCost(s) * model(s).seconds, price: realizedPrice(s) * model(s).seconds, premium: premiumFor(s, s.mdl), auto: has(s, 'autocena') && !!s.amOn.autocena,
-    slow: rate1(s) > demand(s) * 1.1, fast: piecesInStock(s, s.mdl) < 1 && s.sold > 0, goal: s.goal, mkt: s.mkt, mktCost: mktCost(s), zl: s.zl,
+    growth: piecesInStock(s, s.mdl) > 0 ? stockGrowth(s, s.mdl) : null, fast: piecesInStock(s, s.mdl) < 1 && s.sold > 0, goal: s.goal, mkt: s.mkt, mktCost: mktCost(s), zl: s.zl,
   }));
   const loss = v.price < v.uc;
-  const hint = loss ? t('hLoss') : v.auto ? t('hAuto') : v.slow ? t('hSlow') : v.fast ? t('hFast') : t('hBase');
+  const hint = loss ? t('hLoss') : v.auto ? t('hAuto') : v.fast ? t('hFast') : t('hBase');
   return (
     <section class="card">
       <CardHead title={t('sales')} aside={t('soldT', fmt(v.sold))} />
@@ -286,6 +287,7 @@ function Sales() {
       </div>
       <ColorPicker />
       {!v.auto && <PriceStepper />}
+      {v.growth && <p class="stock-growth">{t('statsStockGrowth', fmt(v.growth.stocked), fmt(v.growth.sold))}</p>}
       {v.premium > 0 && <p class="hint">{t('qualityPrice', money(v.price))}</p>}
       <p class={'hint' + (loss ? ' bad' : '')}>{hint}</p>
       {v.goal >= 4 && (

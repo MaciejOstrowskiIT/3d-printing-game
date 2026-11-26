@@ -6,7 +6,13 @@ export const PERIOD_COUNT = 10;
 export const CASH_KINDS = ['sales', 'orders', 'bonus', 'filament', 'equipment', 'other'] as const;
 type CashKind = typeof CASH_KINDS[number];
 
-interface ModelSales { pieces: number; revenue: number }
+interface ModelSales {
+  pieces: number;
+  revenue: number;
+  cost?: number | null;
+  stocked?: number;
+  shipped?: number;
+}
 export interface CashPeriod {
   index: number;
   cash: Record<CashKind, number>;
@@ -20,10 +26,7 @@ export const newPeriod = (index: number): CashPeriod => ({
 export const income = ({ cash }: CashPeriod) => cash.sales + cash.orders + cash.bonus;
 export const expenses = ({ cash }: CashPeriod) => cash.filament + cash.equipment + cash.other;
 
-export function bookCash(s: GameState, kind: CashKind, amount: number, sale?: { modelId: string; pieces: number }) {
-  s.zl += kind === 'filament' || kind === 'equipment' || kind === 'other' ? -amount : amount;
-  if (!amount || s.ph !== 1) return;
-
+function currentPeriod(s: GameState) {
   const index = periodIndex(s);
   let period = s.finance.at(-1);
   if (period?.index !== index) {
@@ -31,9 +34,38 @@ export function bookCash(s: GameState, kind: CashKind, amount: number, sale?: { 
     period = newPeriod(index);
     s.finance.push(period);
   }
-  period.cash[kind] += amount;
+  return period;
+}
+
+function modelActivity(s: GameState, id: string) {
+  return currentPeriod(s).models[id] ??= { pieces: 0, revenue: 0 };
+}
+
+export function recordStockOutput(s: GameState, id: string, pieces: number) {
+  const activity = modelActivity(s, id);
+  activity.stocked = (activity.stocked ?? 0) + pieces;
+}
+
+export function recordStockShipment(s: GameState, id: string, pieces: number) {
+  const activity = modelActivity(s, id);
+  activity.shipped = (activity.shipped ?? 0) + pieces;
+}
+
+export function stockGrowth(s: GameState, id: string) {
+  const activity = s.finance.find(p => p.index === periodIndex(s) - 1)?.models[id];
+  const stocked = activity?.stocked ?? 0;
+  const sold = activity?.pieces ?? 0;
+  if (stocked < Math.max(1, 1.1 * (sold + (activity?.shipped ?? 0)) + 1e-9)) return null;
+  return { stocked: stocked * 60 / PERIOD_SECONDS, sold: sold * 60 / PERIOD_SECONDS };
+}
+
+export function bookCash(s: GameState, kind: CashKind, amount: number, sale?: { modelId: string; pieces: number; cost?: number | null }) {
+  s.zl += kind === 'filament' || kind === 'equipment' || kind === 'other' ? -amount : amount;
+  if (!amount || s.ph !== 1) return;
+  currentPeriod(s).cash[kind] += amount;
   if (sale) {
-    const model = period.models[sale.modelId] ??= { pieces: 0, revenue: 0 };
+    const model = modelActivity(s, sale.modelId);
+    model.cost = sale.cost != null && (!model.pieces || model.cost != null) ? (model.cost ?? 0) + sale.cost : null;
     model.pieces += sale.pieces;
     model.revenue += amount;
   }
@@ -49,7 +81,9 @@ export function validWorkshopStats(s: GameState) {
         !record(p.cash) || !CASH_KINDS.every(kind => nonNegative(p.cash[kind])) || !record(p.models)) return false;
     previous = p.index;
     if (!Object.entries(p.models).every(([id, m]) => Object.hasOwn(MODEL, id) && record(m) &&
-      Number.isSafeInteger(m.pieces) && m.pieces > 0 && nonNegative(m.revenue))) return false;
+      Number.isSafeInteger(m.pieces) && m.pieces >= 0 && nonNegative(m.revenue) &&
+      (m.cost == null || nonNegative(m.cost)) &&
+      [m.stocked, m.shipped].every(n => n === undefined || (Number.isSafeInteger(n) && n >= 0)))) return false;
   }
   return true;
 }

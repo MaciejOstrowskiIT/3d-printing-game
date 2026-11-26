@@ -377,3 +377,9 @@ body.space .title-screen{background:#14122b}
   .stats-totals .stats-money{font-size:19px}
   .stats-column{height:80px;padding:0 2px}
 }
+
+.stats-margins small{display:block;color:var(--mute);font-size:12px;font-weight:500}
+.stats-margins td{overflow-wrap:anywhere}
+.stats-margins .loss{color:var(--bad)}
+.stock-growth{margin:8px 0;padding:6px 8px;border-left:2px solid var(--or);background:var(--orS);border-radius:4px;color:var(--ink);font-size:13px}
+@media(max-width:420px){.stats-margins th,.stats-margins td{padding-left:4px;font-size:13px}}

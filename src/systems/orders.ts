@@ -30,9 +30,10 @@ function releaseOrderStock(s: GameState) {
   let figurines = s.ord?.got ?? 0;
   for (const [id, count] of Object.entries(s.orderStock)) {
     figurines -= count * MODEL[id].seconds;
-    putPieces(s, id, count, 0);
+    putPieces(s, id, count, 0, s.modelStock[id]?.reservedCost ?? null);
   }
-  putPieces(s, 'fig', figurines, 0);
+  putPieces(s, 'fig', figurines, 0, s.modelStock.fig?.reservedCost ?? null);
+  for (const stock of Object.values(s.modelStock)) delete stock.reservedCost;
   s.orderStock = {};
 }
 
