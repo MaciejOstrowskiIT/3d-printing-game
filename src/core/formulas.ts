@@ -1,5 +1,6 @@
 import { BAL } from '../content/balance';
 import { MARKET_EVENT } from '../content/events';
+import { calendarOn } from '../content/calendar';
 import { DEFAULT_MODEL, MODEL, type PrintModel } from '../content/models';
 import { patLvl, type GameState } from './state';
 
@@ -13,7 +14,19 @@ export const mktCost = (s: GameState) => BAL.marketingCost * BAL.marketingCostGr
 export function marketMul(s: GameState, key: 'demand' | 'spool') {
   let m = 1;
   for (const fx of s.mfx ?? []) m *= MARKET_EVENT[fx.id]?.[key] ?? 1;
+  if (key === 'demand') m *= calendarMul(s);
   return Math.min(BAL.marketMulRange[1], Math.max(BAL.marketMulRange[0], m));
+}
+
+/** Demand multiplier from calendar events running today (content/calendar.ts), for the selected model and colour. */
+export function calendarMul(s: GameState) {
+  let m = 1;
+  for (const e of calendarOn(s.today ?? 0)) {
+    m *= e.demand ?? 1;
+    m *= e.models?.[s.mdl] ?? 1;
+    if (e.colors?.includes(s.col)) m *= e.colorMul ?? 1;
+  }
+  return m;
 }
 
 export const spoolPrice = (s: GameState) => (s.spoolG > 1000 ? s.spool * 5 * BAL.bulkPackDiscount : s.spool) * marketMul(s, 'spool');
