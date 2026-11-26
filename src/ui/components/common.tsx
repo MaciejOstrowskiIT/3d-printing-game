@@ -41,8 +41,8 @@ export const Tile = ({ label, value, warn }: { label: string; value: string; war
   <div class={'tile' + (warn ? ' warn' : '')}><small>{label}</small><b>{value}</b></div>
 );
 
-export const Item = ({ name, sub, children }: { name: string; sub: string; children: ComponentChildren }) => (
-  <div class="item"><div class="it"><b>{name}</b><small>{sub}</small></div>{children}</div>
+export const Item = ({ name, sub, children, className }: { name: string; sub: string; children: ComponentChildren; className?: string }) => (
+  <div class={className ? 'item ' + className : 'item'}><div class="it"><b>{name}</b><small>{sub}</small></div>{children}</div>
 );
 
 export const Meter = ({ pct, tone, style }: { pct: number; tone?: 'or' | 'bad'; style?: Record<string, string> }) => (
