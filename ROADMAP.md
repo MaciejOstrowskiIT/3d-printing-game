@@ -12,7 +12,7 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 
 | Card | PR | Notes |
 |---|---|---|
-| Big research tree: 69 nodes in 8 branches on two pages, data-driven research modifiers, 3 new automations | (this PR) | Pacing: liftoff ~60 min, end ~90 min (bot) |
+| Big research tree: 69 nodes in 8 branches on two pages, data-driven research modifiers, 3 new automations | #33 | Pacing: liftoff ~60 min, end ~90 min (bot) |
 
 ## 🚦 Next up
 
