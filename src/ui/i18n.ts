@@ -78,5 +78,6 @@ export function logText(e: LogEntry): string {
       default: return x;
     }
   });
-  return fill((D.L as Record<string, string>)[e.k] ?? e.k, args);
+  // Abbreviated numbers end with a dot ("12 tys."); do not double it at the end of a sentence.
+  return fill((D.L as Record<string, string>)[e.k] ?? e.k, args).replace(/\.\.(?=\s|$)/g, '.');
 }
