@@ -1,4 +1,5 @@
 import { primaryRate, secondaryRate, splitUnlocked } from '../../systems/fleet';
+import { stockGrowth } from '../../systems/workshopStats';
 import { piecesInStock, premiumFor, stockPrice } from '../../systems/inventory';
 import { BAL } from '../../content/balance';
 import { MATERIAL, MATERIALS, materialDemand } from '../../content/materials';
@@ -19,9 +20,9 @@ import { MODELS, type PrintModel } from '../../content/models';
 import { qualityUnlocked } from '../../systems/printQuality';
 import { materialStock } from '../../systems/materials';
 import { autobuyOn, filamentRunway, stockedAlternative } from '../../systems/filament';
-import { designVisible } from '../../systems/models';
+import { designCost, designVisible } from '../../systems/models';
 import { platform } from '../platform';
-import { act, adPending, useS, watchAdForBoost } from '../store';
+import { act, game, adPending, useS, watchAdForBoost } from '../store';
 import { clock, colorName, dict, dur, fmt, li, money, nf, t } from '../i18n';
 import { BuyButton, CardHead, Item, Meter, Tile, useHold } from './common';
 import { WorkshopStats } from './WorkshopStats';
@@ -273,10 +274,10 @@ function PrintQuality() {
 function Sales() {
   const v = useS(s => ({
     sold: s.sold, inv: piecesInStock(s, s.mdl), name: model(s).name[li()], piecesPerSecond: demand(s) / model(s).seconds, uc: unitCost(s) * model(s).seconds, price: realizedPrice(s) * model(s).seconds, premium: premiumFor(s, s.mdl), auto: has(s, 'autocena') && !!s.amOn.autocena,
-    slow: primaryRate(s) > demand(s) * 1.1, fast: piecesInStock(s, s.mdl) < 1 && s.sold > 0, goal: s.goal, mkt: s.mkt, mktCost: mktCost(s), zl: s.zl,
+    growth: piecesInStock(s, s.mdl) > 0 ? stockGrowth(s, s.mdl) : null, fast: piecesInStock(s, s.mdl) < 1 && s.sold > 0, goal: s.goal, mkt: s.mkt, mktCost: mktCost(s), zl: s.zl,
   }));
   const loss = v.price < v.uc;
-  const hint = loss ? t('hLoss') : v.auto ? t('hAuto') : v.slow ? t('hSlow') : v.fast ? t('hFast') : t('hBase');
+  const hint = loss ? t('hLoss') : v.auto ? t('hAuto') : v.fast ? t('hFast') : t('hBase');
   return (
     <section class="card">
       <CardHead title={t('sales')} aside={t('soldT', fmt(v.sold))} />
@@ -287,6 +288,7 @@ function Sales() {
       </div>
       <ColorPicker />
       {!v.auto && <PriceStepper />}
+      {v.growth && <p class="stock-growth">{t('statsStockGrowth', fmt(v.growth.stocked), fmt(v.growth.sold))}</p>}
       {v.premium > 0 && <p class="hint">{t('qualityPrice', money(v.price))}</p>}
       <p class={'hint' + (loss ? ' bad' : '')}>{hint}</p>
       {v.goal >= 4 && (
@@ -377,7 +379,7 @@ function Models() {
             </div>
             {have
               ? <button class={on ? 'on' : ''} disabled={on} onClick={e => { if (act(`mdl:${m.id}`) && e.detail > 0) e.currentTarget.blur(); }}>{on ? t('mdlOn') : t('mdlUse')}</button>
-              : <BuyButton action={`stl:${m.id}`} cost={m.design} have={v.zl} label={money(m.design)} />}
+              : <BuyButton action={`stl:${m.id}`} cost={designCost(game.s, m)} have={v.zl} label={money(designCost(game.s, m))} />}
           </div>
         );
       })}

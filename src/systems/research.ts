@@ -26,7 +26,7 @@ export function buyNode(s: GameState, ctx: Ctx, id: string, logKey = 'node'): bo
   bookCash(s, 'other', nodeZl(s, n));
   s.inv -= n.wyd ?? 0;
   s.done.push(n.id);
-  n.fx(s);
+  n.fx?.(s);
   ctx.emit({ type: 'node', id });
   if (n.liftoff) {
     s.drones += 3 * patLvl(s, 'fleet');

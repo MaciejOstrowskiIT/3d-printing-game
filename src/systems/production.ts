@@ -1,22 +1,31 @@
-import { bookCash } from './workshopStats';
+import { bookCash, recordStockOutput } from './workshopStats';
 import { MODEL } from '../content/models';
 import { fleetFilamentPerSecond, secondaryRate } from './fleet';
 import { BAL } from '../content/balance';
 import { modelStock, putPieces } from './inventory';
 import { log, sfx, type Ctx } from '../core/ctx';
-import { gpu, model, rate1, spoolPrice } from '../core/formulas';
+import { gpu, model, rate1, spoolPrice, unitCost } from '../core/formulas';
 import { has, type GameState } from '../core/state';
 import { pickOrderCooldown } from './orders';
 import { stockedAlternative } from './filament';
 
 /** New figurines fill an accepted order first; the rest goes to stock. */
-export function make(s: GameState, ctx: Ctx, n: number, premium = s.precision ? BAL.precisionPremium : 0, m = model(s)) {
+export function make(s: GameState, ctx: Ctx, n: number, premium = s.precision ? BAL.precisionPremium : 0, cost: number | null = null, m = model(s)) {
   s.total += n;
   if (s.ph === 2) { s.inv += n; return; }
-  modelStock(s, m.id).printed += n / m.seconds;
+  const lot = modelStock(s, m.id);
+  lot.printed += n / m.seconds;
   const o = s.ord;
   if (o && o.acc && o.got < o.n) {
     const k = Math.min(n, Math.ceil((o.n - o.got) / m.seconds) * m.seconds);
+    const previouslyReserved = m.id === 'fig'
+      ? o.got - Object.entries(s.orderStock).reduce((sum, [id, count]) => sum + count * MODEL[id].seconds, 0)
+      : (s.orderStock[m.id] ?? 0) * m.seconds;
+    const reservedCost = cost === null ? null : cost * k / n;
+    lot.reservedCost = reservedCost !== null && (!previouslyReserved || lot.reservedCost != null)
+      ? (previouslyReserved ? lot.reservedCost ?? 0 : 0) + reservedCost
+      : null;
+    if (cost !== null) cost *= (n - k) / n;
     if (m.id !== 'fig') s.orderStock[m.id] = (s.orderStock[m.id] ?? 0) + k / m.seconds;
     o.got += k;
     n -= k;
@@ -27,11 +36,13 @@ export function make(s: GameState, ctx: Ctx, n: number, premium = s.precision ? 
       ctx.emit({ type: 'order', result: 'delivered' });
       s.ord = null;
       s.orderStock = {};
+      for (const stock of Object.values(s.modelStock)) delete stock.reservedCost;
       s.ordT = pickOrderCooldown(ctx);
       sfx(ctx, 'goal');
     }
   }
-  putPieces(s, m.id, n / m.seconds, premium);
+  putPieces(s, m.id, n / m.seconds, premium, cost);
+  if (n > 0) recordStockOutput(s, m.id, n / m.seconds);
 }
 
 export function buySpool(s: GameState): boolean {
@@ -52,13 +63,17 @@ export function printWork(s: GameState, ctx: Ctx, requested: number, m = model(s
   const premium = s.precision ? BAL.precisionPremium : 0;
   const previous = lot.progress;
   const total = previous + work;
+  const quotedCost = unitCost(s, m);
+  const previousCost = previous ? lot.progressCost ?? null : 0;
   const printed = Math.floor((total + 1e-9) / m.seconds) * m.seconds;
   lot.progress = Math.max(0, total - printed);
   if (printed) {
     const blended = (previous * lot.progressPremium + (printed - previous) * premium) / printed;
     lot.progressPremium = premium;
-    make(s, ctx, printed, blended, m);
+    lot.progressCost = lot.progress * quotedCost;
+    make(s, ctx, printed, blended, previousCost === null ? null : previousCost + (printed - previous) * quotedCost, m);
   } else {
+    lot.progressCost = previousCost === null ? null : previousCost + work * quotedCost;
     lot.progressPremium = (previous * lot.progressPremium + work * premium) / total;
   }
   return work;

@@ -6,6 +6,7 @@ import { MARKET_EVENT, MARKET_EVENTS, type MarketEvent } from '../content/events
 import { log, pick, sfx, type Ctx } from '../core/ctx';
 import { demand, marketMul, rate1, spoolPrice } from '../core/formulas';
 import type { GameState } from '../core/state';
+import { mod } from '../core/mods';
 
 /** Market events: random swings during phase 1. Some just happen, some are offers the player may take.
  *  Effects tick down offline too, but new events only appear while the player is watching. */
@@ -17,7 +18,7 @@ const baseIncome = (s: GameState) => Math.min(demand(s) / marketMul(s, 'demand')
 export function offerCost(s: GameState, e: MarketEvent): number {
   if (!e.offer) return 0;
   if (e.spools) return Math.ceil(spoolPrice(s, DEFAULT_MATERIAL) * e.spools * BAL.clearanceDiscount * 100) / 100;
-  return Math.max(BAL.marketMinMoney, Math.round(baseIncome(s) * e.offer.seconds));
+  return Math.max(BAL.marketMinMoney, Math.round(baseIncome(s) * e.offer.seconds * mod(s, 'offer')));
 }
 
 export const canAfford = (s: GameState) => {

@@ -22,9 +22,10 @@ export function salesSystem(s: GameState, dt: number) {
 
     const count = Math.min(wanted, stock);
     if (!count) continue;
-    bookCash(s, 'sales', count * m.seconds * realizedPrice(s, m.id), { modelId: m.id, pieces: count });
+    const revenue = count * m.seconds * realizedPrice(s, m.id);
     s.sold += count;
-    takePieces(s, m.id, count);
+    const cost = takePieces(s, m.id, count);
+    bookCash(s, 'sales', revenue, { modelId: m.id, pieces: count, cost });
   }
 }
 
