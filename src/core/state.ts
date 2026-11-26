@@ -79,13 +79,13 @@ export interface GameState {
   orderStock: Record<string, number>;
   financeTime: number;
   finance: CashPeriod[];
-  fleetModel: string;
-  fleetPrinters: number;
   /** Production planner automation: seconds since its last check. */
   planT: number;
+  /** Auto printers dedicated to models other than the main one (model id → printers). */
+  fleet: Record<string, number>;
 }
 
-export const SAVE_VERSION = 6;
+export const SAVE_VERSION = 7;
 
 export const createState = (): GameState => ({
   v: SAVE_VERSION,
@@ -120,8 +120,8 @@ export const createState = (): GameState => ({
   lowFil: false, matHint: false, autoMat: false,
   modelStock: {}, orderStock: {},
   financeTime: 0, finance: [],
-  fleetModel: '', fleetPrinters: 0,
   planT: 0,
+  fleet: {},
 });
 
 export const has = (s: GameState, id: string) => s.done.includes(id);

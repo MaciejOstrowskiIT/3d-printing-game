@@ -12,13 +12,12 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 
 | Card | PR | Notes |
 |---|---|---|
-| Big research tree: 69 nodes in 8 branches on two pages, data-driven research modifiers, 3 new automations | #33 | Pacing: liftoff ~60 min, end ~90 min (bot) |
 
 ## In progress
 
 | Card | Branch | Owner |
 |---|---|---|
-| Split the fleet between two models | `feat/fleet-split` | Codex |
+| **Workshop redesign** (mockup approved by Maciej): production line with printers allocated per model (replaces the two-group fleet split), model tiles with bars instead of multipliers, event cards always visible, money/s and filament runway in the HUD, dark buy buttons (orange only for Print), mobile bottom nav Production / Sales / Print / Research | `feat/workshop-redesign` | Claude |
 
 ## 🚦 Next up
 
@@ -87,3 +86,5 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 | Story messages | #27 |
 | Filament run-out handling | #28 |
 | Research visibility | #30 |
+| Big research tree | #33 |
+| Split the fleet between two models | #35 |

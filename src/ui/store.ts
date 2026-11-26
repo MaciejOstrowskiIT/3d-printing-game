@@ -69,6 +69,9 @@ function pushToast(id: string) {
 
 /** True while a rewarded ad is being requested or shown. */
 export const adPending = signal(false);
+
+/** Workshop view on phones: production or sales (bottom nav). Desktop shows both. */
+export const mobileView = signal<'p' | 's'>('p');
 let suspendedDuringAd = false;
 
 /** Shows a rewarded ad and runs `reward` only if the platform confirms it was watched. */

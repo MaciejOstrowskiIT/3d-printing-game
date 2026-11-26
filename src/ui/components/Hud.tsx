@@ -6,11 +6,18 @@ import { TREE } from '../../content/tree';
 import { eff, freePts, gpu, opsCap } from '../../core/formulas';
 import { has } from '../../core/state';
 import { nodeStatus } from '../../systems/research';
-import { fmt, money, t } from '../i18n';
+import { dur, fmt, money, t } from '../i18n';
+import { incomePerSecond } from '../../systems/workshopStats';
 import { ui, useS } from '../store';
 
-const Chip = ({ label, value, warn, show = true }: { label: string; value: string; warn?: boolean; show?: boolean }) =>
-  show ? <div class={'chip' + (warn ? ' warn' : '')}><small>{label}</small><b>{value}</b></div> : null;
+const Chip = ({ label, value, warn, show = true, sub, meter, big }: { label: string; value: string; warn?: boolean; show?: boolean; sub?: string; meter?: number; big?: boolean }) =>
+  show ? (
+    <div class={'chip' + (warn ? ' warn' : '') + (big ? ' big' : '')}>
+      <small>{label}</small><b>{value}</b>
+      {sub && <small class="chip-sub">{sub}</small>}
+      {meter !== undefined && <span class="chip-meter"><i style={{ width: Math.max(0, Math.min(100, meter)) + '%' }} /></span>}
+    </div>
+  ) : null;
 
 /** Whether the Research tab is unlocked yet. */
 export const useResearchUnlocked = () => useS(s => s.goal >= 5 || s.rep > 0 || s.done.length > 0 || s.meta.runs > 0 || s.meta.patents > 0);
@@ -43,15 +50,18 @@ export function Tabs({ class: cls }: { class?: string }) {
 export function Hud() {
   const v = useS(s => ({
     sp: s.ph === 2, g: s.goal, zl: money(s.zl), inv: fmt(s.ph === 2 ? Math.floor(s.inv) : MODELS.reduce((sum, m) => sum + piecesInStock(s, m.id), 0)), fil: fmt(s.fil) + ' g', filWarn: s.ph === 1 && (s.fil < gpu(s) || (filamentRunway(s) < BAL.filamentWarnSeconds && !autobuyOn(s) && s.total > 0)),
+    earn: s.ph === 1 ? incomePerSecond(s) : 0, run: s.ph === 1 ? filamentRunway(s) : Infinity, auto: autobuyOn(s),
     real: (s.slow || 1) > 1, farmOn: s.farmOn, en: Math.round(eff(s) * 100), ops: fmt(Math.floor(s.ops)) + ' / ' + fmt(opsCap(s)), mat: fmt(s.mat) + ' t',
   }), );
   const unlocked = useResearchUnlocked();
   return (
     <nav class="hud">
       <div class="chips">
-        <Chip show={!v.sp && v.g >= 1} label={t('funds')} value={v.zl} />
+        <Chip show={!v.sp && v.g >= 1} big label={t('funds')} value={v.zl} sub={v.earn > 0 ? '+' + t('moneyRate', money(v.earn)) : undefined} />
         <Chip show={v.g >= 1} label={t('stock')} value={v.inv} />
-        <Chip show={!v.sp} label={t('filament')} value={v.fil} warn={v.filWarn} />
+        <Chip show={!v.sp} label={t('filament')} value={v.fil} warn={v.filWarn}
+          sub={Number.isFinite(v.run) && !v.auto ? t('filLeft', dur(Math.round(v.run))) : undefined}
+          meter={Number.isFinite(v.run) && !v.auto ? (100 * v.run) / 600 : undefined} />
         <Chip show={!v.sp && v.farmOn} label={t('power')} value={v.en + '%'} warn={v.en < 100} />
         <Chip show={unlocked} label={t('compute')} value={v.ops} />
         <Chip show={v.sp} label={t('matter')} value={v.mat} />

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { GOALS } from '../../content/goals';
 import { DEFAULT_MODEL, MODEL } from '../../content/models';
 import { gpu, model, rate1, spaceRate } from '../../core/formulas';
-import { primaryRate } from '../../systems/fleet';
+import { rateOn } from '../../systems/fleet';
 import { fmt, li, logText, prefs, setPrefs, t } from '../i18n';
 import { buildRoom, roomSignature, type Stage } from '../scene/room';
 import { mountPrinter } from '../scene/printer';
@@ -91,7 +91,7 @@ function StationReadout() {
   const v = useS(s => {
     const m = model(s);
     const space = s.ph === 2;
-    const speed = space ? spaceRate(s) : primaryRate(s) / m.seconds;
+    const speed = space ? spaceRate(s) : rateOn(s, s.mdl) / m.seconds;
     const out = !space && s.fil <= 0;
     const status = s.end ? 'stationDone' : out ? 'stationEmpty' : s.brk > 0 ? 'stationFault'
       : speed > 0 ? 'stationRunning' : space ? 'stationIdle' : 'stationManual';

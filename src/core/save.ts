@@ -13,6 +13,13 @@ const MIGRATIONS: Record<number, Migration> = {
   // v5 stock was pooled in figurine equivalents, with no model provenance.
   // Keep it as figurines. Old partially printed work was not paid for yet.
   5: raw => { raw.acc = 0; raw.mp = 0; },
+  // v6 could split the auto printers into two groups (fleetModel/fleetPrinters); v7 allocates them per model.
+  6: raw => {
+    raw.fleet = typeof raw.fleetModel === 'string' && raw.fleetModel && typeof raw.fleetPrinters === 'number' && raw.fleetPrinters > 0
+      ? { [raw.fleetModel]: raw.fleetPrinters } : {};
+    delete raw.fleetModel;
+    delete raw.fleetPrinters;
+  },
 };
 
 /** Loads a raw save (including old versions) and returns a complete, current state. */

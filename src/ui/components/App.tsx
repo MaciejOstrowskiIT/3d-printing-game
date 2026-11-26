@@ -1,23 +1,42 @@
 import { useEffect } from 'preact/hooks';
 import { dur, fmt, logText, money, prefs, t } from '../i18n';
-import { act, adPending, awayReport, dialog, resetGame, screen, useS, watchAdForOfflineBonus } from '../store';
+import { act, adPending, awayReport, dialog, mobileView, resetGame, screen, ui, useS, watchAdForOfflineBonus } from '../store';
 import { offlineBonusReady } from '../../systems/offlineBonus';
 import { platform } from '../platform';
 import { Toasts } from './Achievements';
 import { SaveDialog } from './SaveDialog';
 import { Title } from './Title';
 import { PrestigeButton } from './Prestige';
-import { Hud, Tabs } from './Hud';
+import { Hud, Tabs, useBadges, useResearchUnlocked } from './Hud';
 import { Research } from './Research';
 import { PrintButton, Settings, Side } from './Side';
 import { Workshop } from './Workshop';
 
+const NavIcon = ({ d }: { d: string }) => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={d} /></svg>
+);
+
+/** Phone navigation: Production and Sales views of the Workshop, Print in the middle, Research. */
 function Dock() {
-  const sp = useS(s => s.ph === 2);
+  const v = useS(s => ({ sp: s.ph === 2, tab: s.tab, sales: s.goal >= 1 }));
+  const research = useResearchUnlocked();
+  const b = useBadges();
+  if (v.sp) return <nav class="dock"><Tabs /></nav>;
+  const go = (view: 'p' | 's') => { mobileView.value = view; ui(s => { s.tab = 'w'; }); window.scrollTo({ top: 0 }); };
+  const on = (view: 'p' | 's') => v.tab === 'w' && (mobileView.value === view || (!v.sales && view === 'p'));
   return (
-    <nav class="dock">
-      <Tabs />
-      {!sp && <PrintButton short />}
+    <nav class="dock nav4" role="tablist">
+      <button class="tab" role="tab" aria-selected={on('p')} onClick={() => go('p')}>
+        <NavIcon d="M4 4h16v16H4zM8 15h8M10 4v6h4V4" /><span>{t('navProd')}</span>{b.workshop && <span class="dot">!</span>}
+      </button>
+      <button class="tab" role="tab" aria-selected={on('s')} disabled={!v.sales} onClick={() => go('s')}>
+        <NavIcon d="M4 20V10M10 20V4M16 20v-7M22 20H2" /><span>{t('navSales')}</span>
+      </button>
+      <PrintButton short />
+      <button class="tab" role="tab" aria-selected={v.tab === 'r'} disabled={!research} onClick={() => { ui(s => { s.tab = 'r'; }); window.scrollTo({ top: 0 }); }}>
+        <NavIcon d="M6 3.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 1 0 0-5M18 3.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 1 0 0-5M12 15.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 1 0 0-5M7.5 8l3.5 8M16.5 8 13 16" />
+        <span>{t('tabR')}</span>{b.research > 0 && <span class="dot" key={b.research}>{b.research}</span>}
+      </button>
     </nav>
   );
 }

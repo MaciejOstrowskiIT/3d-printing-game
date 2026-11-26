@@ -2,6 +2,7 @@ import type { ComponentChildren } from 'preact';
 import { useEffect, useRef } from 'preact/hooks';
 import type { Action } from '../../core/game';
 import { act } from '../store';
+import { money, t } from '../i18n';
 
 /** Holding the button repeats the action (printing, price changes). Keyboard activation works as a plain click. */
 export function useHold(action: Action) {
@@ -26,13 +27,15 @@ export function useHold(action: Action) {
   };
 }
 
-/** Purchase button: fills up as you save money and turns orange once you can afford it. */
-export function BuyButton({ cost, have, label, action }: { cost: number; have: number; label: string; action: Action }) {
+/** Purchase button: an outline that fills up as you save, with how much is missing; solid once you can afford it.
+ *  `unit` formats the missing amount (money by default, figurines in space). */
+export function BuyButton({ cost, have, label, action, unit = money }: { cost: number; have: number; label: string; action: Action; unit?: (n: number) => string }) {
   const ok = have >= cost;
-  const pct = Math.min(100, (100 * have) / cost).toFixed(1) + '%';
+  const pct = Math.max(0, Math.min(100, (100 * have) / cost)).toFixed(1) + '%';
   return (
     <button class={'buy' + (ok ? ' ok' : '')} disabled={!ok} style={{ '--pp': pct }} onClick={() => act(action)}>
-      {label}
+      <span>{label}</span>
+      {!ok && <small>{t('missing', unit(cost - Math.max(0, have)))}</small>}
     </button>
   );
 }

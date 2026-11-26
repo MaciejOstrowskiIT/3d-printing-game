@@ -1,5 +1,6 @@
-import { useLayoutEffect, useRef, useState } from 'preact/hooks';
-import { primaryRate, secondaryRate, splitUnlocked } from '../../systems/fleet';
+import { useLayoutEffect, useRef } from 'preact/hooks';
+import { signal } from '@preact/signals';
+import { dedicated, printersOn, rateOn, splitUnlocked } from '../../systems/fleet';
 import { stockGrowth } from '../../systems/workshopStats';
 import { piecesInStock, premiumFor, stockPrice } from '../../systems/inventory';
 import { BAL } from '../../content/balance';
@@ -9,7 +10,7 @@ import { useResearchUnlocked } from './Hud';
 import { COLORS } from '../../content/colors';
 import { AUTOMATIONS, NODE } from '../../content/tree';
 import {
-  autoCost, clickCost, clickPower, demand, drawP, gpu, material, model, droneCost, eff, fabCost, farmCost, inTrend, mktCost, panelCost, rate1, realizedPrice, spaceRate, spoolPrice, supply, trendOn, unitCost,
+  autoCost, clickCost, clickPower, demand, drawP, gpu, material, droneCost, eff, fabCost, farmCost, inTrend, mktCost, panelCost, realizedPrice, spaceRate, spoolPrice, supply, trendOn, unitCost,
 } from '../../core/formulas';
 import { has, type GameState } from '../../core/state';
 import { boostUnlocked } from '../../systems/boost';
@@ -23,7 +24,7 @@ import { materialStock } from '../../systems/materials';
 import { autobuyOn, filamentRunway, stockedAlternative } from '../../systems/filament';
 import { designCost, designVisible } from '../../systems/models';
 import { platform } from '../platform';
-import { act, game, adPending, useS, watchAdForBoost } from '../store';
+import { act, game, adPending, mobileView, useS, watchAdForBoost } from '../store';
 import { clock, colorName, dict, dur, fmt, li, money, nf, t } from '../i18n';
 import { BuyButton, CardHead, Item, Meter, Tile, useHold } from './common';
 import { WorkshopStats } from './WorkshopStats';
@@ -124,52 +125,40 @@ function Events() {
   const daily = useS(s => s.ph === 1 && !!s.dord && s.dord.day === s.dday);
   const msg = useS(s => !!s.msg);
   const filament = useS(s => !!filamentNotice(s));
-  const count = Number(!!o) + Number(!!brk) + Number(market) + Number(daily) + Number(msg) + Number(filament);
-  const notice = brk ? t('brkTitle') : filament ? t('workshopNoticeFilament') : o ? t('workshopNoticeOrder')
-    : msg ? t('workshopNoticeMessage') : daily ? t('dTitle') : market ? t('fxTitle') : '';
+  if (!o && !brk && !market && !daily && !msg && !filament) return null;
   return (
-    <details class="workshop-notices">
-      <summary>
-        <span>{t('workshopNotices')}</span>
-        <span class="workshop-notice-status" aria-live="polite">
-          {count > 0 && <><span class="workshop-notice-name">{notice}</span><b>{count}</b></>}
-        </span>
-      </summary>
-      <div class="workshop-notice-body" tabIndex={0} role="region" aria-label={t('workshopNotices')}>
-        {count ? <div class="events">
-          <FilamentAlert />
-          <StoryCard />
-          <DailyOrderCard />
-          <MarketEffects />
-          <MarketOffer />
-          {o && (
-            <div class="ev">
-              <div class="evt">
-                <b>{t('oFrom', dict().clients[o.c])}</b>
-                <p>{o.acc ? t('oProg', fmt(o.got), fmt(o.n), fmt(Math.ceil(o.left)), money(o.pay)) : t('oOffer', fmt(o.n), fmt(o.time), money(o.pay), fmt(Math.ceil(o.offer)))}</p>
-                <Meter tone="or" pct={o.acc ? (100 * o.got) / o.n : (100 * o.offer) / BAL.orderOffer} />
-                {o.acc && <p class="hint">{t('oHint')}</p>}
-              </div>
-              {!o.acc && (
-                <div class="evb">
-                  <button class="btn-main" onClick={() => act('oacc')}>{t('accept')}</button>
-                  <button onClick={() => act('odec')}>{t('decline')}</button>
-                </div>
-              )}
+    <div class="events" aria-label={t('workshopNotices')} role="region">
+      <FilamentAlert />
+      {brk && (
+        <div class="ev bad">
+          <div class="evt">
+            <b>{t('brkTitle')}</b>
+            <p>{t('bDesc', Math.round(brk.brk * 100), dict().causes[brk.c])}{brk.cam ? ' ' + t('bAuto', Math.ceil(Math.max(0, brk.fixT))) : ''}</p>
+          </div>
+          {!brk.cam && <div class="evb"><button class="btn-main" onClick={() => act('fix')}>{t('repair')}</button></div>}
+        </div>
+      )}
+      {o && (
+        <div class="ev">
+          <div class="evt">
+            <b>{t('oFrom', dict().clients[o.c])}</b>
+            <p>{o.acc ? t('oProg', fmt(o.got), fmt(o.n), fmt(Math.ceil(o.left)), money(o.pay)) : t('oOffer', fmt(o.n), fmt(o.time), money(o.pay), fmt(Math.ceil(o.offer)))}</p>
+            <Meter tone="or" pct={o.acc ? (100 * o.got) / o.n : (100 * o.offer) / BAL.orderOffer} />
+            {o.acc && <p class="hint">{t('oHint')}</p>}
+          </div>
+          {!o.acc && (
+            <div class="evb">
+              <button class="btn-main" onClick={() => act('oacc')}>{t('accept')}</button>
+              <button onClick={() => act('odec')}>{t('decline')}</button>
             </div>
           )}
-          {brk && (
-            <div class="ev bad">
-              <div class="evt">
-                <b>{t('brkTitle')}</b>
-                <p>{t('bDesc', Math.round(brk.brk * 100), dict().causes[brk.c])}{brk.cam ? ' ' + t('bAuto', Math.ceil(Math.max(0, brk.fixT))) : ''}</p>
-              </div>
-              {!brk.cam && <button class="btn-main" onClick={() => act('fix')}>{t('repair')}</button>}
-            </div>
-          )}
-        </div> : <p class="hint">{t('workshopNoNotices')}</p>}
-      </div>
-    </details>
+        </div>
+      )}
+      <StoryCard />
+      <DailyOrderCard />
+      <MarketOffer />
+      <MarketEffects />
+    </div>
   );
 }
 
@@ -201,20 +190,15 @@ function FilamentAlert() {
   );
 }
 
-function Production() {
+function Investments() {
   const v = useS(s => ({
-    rate: rate1(s), fil: s.fil, g: gpu(s), feedstock: material(s).name[li()], showFeedstock: s.total >= MATERIALS[1].unlockAt, clk: s.clk, clickPow: clickPower(s), clickCost: clickCost(s), printers: s.auto + s.farm * 60, zl: s.zl, bulk: s.spoolG > 1000, spool: spoolPrice(s), spoolD: s.spoolD,
-    goal: s.goal, auto: s.auto, spd: s.spd, autoCost: autoCost(s), farmOn: s.farmOn, farm: s.farm, farmCost: farmCost(s),
+    feedstock: material(s).name[li()], showFeedstock: s.total >= MATERIALS[1].unlockAt, clk: s.clk, clickPow: clickPower(s), clickCost: clickCost(s), zl: s.zl, bulk: s.spoolG > 1000, spool: spoolPrice(s), spoolD: s.spoolD,
+    goal: s.goal, auto: s.auto, spd: s.spd, autoCost: autoCost(s), farmOn: s.farmOn, farm: s.farm, farmCost: farmCost(s), mkt: s.mkt, mktCost: mktCost(s),
   }));
   const spoolSub = !v.spoolD ? t('spoolSub') : t(v.spoolD > 0 ? 'spoolUp' : 'spoolDn', Math.abs(Math.round(v.spoolD * 100)));
   return (
-    <section class="card workshop-production">
-      <CardHead title={t('production')} aside={t('perS', fmt(v.rate, 1))} />
-      <div class="tiles">
-        <Tile label={t('filament')} value={fmt(v.fil) + ' g'} warn={v.fil < v.g} />
-        <Tile label={t('perFigS')} value={nf(v.g, 1) + ' g'} />
-        <Tile label={t('printersS')} value={fmt(v.printers)} />
-      </div>
+    <section class="card workshop-production v-p">
+      <CardHead title={t(v.goal >= 2 ? 'investTitle' : 'production')} aside={v.goal >= 2 ? t('investAside') : undefined} />
       <BoostRow />
       <Item className="spool-row" name={t(v.bulk ? 'spool5Item' : 'spoolItem')} sub={v.showFeedstock ? v.feedstock + ' · ' + spoolSub : spoolSub}>
         <BuyButton action="spool" cost={v.spool} have={v.zl} label={money(v.spool)} />
@@ -227,6 +211,11 @@ function Production() {
       {v.goal >= 2 && (
         <Item name={t('autoItem')} sub={t('autoSub', fmt(v.auto), nf(v.spd, 2))}>
           <BuyButton action="auto" cost={v.autoCost} have={v.zl} label={money(v.autoCost)} />
+        </Item>
+      )}
+      {v.goal >= 4 && (
+        <Item name={t('mktItem')} sub={t('mktSub', v.mkt)}>
+          <BuyButton action="mkt" cost={v.mktCost} have={v.zl} label={money(v.mktCost)} />
         </Item>
       )}
       {v.farmOn && (
@@ -287,11 +276,13 @@ function PrintQuality() {
   );
 }
 
+/** Model shown in Sales; set from the production line tiles or the Sales picker. */
+const salesPick = signal<string | null>(null);
+
 function Sales() {
-  const [selected, setSelected] = useState<string | null>(null);
+  const selected = salesPick.value;
   const shop = useS(s => ({
     main: s.mdl, owned: s.mdls, sold: s.sold, auto: has(s, 'autocena') && !!s.amOn.autocena,
-    goal: s.goal, mkt: s.mkt, mktCost: mktCost(s), zl: s.zl,
     channels: Object.fromEntries(s.mdls.map(id => {
       const m = MODEL[id];
       const inv = piecesInStock(s, id);
@@ -309,13 +300,10 @@ function Sales() {
   const loss = v.price < v.uc;
   const hint = loss ? t('hLoss') : v.premium > 0 ? t('qualityPrice', money(v.price)) : v.auto ? t('hAuto') : t('hBase');
   return (
-    <section class="card workshop-sales">
-      <CardHead title={t('sales')} aside={t('soldT', fmt(v.sold))} />
-      {v.owned.length > 1 && <div class="sales-model">
-        <label for="sales-model">{t('salesModel')}</label>
-        <select id="sales-model" value={id} onChange={e => setSelected(e.currentTarget.value)}>
-          {v.owned.map(id => <option key={id} value={id}>{MODEL[id].name[li()]}</option>)}
-        </select>
+    <section class="card workshop-sales v-s">
+      <CardHead title={v.owned.length > 1 ? t('salesOf', MODEL[id].name[li()]) : t('sales')} aside={t('soldT', fmt(v.sold))} />
+      {v.owned.length > 1 && <div class="seg" role="group" aria-label={t('salesModel')}>
+        {v.owned.map(o => <button key={o} aria-pressed={o === id} onClick={() => { salesPick.value = o; }}>{MODEL[o].name[li()]}</button>)}
       </div>}
       <div class="tiles">
         <Tile label={t('stock')} value={t('statsPiecesSold', fmt(v.inv))} />
@@ -334,11 +322,6 @@ function Sales() {
         </div>
         <p class={'hint' + (loss ? ' bad' : '')}>{hint}</p>
       </div>
-      {v.goal >= 4 && (
-        <Item name={t('mktItem')} sub={t('mktSub', v.mkt)}>
-          <BuyButton action="mkt" cost={v.mktCost} have={v.zl} label={money(v.mktCost)} />
-        </Item>
-      )}
     </section>
   );
 }
@@ -353,80 +336,86 @@ function Shape({ m, size = 36 }: { m: PrintModel; size?: number }) {
   );
 }
 
-function FleetSplit() {
-  const v = useS(s => ({
-    unlocked: splitUnlocked(s), main: model(s), selected: s.fleetModel,
-    printers: s.fleetPrinters, total: s.auto,
-    available: MODELS.filter(m => m.id !== s.mdl && s.mdls.includes(m.id)),
-    primaryRate: primaryRate(s), secondaryRate: secondaryRate(s),
-  }));
-  if (!v.unlocked) return null;
+/** Colour of a model in the allocation bar and on its tile. */
+const MODEL_TONE = ['#ff6a1f', '#008ba7', '#7a5af5', '#2f9e5a', '#d6457a', '#c8a400'];
+const tone = (id: string) => MODEL_TONE[Math.max(0, MODELS.findIndex(m => m.id === id)) % MODEL_TONE.length];
 
-  const secondary = v.available.find(m => m.id === v.selected);
-  return (
-    <details class="fleet-split">
-      <summary>{t('fleetTitle')}{secondary && <small>{secondary.name[li()]} · {t('fleetCount', v.printers)}</small>}</summary>
-      <div class="fleet-controls">
-        <div>
-          <label for="fleet-model">{t('fleetSecond')}</label>
-          <select id="fleet-model" value={v.selected} onChange={e => act(`fleet-model:${e.currentTarget.value}`)}>
-            <option value="">{t('fleetNone')}</option>
-            {v.available.map(m => <option key={m.id} value={m.id}>{m.name[li()]}</option>)}
-          </select>
-        </div>
-        {secondary && <>
-          <label>{t('fleetCount', v.printers)}
-            <input type="range" min="1" max={v.total - 1} step="1" value={v.printers}
-              disabled={v.total === 2} onInput={e => act(`fleet-count:${e.currentTarget.valueAsNumber}`)} />
-          </label>
-          <div class="fleet-rates">
-            <span>{v.main.name[li()]} · {t('fleetCount', v.total - v.printers)} · {t('fleetRate', nf(60 * v.primaryRate / v.main.seconds, 1))}</span>
-            <span>{secondary.name[li()]} · {t('fleetCount', v.printers)} · {t('fleetRate', nf(60 * v.secondaryRate / secondary.seconds, 1))}</span>
-          </div>
-        </>}
-        <p class="hint">{t('fleetHint')}</p>
-      </div>
-    </details>
-  );
-}
+/** A relative bar (0–1) with a label, used on model tiles instead of raw multipliers. */
+const Bar = ({ label, v, kind }: { label: string; v: number; kind: string }) => (
+  <><span>{label}</span><div class={'mbar ' + kind} role="meter" aria-label={label} aria-valuenow={Math.round(v * 100)} aria-valuemin={0} aria-valuemax={100}><i style={{ width: Math.max(6, v * 100) + '%' }} /></div></>
+);
 
-/** Print models: owned ones can be selected for the main group, visible ones bought as designs. Data: content/models.ts. */
-function Models() {
+/** Production line: one tile per model. Printers are allocated per model; the main model also gets farms,
+ *  manual printing and new printers. Tile click shows the model in Sales. Data: content/models.ts. */
+function ProductionLine() {
   const v = useS(s => ({
     stock: Object.fromEntries(s.mdls.map(id => [id, piecesInStock(s, id)])),
-    printed: Object.fromEntries(s.mdls.map(id => [id, s.modelStock[id]?.printed ?? 0])),
-    prices: Object.fromEntries(s.mdls.map(id => [id, stockPrice(s, id)])),
+    rate: Object.fromEntries(s.mdls.map(id => [id, rateOn(s, id)])),
+    printers: Object.fromEntries(s.mdls.map(id => [id, printersOn(s, id)])),
     progress: s.modelStock[s.mdl]?.progress ?? 0,
-    cur: s.mdl, owned: s.mdls.join(','), zl: s.zl, total: s.total, slow: s.slow || 1,
+    cur: s.mdl, owned: s.mdls.join(','), zl: s.zl, slow: s.slow || 1, auto: s.auto, farm: s.farm,
+    split: splitUnlocked(s), free: s.auto - dedicated(s) > 0 ? 1 : 0, total: s.total, sales: s.goal >= 1,
     visible: MODELS.filter(m => designVisible(s, m)).map(m => m.id).join(','),
   }));
-  const visible = MODELS.filter(m => v.visible.split(',').includes(m.id));
+  const picked = salesPick.value;
+  const owned = v.owned.split(',');
+  // Main model first, then the other owned ones, then designs to buy.
+  const rank = (id: string) => id === v.cur ? 0 : owned.includes(id) ? 1 : 2;
+  const visible = MODELS.filter(m => v.visible.split(',').includes(m.id)).sort((a, b) => rank(a.id) - rank(b.id));
   if (visible.length < 2) return null;
   const next = MODELS.find(m => !v.visible.split(',').includes(m.id));
-  const cur = MODELS.find(m => m.id === v.cur) ?? MODELS[0];
+  const max = { pay: Math.max(...visible.map(m => m.value)), mkt: Math.max(...visible.map(m => m.market)), mat: Math.max(...visible.map(m => m.material)) };
+  const shown = picked && owned.includes(picked) ? picked : v.cur;
   return (
-    <section class="card models">
-      <CardHead title={t('mdlTitle')} aside={t('mdlAside', cur.name[li()])} />
-      <p class="hint">{t('mdlHint')}</p>
-      <FleetSplit />
-      {visible.map(m => {
-        const have = v.owned.split(',').includes(m.id), on = m.id === v.cur;
-        const secs = m.seconds * v.slow;
-        const stats = [t('mdlTime', nf(secs, secs < 1 ? 1 : 0)), t('mdlPay', nf(m.value, 2)), t('mdlMkt', nf(m.market, 2)), t('mdlMat', nf(m.material, 2))].join(' · ');
-        return (
-          <div key={m.id} class={'item model' + (on ? ' active' : '')}>
-            <Shape m={m} />
-            <div class="it"><b>{m.name[li()]}</b><small>{m.desc[li()]}</small><small class="stats">{stats}</small>
-              {have && <small>{t('modelPrinted', fmt(v.printed[m.id]))} · {t('modelPieces', fmt(v.stock[m.id]))} · {t('modelPiecePrice', money(v.prices[m.id] * m.seconds))}</small>}
-              {on && <Meter pct={100 * v.progress / m.seconds} />}
+    <section class="card line v-p">
+      <CardHead title={t('lineTitle')} aside={v.split ? t('linePrinters', fmt(v.auto)) : t('mdlAside', MODEL[v.cur].name[li()])} />
+      <p class="hint">{t(v.split ? 'lineHint' : 'mdlHint')}</p>
+      {v.split && <div class="alloc" aria-hidden="true">
+        {owned.filter(id => v.printers[id] > 0).map(id => <i key={id} style={{ flexGrow: v.printers[id], background: tone(id) }} title={MODEL[id].name[li()]} />)}
+      </div>}
+      <div class="mtiles">
+        {visible.map(m => {
+          const have = owned.includes(m.id), main = m.id === v.cur, n = v.printers[m.id] ?? 0;
+          const secs = m.seconds * v.slow;
+          return (
+            <div key={m.id} class={'mtile' + (main ? ' main' : '') + (have ? '' : ' locked') + (have && v.sales && m.id === shown ? ' picked' : '')} style={{ '--tone': tone(m.id) }}>
+              <button class="mt-head" disabled={!have || !v.sales} aria-pressed={have && v.sales ? m.id === shown : undefined}
+                onClick={() => { salesPick.value = m.id; }} title={m.desc[li()]}>
+                <Shape m={m} size={34} />
+                <span><b>{m.name[li()]}</b><small>{t('mdlTime', nf(secs, secs < 1 ? 1 : 0))}{have ? ' · ' + t('modelPieces', fmt(v.stock[m.id])) : ''}</small></span>
+              </button>
+              <div class="mbars">
+                <Bar label={t('barPay')} v={m.value / max.pay} kind="pay" />
+                <Bar label={t('barMkt')} v={m.market / max.mkt} kind="mkt" />
+                <Bar label={t('barMat')} v={m.material / max.mat} kind="mat" />
+              </div>
+              {!have
+                ? <BuyButton action={`stl:${m.id}`} cost={designCost(game.s, m)} have={v.zl} label={t('mdlBuyDesign', money(designCost(game.s, m)))} />
+                : v.split
+                  ? <div class="mt-foot">
+                      {main
+                        ? <div class="mt-main"><b class="num">{fmt(n)}</b><small>{t(v.farm > 0 ? 'lineMainFarms' : 'lineMain')}</small></div>
+                        : <div class="stepper small">
+                            <button aria-label={t('lineLess', m.name[li()])} disabled={n === 0} onClick={() => act(`fleet:${m.id}:${n - 1}`)}>−</button>
+                            <div class="pv"><b>{fmt(n)}</b><small>{t('linePrintersShort')}</small></div>
+                            <button aria-label={t('lineMore', m.name[li()])} disabled={!v.free} onClick={() => act(`fleet:${m.id}:${n + 1}`)}>+</button>
+                          </div>}
+                      {!main && <button class="mt-mk" onClick={() => act(`mdl:${m.id}`)}>{t('lineMakeMain')}</button>}
+                      {(main || n > 0) && <small class="mt-rate">{t('fleetRate', nf(60 * v.rate[m.id] / m.seconds, 1))}</small>}
+                    </div>
+                  : <button class={main ? 'on' : ''} disabled={main} onClick={e => { if (act(`mdl:${m.id}`) && e.detail > 0) e.currentTarget.blur(); }}>{main ? t('mdlOn') : t('mdlUse')}</button>}
+              {main && <Meter pct={100 * v.progress / m.seconds} />}
             </div>
-            {have
-              ? <button class={on ? 'on' : ''} disabled={on} onClick={e => { if (act(`mdl:${m.id}`) && e.detail > 0) e.currentTarget.blur(); }}>{on ? t('mdlOn') : t('mdlUse')}</button>
-              : <BuyButton action={`stl:${m.id}`} cost={designCost(game.s, m)} have={v.zl} label={money(designCost(game.s, m))} />}
+          );
+        })}
+        {next && (
+          <div class="mtile next">
+            <b>{t('lineNext')}</b>
+            <small>{t('mdlNext', fmt(next.unlockAt))}</small>
+            <Meter pct={100 * v.total / next.unlockAt} />
           </div>
-        );
-      })}
-      {next && <p class="hint">{t('mdlNext', fmt(next.unlockAt))}</p>}
+        )}
+      </div>
     </section>
   );
 }
@@ -449,7 +438,7 @@ function Materials() {
   if (rows.length < 2) return null;
 
   return (
-    <section class="card wide">
+    <section class="card wide v-p">
       <CardHead title={t('materialsTitle')} />
       <AutoMaterialToggle />
       {rows.map(({ material: m, selected, stock, price, bonus }) => (
@@ -506,10 +495,10 @@ function Space() {
       </div>
       <BoostRow />
       <Item name={t('droneItem')} sub={t('droneSub', fmt(v.drones), fmt(v.dRate, 1))}>
-        <BuyButton action="drone" cost={v.dCost} have={v.inv} label={t('figs', fmt(v.dCost))} />
+        <BuyButton action="drone" cost={v.dCost} have={v.inv} label={t('figs', fmt(v.dCost))} unit={n => t('figs', fmt(n))} />
       </Item>
       <Item name={t('fabItem')} sub={t('fabSub', fmt(v.fabs), fmt(v.fRate, 1))}>
-        <BuyButton action="fab" cost={v.fCost} have={v.inv} label={t('figs', fmt(v.fCost))} />
+        <BuyButton action="fab" cost={v.fCost} have={v.inv} label={t('figs', fmt(v.fCost))} unit={n => t('figs', fmt(n))} />
       </Item>
       <p class="hint">{t('spaceHint')}</p>
     </section>
@@ -582,16 +571,19 @@ export function Workshop() {
 
   const support = research || v.support;
   return (
-    <div class="workshop-layout">
+    <div class="workshop-layout" data-view={mobileView.value}>
       <Events />
       <div class="workshop-board">
         <div class="workshop-core">
-          <Production />
-          {v.sales && <Sales />}
-          {v.sales && <WorkshopStats />}
+          <ProductionLine />
+          <div class="core-pair">
+            {v.sales && <Sales />}
+            <Investments />
+          </div>
+          {v.sales && <div class="v-s"><WorkshopStats /></div>}
         </div>
-        {(v.designs || support) && <div class="workshop-tools">
-          {v.designs && <div class="workshop-stack"><Models /><Materials /></div>}
+        {(v.designs || support) && <div class="workshop-tools v-p">
+          {v.designs && <div class="workshop-stack"><Materials /></div>}
           {support && <WorkshopSupport research={research} farm={v.farm} compact={v.designs} />}
         </div>}
       </div>

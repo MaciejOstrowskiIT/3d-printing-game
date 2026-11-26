@@ -1,41 +1,59 @@
 import { BAL } from '../content/balance';
-import { MODEL } from '../content/models';
+import { MODEL, type PrintModel } from '../content/models';
 import { eff, gpu, model, rate1 } from '../core/formulas';
 import type { GameState } from '../core/state';
 
+/** Auto printers can be dedicated to other models once there are at least two printers and two designs. */
 export const splitUnlocked = (s: GameState) => s.ph === 1 && s.auto >= 2 && s.mdls.length >= 2;
 
-export function secondaryRate(s: GameState, totalRate = rate1(s)) {
-  // Available power affects farms, but both groups of standalone printers
-  // share the same shop speed, boost and breakdown modifiers.
+/** Auto printers dedicated to models other than the main one. */
+export const dedicated = (s: GameState) => Object.values(s.fleet).reduce((sum, n) => sum + n, 0);
+
+/** Auto printers working on a model. The main model gets every printer not dedicated elsewhere. */
+export const printersOn = (s: GameState, id: string) => id === s.mdl ? s.auto - dedicated(s) : s.fleet[id] ?? 0;
+
+/** Print rate (figurine work/s) of a model. Farms, manual work and new printers always go to the main model;
+ *  all standalone printers share the same speed, boost and breakdown modifiers. */
+export function rateOn(s: GameState, id: string, totalRate = rate1(s)) {
   const effectivePrinters = s.auto + s.farm * BAL.farmPrinters * eff(s);
-  return s.fleetModel && effectivePrinters > 0 ? totalRate * s.fleetPrinters / effectivePrinters : 0;
+  if (effectivePrinters <= 0) return 0;
+  const perPrinter = totalRate / effectivePrinters;
+  return id === s.mdl ? totalRate - perPrinter * dedicated(s) : perPrinter * (s.fleet[id] ?? 0);
 }
 
-export const primaryRate = (s: GameState) => rate1(s) - secondaryRate(s);
-
-export function fleetFilamentPerSecond(s: GameState) {
-  const total = rate1(s), secondary = secondaryRate(s, total);
-  return (total - secondary) * gpu(s) + (s.fleetModel ? secondary * gpu(s, MODEL[s.fleetModel]) : 0);
+/** Models printing right now, main first, with their rates. */
+export function printing(s: GameState, totalRate = rate1(s)): { m: PrintModel; rate: number }[] {
+  const out = [{ m: model(s), rate: rateOn(s, s.mdl, totalRate) }];
+  for (const [id, n] of Object.entries(s.fleet)) if (n > 0 && MODEL[id]) out.push({ m: MODEL[id], rate: rateOn(s, id, totalRate) });
+  return out;
 }
 
-export function setFleetModel(s: GameState, id: string) {
-  if (!splitUnlocked(s) || (id && (id === model(s).id || !s.mdls.includes(id) || !Object.hasOwn(MODEL, id)))) return false;
-  if (id === s.fleetModel) return false;
-  s.fleetModel = id;
-  s.fleetPrinters = id ? Math.max(1, s.fleetPrinters) : 0;
+export const fleetFilamentPerSecond = (s: GameState) => printing(s).reduce((sum, p) => sum + p.rate * gpu(s, p.m), 0);
+
+/** Dedicates `count` auto printers to a model other than the main one (0 returns them to the main model). */
+export function setFleet(s: GameState, id: string, count: number) {
+  if (!splitUnlocked(s) || !Object.hasOwn(MODEL, id) || id === s.mdl || !s.mdls.includes(id)) return false;
+  if (!Number.isSafeInteger(count) || count < 0 || count === (s.fleet[id] ?? 0)) return false;
+  if (dedicated(s) - (s.fleet[id] ?? 0) + count > s.auto) return false;
+  if (count) s.fleet[id] = count; else delete s.fleet[id];
   return true;
 }
 
-export function setFleetPrinters(s: GameState, count: number) {
-  if (!splitUnlocked(s) || !s.fleetModel || !Number.isSafeInteger(count) || count < 1 || count >= s.auto ||
-      count === s.fleetPrinters) return false;
-  s.fleetPrinters = count;
-  return true;
+/** The main model changes. If the new main already had dedicated printers, the two swap roles: those printers
+ *  stay on it and the old main keeps its remaining printers. Otherwise the main group simply moves to the new model. */
+export function swapMain(s: GameState, from: string, to: string) {
+  if (!s.fleet[to]) return;
+  const rest = s.auto - dedicated(s);
+  delete s.fleet[to];
+  if (rest > 0) s.fleet[from] = rest;
 }
 
 export function validFleet(s: GameState) {
-  if (s.fleetModel === '') return s.fleetPrinters === 0;
-  return typeof s.fleetModel === 'string' && Object.hasOwn(MODEL, s.fleetModel) && s.mdls.includes(s.fleetModel) &&
-    s.fleetModel !== s.mdl && Number.isSafeInteger(s.fleetPrinters) && s.fleetPrinters >= 1 && s.fleetPrinters < s.auto;
+  if (!s.fleet || typeof s.fleet !== 'object' || Array.isArray(s.fleet)) return false;
+  let sum = 0;
+  for (const [id, n] of Object.entries(s.fleet)) {
+    if (!Object.hasOwn(MODEL, id) || id === s.mdl || !s.mdls.includes(id) || !Number.isSafeInteger(n) || n < 1) return false;
+    sum += n;
+  }
+  return sum <= s.auto;
 }
