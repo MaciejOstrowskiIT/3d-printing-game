@@ -98,6 +98,7 @@ game.on(e => {
   if (e.type === 'prestige') track('prestige', { gain: e.gain, realistic: !!e.realistic });
   if (e.type === 'market') track('market', { id: e.id, result: e.result });
   if (e.type === 'model') track('model', { id: e.id, action: e.action });
+  if (e.type === 'daily') track('daily', { result: e.result, streak: e.streak });
   if (e.type === 'achievement') { pushToast(e.id); track('achievement', { id: e.id }); }
 });
 
@@ -115,9 +116,14 @@ export const screen = signal<'title' | 'game'>('title');
 /** Open modal dialog, if any. */
 export const dialog = signal<null | 'save'>(null);
 
+/** Local calendar day number, for the order of the day. The core only accepts days moving forward. */
+export const localDay = (now = new Date()) => Math.floor((now.getTime() - now.getTimezoneOffset() * 60_000) / 86_400_000);
+const reportDay = () => act(`day:${localDay()}`);
+
 export function startGame(fresh = false) {
   const resumed = game.s.total > 0 || game.s.meta.runs > 0;
   if (fresh) resetGame('fresh');
+  reportDay();
   lastT = performance.now();
   screen.value = 'game';
   track('session', { kind: fresh ? 'new' : resumed ? 'continue' : 'first' });
@@ -171,7 +177,7 @@ export function startLoop() {
   let lastSave = performance.now();
   let lastWall = Date.now();
   let lastClockCheck = lastSave;
-  let sinceBeat = 0;
+  let sinceBeat = 0, sinceDay = 0;
 
   function advance(resuming = false) {
     const now = performance.now();
@@ -200,6 +206,9 @@ export function startLoop() {
         sinceBeat -= HEARTBEAT_S;
         track('heartbeat');
       }
+      // New day after midnight, or the order of the day just unlocked: check every 30 s of play.
+      sinceDay += dt;
+      if (sinceDay >= 30) { sinceDay = 0; reportDay(); }
     }
     bump();
     if (resuming || performance.now() - lastSave >= 5000) {

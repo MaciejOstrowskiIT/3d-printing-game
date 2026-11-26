@@ -106,4 +106,12 @@ export const BAL = {
   realisticSlow: 10,               // printing takes 10× longer (printers and clicks; the space phase is unchanged)
   realisticPatentMult: 2,          // patents for finishing such a line
   realisticOfflineMax: 24 * 3600,  // longer offline progress, made for playing in the background
+
+  // order of the day (systems/dailyOrder.ts)
+  dailyFromGoal: 3,        // shows up once regular orders are known
+  dailySeconds: 180,       // size: this many seconds of current production
+  dailyMinSize: 30,
+  dailyPayMultiplier: 3,   // × the current price per figurine
+  dailyStreakStep: 0.15,   // +15% pay per day in a row…
+  dailyStreakMax: 7,       // …up to the 7th day (×1.9)
 } as const;
