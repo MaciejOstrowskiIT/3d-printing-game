@@ -6,7 +6,7 @@ import { demand, marketMul, spoolPrice } from '../src/core/formulas';
 import { createGame } from '../src/core/game';
 import { migrate } from '../src/core/save';
 import { createState, type GameState } from '../src/core/state';
-import { acceptMarketEvent, marketEventsSystem, offerCost } from '../src/systems/marketEvents';
+import { acceptMarketEvent, marketEventsSystem, offerCost, validMarketState } from '../src/systems/marketEvents';
 
 function ctx(rng = () => 0, offline = false) {
   const events: GameEvent[] = [];
@@ -112,5 +112,19 @@ describe('market events', () => {
     expect(s.mfx).toEqual([]);
     expect(s.mev).toBeNull();
     expect(marketMul(s, 'demand')).toBe(1);
+  });
+
+  it('rejects tampered market state', () => {
+    const s = midGame();
+    s.mevT = 100;
+    expect(validMarketState(s)).toBe(true);
+    offer(s, 'expo');
+    expect(validMarketState(s)).toBe(true);
+    expect(validMarketState({ ...s, mev: { ...s.mev!, cost: -1e9 } })).toBe(false);
+    expect(acceptMarketEvent({ ...s, mev: { ...s.mev!, cost: -1e9 } }, ctx().c)).toBe(false);
+    expect(validMarketState({ ...s, mev: { id: 'holiday', offer: 5, cost: 10 } })).toBe(false); // not an offer
+    expect(validMarketState({ ...s, mfx: [{ id: 'viral', t: 1e6 }] })).toBe(false);
+    expect(validMarketState({ ...s, mfx: [{ id: 'nope', t: 1 }] })).toBe(false);
+    expect(validMarketState({ ...s, mfx: [{ id: 'holiday', t: 5 }, { id: 'holiday', t: 5 }] })).toBe(false);
   });
 });

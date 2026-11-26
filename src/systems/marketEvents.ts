@@ -19,9 +19,22 @@ export function offerCost(s: GameState, e: MarketEvent): number {
 
 export const canAfford = (s: GameState) => {
   const e = s.mev && MARKET_EVENT[s.mev.id];
-  if (!s.mev || !e?.offer) return false;
+  if (!s.mev || !e?.offer || !(Number.isFinite(s.mev.cost) && s.mev.cost > 0)) return false;
   return s.zl >= s.mev.cost;
 };
+
+/** Save validation for the market fields: known ids, sane timers, a positive price.
+ *  Meant for core/saveValidation (cheat-proofing); a bad pending offer could otherwise pay out on accept. */
+export function validMarketState(s: GameState): boolean {
+  const num = (v: unknown, min: number, max: number) => typeof v === 'number' && Number.isFinite(v) && v >= min && v <= max;
+  if (!num(s.mevT, -1, BAL.marketEventEvery[1])) return false;
+  if (!Array.isArray(s.mfx) || s.mfx.length > MARKET_EVENTS.length) return false;
+  if (!s.mfx.every(f => f && MARKET_EVENT[f.id]?.seconds && num(f.t, 0, MARKET_EVENT[f.id].seconds))) return false;
+  if (new Set(s.mfx.map(f => f.id)).size !== s.mfx.length) return false;
+  if (s.mev === null) return true;
+  const e = s.mev && MARKET_EVENT[s.mev.id];
+  return !!e?.offer && num(s.mev.offer, 0, BAL.marketEventOffer) && num(s.mev.cost, 1e-9, Number.MAX_SAFE_INTEGER);
+}
 
 const startEffect = (s: GameState, e: MarketEvent) => {
   if (e.seconds > 0) s.mfx = [...s.mfx.filter(f => f.id !== e.id), { id: e.id, t: e.seconds }];
