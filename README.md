@@ -2,6 +2,8 @@
 
 A browser incremental game in the spirit of Universal Paperclips, set in the world of 3D printing. You start with a single printer in a garage and end up turning an asteroid belt into figurines.
 
+**Play:** https://maciejostrowskiit.github.io/3d-printing-game/
+
 ## Getting started
 
 ```bash
@@ -10,6 +12,10 @@ npm run dev        # dev server with hot reload
 npm test           # unit tests + a bot that plays the whole game
 npm run build      # dist/index.html: one self-contained file (portals, GitHub Pages)
 ```
+
+## Deployment
+
+`.github/workflows/deploy.yml` runs tests and the build on every pull request, and on every push to `main` it also deploys `dist/` to GitHub Pages. Pages must use **GitHub Actions** as its source (Settings → Pages → Build and deployment).
 
 ## Architecture
 
