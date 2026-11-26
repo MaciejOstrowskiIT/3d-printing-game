@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from 'preact/hooks';
+import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { primaryRate, secondaryRate, splitUnlocked } from '../../systems/fleet';
 import { stockGrowth } from '../../systems/workshopStats';
 import { piecesInStock, premiumFor, stockPrice } from '../../systems/inventory';
@@ -17,7 +17,7 @@ import { canAfford } from '../../systems/marketEvents';
 import { MARKET_EVENT } from '../../content/events';
 import { STORY_MSG } from '../../content/story';
 import { CALENDAR_EVENT, calendarOn } from '../../content/calendar';
-import { MODELS, type PrintModel } from '../../content/models';
+import { MODEL, MODELS, type PrintModel } from '../../content/models';
 import { qualityUnlocked } from '../../systems/printQuality';
 import { materialStock } from '../../systems/materials';
 import { autobuyOn, filamentRunway, stockedAlternative } from '../../systems/filament';
@@ -254,9 +254,9 @@ function ColorPicker() {
   );
 }
 
-function PriceStepper() {
-  const price = useS(s => s.price * model(s).seconds);
-  const minus = useHold('pminus'), plus = useHold('pplus');
+function PriceStepper({ id }: { id: string }) {
+  const price = useS(s => stockPrice(s, id) * MODEL[id].seconds);
+  const minus = useHold(`price-down:${id}`), plus = useHold(`price-up:${id}`);
   return (
     <div class="stepper">
       <button aria-label="−" {...minus}>−</button>
@@ -288,22 +288,44 @@ function PrintQuality() {
 }
 
 function Sales() {
-  const v = useS(s => ({
-    sold: s.sold, inv: piecesInStock(s, s.mdl), name: model(s).name[li()], piecesPerSecond: demand(s) / model(s).seconds, uc: unitCost(s) * model(s).seconds, price: realizedPrice(s) * model(s).seconds, premium: premiumFor(s, s.mdl), auto: has(s, 'autocena') && !!s.amOn.autocena,
-    growth: piecesInStock(s, s.mdl) > 0 ? stockGrowth(s, s.mdl) : null, fast: piecesInStock(s, s.mdl) < 1 && s.sold > 0, goal: s.goal, mkt: s.mkt, mktCost: mktCost(s), zl: s.zl,
+  const [selected, setSelected] = useState<string | null>(null);
+  const shop = useS(s => ({
+    main: s.mdl, owned: s.mdls, sold: s.sold, auto: has(s, 'autocena') && !!s.amOn.autocena,
+    goal: s.goal, mkt: s.mkt, mktCost: mktCost(s), zl: s.zl,
+    channels: Object.fromEntries(s.mdls.map(id => {
+      const m = MODEL[id];
+      const inv = piecesInStock(s, id);
+      const price = stockPrice(s, id);
+      return [id, {
+        inv, piecesPerSecond: demand(s, m, price) / m.seconds,
+        uc: unitCost(s, m) * m.seconds, price: realizedPrice(s, id) * m.seconds,
+        premium: premiumFor(s, id), growth: inv > 0 ? stockGrowth(s, id) : null,
+        fast: inv < 1 && s.sold > 0,
+      }];
+    })),
   }));
+  const id = selected && shop.owned.includes(selected) ? selected : shop.main;
+  const v = { ...shop, ...shop.channels[id] };
   const loss = v.price < v.uc;
   const hint = loss ? t('hLoss') : v.premium > 0 ? t('qualityPrice', money(v.price)) : v.auto ? t('hAuto') : t('hBase');
   return (
     <section class="card workshop-sales">
       <CardHead title={t('sales')} aside={t('soldT', fmt(v.sold))} />
+      {v.owned.length > 1 && <div class="sales-model">
+        <label for="sales-model">{t('salesModel')}</label>
+        <select id="sales-model" value={id} onChange={e => setSelected(e.currentTarget.value)}>
+          {v.owned.map(id => <option key={id} value={id}>{MODEL[id].name[li()]}</option>)}
+        </select>
+      </div>}
       <div class="tiles">
-        <Tile label={v.name} value={t('statsPiecesSold', fmt(v.inv))} />
+        <Tile label={t('stock')} value={t('statsPiecesSold', fmt(v.inv))} />
         <Tile label={t('buyRateS')} value={t('perS', fmt(v.piecesPerSecond, 1))} />
         <Tile label={t('unitCostS')} value={money(v.uc)} />
       </div>
       <ColorPicker />
-      {!v.auto && <PriceStepper />}
+      {v.auto
+        ? <p class="hint sales-auto-price">{t('salesCurrentPrice', money(v.price))}</p>
+        : <PriceStepper id={id} key={id} />}
       <div class="sales-notes">
         <div class="sales-flow">
           {v.growth

@@ -1,9 +1,11 @@
 import { bookCash } from './workshopStats';
-import { primaryRate } from './fleet';
+import { MODELS } from '../content/models';
+import { piecesInStock, setStockPrice, stockPrice } from './inventory';
+import { primaryRate, secondaryRate } from './fleet';
 import { BAL } from '../content/balance';
 import { TREE } from '../content/tree';
 import type { Ctx } from '../core/ctx';
-import { activeStockWork, autoCost, drawP, fabCap, farmCost, freePts, mining, mktCost, panelCost, spoolPrice, supply, unitCost, droneCost, fabCost, gpu, clearingPrice } from '../core/formulas';
+import { autoCost, drawP, fabCap, farmCost, freePts, mining, mktCost, panelCost, spoolPrice, supply, unitCost, droneCost, fabCost, gpu, clearingPrice } from '../core/formulas';
 import { has, type GameState } from '../core/state';
 import { acceptOrder } from './orders';
 import { acceptMarketEvent, canAfford } from './marketEvents';
@@ -20,15 +22,21 @@ export const savingForLiftoff = (s: GameState) => !has(s, 'replik') && TREE.some
  *  extra stock (never more than autoPriceMaxDrain × production), and moves there by at most autoPriceStep a second.
  *  A smooth controller: the old one overshot, piled up stock, then crashed the price and dumped it all at once. */
 export function autoPrice(s: GameState) {
-  const rate = s.fil >= gpu(s) ? primaryRate(s) : 0;
-  const target = Math.max(10, rate * BAL.autoPriceStockSeconds);
-  const stock = activeStockWork(s);
-  const drain = Math.min(BAL.autoPriceMaxDrain, Math.max(0.5, 1 + (stock - target) / (target * 4)));
-  const sales = rate > 0 ? rate * drain : Math.max(stock / 60, 0.1);
-  const want = clearingPrice(s, sales);
-  const step = s.price * BAL.autoPriceStep;
-  const next = s.price + Math.max(-step, Math.min(step, want - s.price));
-  s.price = Math.min(500, Math.max(Math.round(next * 1000) / 1000, Math.ceil(unitCost(s) * 1.3 * 1000) / 1000));
+  const primary = primaryRate(s), secondary = secondaryRate(s);
+  for (const m of MODELS) {
+    const stock = piecesInStock(s, m.id) * m.seconds;
+    const capacity = m.id === s.mdl ? primary : m.id === s.fleetModel ? secondary : 0;
+    if (m.id !== s.mdl && stock === 0 && capacity === 0) continue;
+    const rate = s.fil >= gpu(s, m) ? capacity : 0;
+    const target = Math.max(10, rate * BAL.autoPriceStockSeconds);
+    const drain = Math.min(BAL.autoPriceMaxDrain, Math.max(0.5, 1 + (stock - target) / (target * 4)));
+    const sales = rate > 0 ? rate * drain : Math.max(stock / 60, 0.1);
+    const price = stockPrice(s, m.id);
+    const want = clearingPrice(s, sales, m, price);
+    const step = price * BAL.autoPriceStep;
+    const next = price + Math.max(-step, Math.min(step, want - price));
+    setStockPrice(s, m.id, Math.min(500, Math.max(Math.round(next * 1000) / 1000, Math.ceil(unitCost(s, m) * 1.3 * 1000) / 1000)));
+  }
 }
 
 /** All automations unlocked in the research tree. Each runs only while the player keeps it enabled. */

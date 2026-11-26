@@ -1,8 +1,8 @@
 import { bookCash } from './workshopStats';
-import { MODELS } from '../content/models';
+import { MODEL, MODELS } from '../content/models';
 import { demand, realizedPrice } from '../core/formulas';
 import type { GameState } from '../core/state';
-import { modelStock, piecesInStock, stockPrice, takePieces } from './inventory';
+import { modelStock, piecesInStock, setStockPrice, stockPrice, takePieces } from './inventory';
 
 export function salesSystem(s: GameState, dt: number) {
   if (s.pen > 0) s.pen -= dt;
@@ -29,6 +29,9 @@ export function salesSystem(s: GameState, dt: number) {
   }
 }
 
-export function changePrice(s: GameState, delta: number) {
-  s.price = Math.max(0.01, Math.round((s.price + delta) * 1000) / 1000);
+export function changePrice(s: GameState, delta: number, id = s.mdl) {
+  if (s.ph !== 1 || !Object.hasOwn(MODEL, id) || !s.mdls.includes(id)) return false;
+  const price = Math.max(0.01, Math.round((stockPrice(s, id) + delta / MODEL[id].seconds) * 1000) / 1000);
+  setStockPrice(s, id, price);
+  return true;
 }

@@ -1,4 +1,4 @@
-import { premiumFor, stockPrice, piecesInStock } from '../systems/inventory';
+import { premiumFor, stockPrice } from '../systems/inventory';
 import { BAL } from '../content/balance';
 import { mod } from './mods';
 import { DEFAULT_MATERIAL, MATERIAL, materialDemand } from '../content/materials';
@@ -44,15 +44,14 @@ export const modelDemand = (m: PrintModel) => m.value ** BAL.demandElasticity * 
 /** Figurines of work added by one click. */
 export const precisionSpeed = (s: GameState) => s.precision ? BAL.precisionSpeed : 1;
 export const realizedPrice = (s: GameState, id = s.mdl) => stockPrice(s, id) * (1 + premiumFor(s, id));
-export const activeStockWork = (s: GameState) => piecesInStock(s, s.mdl) * model(s).seconds;
 export const clickPower = (s: GameState) => BAL.clickWork * (1 + BAL.clickStep * s.clk) * precisionSpeed(s) * mod(s, 'click') / (s.slow || 1);
 /** Print time of one piece of a model in seconds, as the player sees it (longer on a realistic line or in precision mode). */
 export const printSeconds = (s: GameState, m: PrintModel) => m.seconds * (s.slow || 1) / precisionSpeed(s);
 export const isRealistic = (s: GameState) => (s.slow || 1) > 1;
 export const clickCost = (s: GameState) => BAL.clickCost * BAL.clickGrowth ** s.clk;
 /** Price per figurine at which demand would be `sales` figurines/s (demand ∝ price^-elasticity). */
-export const clearingPrice = (s: GameState, sales: number) =>
-  s.price * (demand(s) / Math.max(sales, 1e-6)) ** (1 / BAL.demandElasticity);
+export const clearingPrice = (s: GameState, sales: number, m = model(s), price = stockPrice(s, m.id)) =>
+  price * (demand(s, m, price) / Math.max(sales, 1e-6)) ** (1 / BAL.demandElasticity);
 
 export const unitCost = (s: GameState, m = model(s)) => (spoolPrice(s) / s.spoolG) * gpu(s, m);
 export const droneCost = (s: GameState) => BAL.droneCost * BAL.droneCostGrowth ** s.drones;
