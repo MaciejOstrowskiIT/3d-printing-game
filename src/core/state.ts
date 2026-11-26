@@ -1,7 +1,8 @@
+import type { DailyOrder } from '../systems/dailyOrder';
 import { BAL } from '../content/balance';
 
 /** Log entry argument. String prefixes are kept for compatibility with old saves:
- *  '@id' tree node, '$123' money, '#2' client, '%1' breakdown cause, '~90' duration in s, '&3' colour, '!id' achievement, '^id' market event, '*id' print model, 'pl|en' goal text. */
+ *  '@id' tree node, '$123' money, '#2' client, '%1' breakdown cause, '~90' duration in s, '&3' colour, '!id' achievement, '^id' market event, '*id' print model, '+id' calendar event, 'pl|en' goal text. */
 export type LogArg = string | number;
 export interface LogEntry { k: string; a: LogArg[] }
 
@@ -58,6 +59,10 @@ export interface GameState {
   offB: number; offBi: number; offBT: number;
   /** Print-time multiplier: 1 normally, BAL.realisticSlow on a realistic line. */
   slow: number;
+  /** Order of the day: last day seen (local day number), today's order, current and best streak. */
+  dday: number; dord: DailyOrder | null; dstreak: number; dbest: number;
+  /** Latest local day number reported by the UI; calendar events follow it. */
+  today: number;
   meta: Meta;
   precision: boolean; bedCalibrated: boolean; dryerInstalled: boolean; stockPremium: number;
 }
@@ -88,6 +93,8 @@ export const createState = (): GameState => ({
   mdl: 'fig', mdls: ['fig'], clk: 0, mp: 0,
   offB: 0, offBi: 0, offBT: 0,
   slow: 1,
+  dday: 0, dord: null, dstreak: 0, dbest: 0,
+  today: 0,
   meta: { patents: 0, earned: 0, runs: 0, pat: {} },
   precision: false, bedCalibrated: false, dryerInstalled: false, stockPremium: 0,
 });

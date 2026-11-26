@@ -9,6 +9,7 @@ import { acceptMarketEvent, declineMarketEvent, marketEventsSystem } from '../sy
 import { acceptOrder, declineOrder, ordersSystem } from '../systems/orders';
 import { setQualityAction } from '../systems/printQuality';
 import { buySpool, productionSystem } from '../systems/production';
+import { deliverDaily, newDay } from '../systems/dailyOrder';
 import { claimOfflineBonus, grantOfflineBonus, offlineBonusSystem } from '../systems/offlineBonus';
 import { buyClickTool, buyDesign, printManual, selectModel } from '../systems/models';
 import { assignPoint, buyNode, computeSystem, goalsSystem, reputationSystem } from '../systems/research';
@@ -45,8 +46,8 @@ export type Action =
   | 'calibrate' | 'dryer' | 'precision'
   | 'print' | 'spool' | 'auto' | 'farm' | 'panel' | 'mkt' | 'drone' | 'fab'
   | 'pminus' | 'pplus' | 'oacc' | 'odec' | 'fix' | 'mevyes' | 'mevno' | 'tool'
-  | 'proc1' | 'procmax' | 'mem1' | 'memmax' | 'boost' | 'adfail' | 'prestige' | 'prestigeR' | 'offx2'
-  | `t:${string}` | `col:${number}` | `mdl:${string}` | `stl:${string}` | `am:${string}:${0 | 1}` | `pat:${string}`;
+  | 'proc1' | 'procmax' | 'mem1' | 'memmax' | 'boost' | 'adfail' | 'prestige' | 'prestigeR' | 'offx2' | 'daily'
+  | `t:${string}` | `col:${number}` | `mdl:${string}` | `stl:${string}` | `day:${number}` | `am:${string}:${0 | 1}` | `pat:${string}`;
 
 export interface Game {
   readonly s: GameState;
@@ -104,6 +105,8 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
       if (a === 'prestige' || a === 'prestigeR') { const next = prestige(s, ctx, a === 'prestigeR'); if (next) s = next; return !!next; }
       if (a.startsWith('pat:')) { const ok = buyPatent(s, a.slice(4)); if (ok) sfx(ctx, 'buy'); return ok; }
       if (a === 'adfail') { log(s, ctx, 'boostFail'); return true; }
+      if (a === 'daily') return deliverDaily(s, ctx);
+      if (a.startsWith('day:')) return newDay(s, ctx, Number(a.slice(4)));
       if (a === 'offx2') { const ok = claimOfflineBonus(s, ctx); if (ok) sfx(ctx, 'buy'); return ok; }
       if (a === 'proc1') { assignPoint(s, 'proc'); return true; }
       if (a === 'procmax') { assignPoint(s, 'proc', true); return true; }
