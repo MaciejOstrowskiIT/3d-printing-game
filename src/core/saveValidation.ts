@@ -4,6 +4,7 @@ import { GOALS } from '../content/goals';
 import { KEPT_AUTOMATION, PATENT } from '../content/patents';
 import { NODE } from '../content/tree';
 import { validMarketState } from '../systems/marketEvents';
+import { validMaterialState } from '../systems/materials';
 import { validModelState } from '../systems/models';
 import type { GameState } from './state';
 
@@ -48,7 +49,7 @@ export function validSave(s: GameState, defaults: GameState) {
   if (!validPatents(s.meta)) return false;
   const kept = KEPT_AUTOMATION[s.meta.pat.keep ?? 0];
   if (s.done.some(id => !kept.includes(id) && NODE[id].req?.some(req => !s.done.includes(req)))) return false;
-  if (!validMarketState(s) || !validModelState(s) || s.play < 0) return false;
+  if (!validMarketState(s) || !validModelState(s) || !validMaterialState(s) || s.play < 0) return false;
   return s.boostT >= 0 && s.boostT <= BAL.boostSeconds &&
     s.boostCd >= s.boostT && s.boostCd <= BAL.boostCooldown;
 }

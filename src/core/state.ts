@@ -1,3 +1,4 @@
+import { DEFAULT_MATERIAL } from '../content/materials';
 import { BAL } from '../content/balance';
 
 /** Log entry argument. String prefixes are kept for compatibility with old saves:
@@ -55,6 +56,9 @@ export interface GameState {
   /** Print models (content/models.ts): selected model, owned designs, click tool level, manual progress on the current piece. */
   mdl: string; mdls: string[]; clk: number; mp: number;
   meta: Meta;
+  /** Active feedstock and reserves. fil holds the active feedstock, including PLA in old saves. */
+  materialId: string;
+  materialStock: Record<string, number>;
 }
 
 export const SAVE_VERSION = 5;
@@ -82,6 +86,7 @@ export const createState = (): GameState => ({
   mev: null, mevT: BAL.marketEventFirst, mfx: [],
   mdl: 'fig', mdls: ['fig'], clk: 0, mp: 0,
   meta: { patents: 0, earned: 0, runs: 0, pat: {} },
+  materialId: DEFAULT_MATERIAL.id, materialStock: {},
 });
 
 export const has = (s: GameState, id: string) => s.done.includes(id);

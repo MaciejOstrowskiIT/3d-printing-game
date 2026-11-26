@@ -16,11 +16,16 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 | Realistic mode (new-line challenge) | #18 | Built on #17 |
 | CrazyGames account saves (data module) | #19 | Merge after #18; needs the submission setting below |
 
+## In progress
+
+| Card | Branch | Owner |
+|---|---|---|
+| **Materials**: PLA, PETG, TPU, resin; each with its own price, durability and matching models | `feat/materials` | Codex |
+
 ## 🚦 Next up
 
 | Card | Effort | Owner | Why |
 |---|---|---|---|
-| **Materials**: PLA, PETG, TPU, resin; each with its own price, durability and matching models | S | Dev | Same data-registry pattern as models; many new combinations for little code |
 | **Print problems & quality**: bed adhesion, spaghetti, clogged nozzle, wet filament; bed calibration, filament dryer, slow-and-fine mode; quality raises the price | M | Dev | Grows out of today's breakdowns; makes the mid-game active instead of waiting |
 | **Order of the day**: one special order per day, bonus for a streak | S | Dev | Day-1/day-7 return, measured in Umami (`open.day`) |
 | Smooth the farm phase (~20 min): production jumps by 60 printers per farm | S | Dev | Next balance candidate after #16 |

@@ -54,7 +54,7 @@ export const MARKET_EVENTS: MarketEvent[] = [
   {
     id: 'clearance', weight: 2, seconds: 0, spools: 5,
     name: ['Wyprzedaż magazynu', 'Warehouse clearance'],
-    desc: ['Hurtownia czyści magazyn: 5 szpul za pół ceny, płacisz {0}.', 'A wholesaler is clearing stock: 5 spools at half price, for {0}.'],
+    desc: ['Hurtownia czyści magazyn: 5 szpul PLA za pół ceny, płacisz {0}.', 'A wholesaler is clearing stock: 5 spools of PLA at half price, for {0}.'],
     offer: { seconds: 0, btn: ['Kupuję', 'Buy'] },
   },
   {
