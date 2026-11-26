@@ -32,6 +32,7 @@ function End() {
         <p>{t('endTxt', fmt(total))}</p>
         <div class="end-actions">
           <PrestigeButton class="btn-main big" />
+          <PrestigeButton class="big" realistic />
           <button onClick={() => resetGame('again')}>{t('again')}</button>
         </div>
       </div>

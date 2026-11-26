@@ -49,7 +49,7 @@ export function validSave(s: GameState, defaults: GameState) {
   if (!validPatents(s.meta)) return false;
   const kept = KEPT_AUTOMATION[s.meta.pat.keep ?? 0];
   if (s.done.some(id => !kept.includes(id) && NODE[id].req?.some(req => !s.done.includes(req)))) return false;
-  if (!validMarketState(s) || !validModelState(s) || !validOfflineBonus(s) || s.play < 0) return false;
+  if (!validMarketState(s) || !validModelState(s) || !validOfflineBonus(s) || ![1, BAL.realisticSlow].includes(s.slow) || s.play < 0) return false;
   return s.boostT >= 0 && s.boostT <= BAL.boostSeconds &&
     s.boostCd >= s.boostT && s.boostCd <= BAL.boostCooldown;
 }
