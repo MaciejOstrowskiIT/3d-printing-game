@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
+import { BAL } from '../../content/balance';
 import { PATENTS } from '../../content/patents';
 import { canPrestige, nextPatentAt, patentsFor } from '../../core/prestige';
 import { patLvl } from '../../core/state';
@@ -7,27 +8,34 @@ import { act, useS } from '../store';
 import { CardHead } from './common';
 
 /** Two-click confirmation for the reset button. */
-function usePrestigeButton() {
+function usePrestigeButton(action: 'prestige' | 'prestigeR') {
   const [sure, setSure] = useState(false);
   useEffect(() => { if (!sure) return; const id = setTimeout(() => setSure(false), 4000); return () => clearTimeout(id); }, [sure]);
-  return { sure, click: () => { if (sure) { act('prestige'); setSure(false); } else setSure(true); } };
+  return { sure, click: () => { if (sure) { act(action); setSure(false); } else setSure(true); } };
 }
 
-export function PrestigeButton({ class: cls = 'btn-main' }: { class?: string }) {
+/** Starts a new line; with `realistic`, a realistic one (the challenge). Two clicks to confirm. */
+export function PrestigeButton({ class: cls = 'btn-main', realistic = false }: { class?: string; realistic?: boolean }) {
   const v = useS(s => ({ can: canPrestige(s), gain: patentsFor(s) }));
-  const b = usePrestigeButton();
-  return <button class={cls} disabled={!v.can} onClick={b.click}>{b.sure ? t('prSure') : t('prBtn', fmt(v.gain))}</button>;
+  const b = usePrestigeButton(realistic ? 'prestigeR' : 'prestige');
+  const label = t(realistic ? 'prBtnR' : 'prBtn', fmt(v.gain));
+  return <button class={cls} disabled={!v.can} onClick={b.click}>{b.sure ? t('prSure') : label}</button>;
 }
 
 /** Offered in the space phase: start over with permanent patents. */
 export function PrestigeCard() {
-  const v = useS(s => ({ gain: patentsFor(s), next: nextPatentAt(s) }));
+  const v = useS(s => ({ gain: patentsFor(s), next: nextPatentAt(s), real: (s.slow || 1) > 1 }));
   return (
     <section class="card wide prestige">
-      <CardHead title={t('prTitle')} />
+      <CardHead title={t('prTitle')} aside={v.real ? t('prRealNow', BAL.realisticPatentMult) : undefined} />
       <p class="hint" style={{ marginTop: 0 }}>{t('prDesc', fmt(v.gain))} {t('prKeep')}</p>
       <p class="hint">{t('prMore', fmt(v.next))}</p>
       <div class="ctl"><PrestigeButton /></div>
+      <div class="real-offer">
+        <b>{t('prReal')}</b>
+        <p class="hint">{t('prRealDesc', BAL.realisticSlow, BAL.realisticOfflineMax / 3600, BAL.realisticPatentMult)}</p>
+        <div class="ctl"><PrestigeButton class="" realistic /></div>
+      </div>
     </section>
   );
 }

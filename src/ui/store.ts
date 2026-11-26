@@ -95,7 +95,7 @@ game.on(e => {
   if (e.type === 'phase') track('liftoff');
   if (e.type === 'order') track('order', { result: e.result });
   if (e.type === 'end') track('end', { total: Math.floor(game.s.total) });
-  if (e.type === 'prestige') track('prestige', { gain: e.gain });
+  if (e.type === 'prestige') track('prestige', { gain: e.gain, realistic: !!e.realistic });
   if (e.type === 'market') track('market', { id: e.id, result: e.result });
   if (e.type === 'model') track('model', { id: e.id, action: e.action });
   if (e.type === 'achievement') { pushToast(e.id); track('achievement', { id: e.id }); }

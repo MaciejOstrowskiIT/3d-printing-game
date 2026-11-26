@@ -27,8 +27,9 @@ export function bestModel(s: GameState): string {
 export interface BotResult { ended: boolean; minutes: number; goalMinutes: number[]; ordersDone: number; ordersFailed: number }
 
 /** Bot that plays like a skilled player: clicks early, watches filament and price, buys sensibly, takes orders. */
-export function playthrough(seed = 1, maxHours = 6, dt = 0.25, meta?: Partial<Meta>, observe?: (s: GameState, t: number) => void): BotResult {
+export function playthrough(seed = 1, maxHours = 6, dt = 0.25, meta?: Partial<Meta>, observe?: (s: GameState, t: number) => void, init?: Partial<GameState>): BotResult {
   const game = createGame({ rng: seededRng(seed) });
+  if (init) Object.assign(game.s, init);
   if (meta) { Object.assign(game.s.meta, meta); applyStartBonuses(game.s); }
   const goalMinutes: number[] = [];
   let t = 0;

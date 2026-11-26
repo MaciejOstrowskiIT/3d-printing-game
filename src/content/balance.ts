@@ -101,4 +101,9 @@ export const BAL = {
   offlineBonusMinSeconds: 120,     // shorter absences get no offer
   offlineBonusMult: 1,             // the ad adds this × what was earned while away
   offlineBonusClaimSeconds: 600,   // the offer stays for 10 minutes of play
+
+  // realistic mode: a challenge chosen when starting a new production line (core/prestige.ts)
+  realisticSlow: 10,               // printing takes 10× longer (printers and clicks; the space phase is unchanged)
+  realisticPatentMult: 2,          // patents for finishing such a line
+  realisticOfflineMax: 24 * 3600,  // longer offline progress, made for playing in the background
 } as const;

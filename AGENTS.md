@@ -21,6 +21,7 @@ Planned work and its order: `ROADMAP.md` (task board). Pick cards from "Next up"
 | PR / branch | Agent | Touches |
 |---|---|---|
 | `feat/offline-double` | Claude | `systems/offlineBonus.ts` (new, appended to `SYSTEMS`); `GameState.offB/offBi/offBT`; `catchUp` sums sales revenue; action `offx2`; `validSave()` hook; `ui/store.ts` (`watchAd()` generalised); `App.tsx` away report; `market.ts` trend pick without retry loop |
+| `feat/realistic-mode` (on top of #17) | Claude | `GameState.slow`; `formulas.ts` (`rateBase`/`clickPower` ÷ slow, `printSeconds`, `isRealistic`); `prestige.ts` (`prestige(s, ctx, realistic)`, `patentsFor` ×2); action `prestigeR`; `catchUp` 24 h cap; `validSave()` hook; `Prestige.tsx`, `App.tsx` End, `Hud.tsx` badge; achievement `realist`; `tests/bot.ts` (`init` arg) |
 
 Merged: #8–#16 (analytics, portal assets, workshop discovery, save validation, market events, print models, mobile touch, early balance).
 

@@ -56,6 +56,8 @@ export interface GameState {
   mdl: string; mdls: string[]; clk: number; mp: number;
   /** Rewarded offline bonus waiting to be claimed: money, figurines, seconds left. */
   offB: number; offBi: number; offBT: number;
+  /** Print-time multiplier: 1 normally, BAL.realisticSlow on a realistic line. */
+  slow: number;
   meta: Meta;
 }
 
@@ -84,6 +86,7 @@ export const createState = (): GameState => ({
   mev: null, mevT: BAL.marketEventFirst, mfx: [],
   mdl: 'fig', mdls: ['fig'], clk: 0, mp: 0,
   offB: 0, offBi: 0, offBT: 0,
+  slow: 1,
   meta: { patents: 0, earned: 0, runs: 0, pat: {} },
 });
 
