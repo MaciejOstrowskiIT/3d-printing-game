@@ -1,5 +1,5 @@
 import { useEffect } from 'preact/hooks';
-import { fmt, logText, money, prefs, t } from '../i18n';
+import { dur, fmt, logText, money, prefs, t } from '../i18n';
 import { act, adPending, awayReport, dialog, resetGame, screen, useS, watchAdForOfflineBonus } from '../store';
 import { offlineBonusReady } from '../../systems/offlineBonus';
 import { platform } from '../platform';
@@ -79,7 +79,7 @@ export function App() {
           <Hud />
           <div class="content">
             {awayReport.value && <div class="away-report">
-              <span role="status">{logText(awayReport.value)}</span>
+              <span role="status">{logText(awayReport.value)}{awayReport.value.idle ? ' ' + t('offIdleTail', dur(awayReport.value.idle)) : ''}</span>
               <OfflineBonusButton />
               <button aria-label={t('sClose')} onClick={() => { awayReport.value = undefined; }}>×</button>
             </div>}
