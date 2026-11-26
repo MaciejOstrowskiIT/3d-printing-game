@@ -5,8 +5,9 @@
  *  and tests/models.test.ts checks every entry (numbers in range, shape fits the printer, texts in PL and EN).
  *
  *  Economy is counted in figurines: one figurine = one second of work of one printer at base speed. A model
- *  that takes 5 s to print is 5 figurines of work, so production, stock, goals and the space phase stay in the
- *  same unit no matter which model is selected. A model changes the market side:
+ *  that takes 5 s to print is 5 figurines of work, so goals and the space phase stay in the
+ *  same unit no matter which model is selected. The workshop stocks and sells whole pieces.
+ *  A model changes the market side:
  *   - demand for it, in figurines/s at the same price per figurine, is multiplied by value^elasticity × market × seconds;
  *   - filament per figurine is multiplied by material.
  *  Bigger models pay more per printer-second but have fewer buyers, so they help most once printers outnumber clients. */

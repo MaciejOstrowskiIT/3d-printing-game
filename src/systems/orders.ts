@@ -1,4 +1,5 @@
-import { stockPrints } from './printQuality';
+import { MODEL } from '../content/models';
+import { putPieces } from './inventory';
 import { BAL } from '../content/balance';
 import { log, pick, sfx, type Ctx } from '../core/ctx';
 import { boostMul, rateBase } from '../core/formulas';
@@ -24,7 +25,18 @@ export function acceptOrder(s: GameState) {
   if (s.ord && !s.ord.acc) { s.ord.acc = true; s.ord.left = s.ord.time; }
 }
 
+function releaseOrderStock(s: GameState) {
+  let figurines = s.ord?.got ?? 0;
+  for (const [id, count] of Object.entries(s.orderStock)) {
+    figurines -= count * MODEL[id].seconds;
+    putPieces(s, id, count, 0);
+  }
+  putPieces(s, 'fig', figurines, 0);
+  s.orderStock = {};
+}
+
 export function declineOrder(s: GameState, ctx: Ctx) {
+  releaseOrderStock(s);
   s.ord = null;
   s.ordT = pickOrderCooldown(ctx);
 }
@@ -45,7 +57,7 @@ export function ordersSystem(s: GameState, dt: number, ctx: Ctx) {
   } else {
     o.left -= dt;
     if (o.left <= 0) {
-      stockPrints(s, o.got);
+      releaseOrderStock(s);
       s.ord = null;
       s.pen = BAL.penaltySeconds;
       s.ordFail++;

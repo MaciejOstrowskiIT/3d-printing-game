@@ -1,3 +1,4 @@
+import { premiumFor, stockPrice, piecesInStock } from '../systems/inventory';
 import { BAL } from '../content/balance';
 import { DEFAULT_MATERIAL, MATERIAL, materialDemand } from '../content/materials';
 import { MARKET_EVENT } from '../content/events';
@@ -12,19 +13,19 @@ export const farmCost = (s: GameState) => BAL.farmCost * BAL.farmCostGrowth ** s
 export const panelCost = (s: GameState) => BAL.panelCost * BAL.panelCostGrowth ** s.panels;
 export const mktCost = (s: GameState) => BAL.marketingCost * BAL.marketingCostGrowth ** (s.mkt - 1);
 /** Product of a multiplier over running market effects, clamped so stacked events cannot break the economy. */
-export function marketMul(s: GameState, key: 'demand' | 'spool') {
+export function marketMul(s: GameState, key: 'demand' | 'spool', modelId = s.mdl) {
   let m = 1;
   for (const fx of s.mfx ?? []) m *= MARKET_EVENT[fx.id]?.[key] ?? 1;
-  if (key === 'demand') m *= calendarMul(s);
+  if (key === 'demand') m *= calendarMul(s, modelId);
   return Math.min(BAL.marketMulRange[1], Math.max(BAL.marketMulRange[0], m));
 }
 
 /** Demand multiplier from calendar events running today (content/calendar.ts), for the selected model and colour. */
-export function calendarMul(s: GameState) {
+export function calendarMul(s: GameState, modelId = s.mdl) {
   let m = 1;
   for (const e of calendarOn(s.today ?? 0)) {
     m *= e.demand ?? 1;
-    m *= e.models?.[s.mdl] ?? 1;
+    m *= e.models?.[modelId] ?? 1;
     if (e.colors?.includes(s.col)) m *= e.colorMul ?? 1;
   }
   return m;
@@ -41,7 +42,8 @@ export const gpu = (s: GameState) => s.g * model(s).material;
 export const modelDemand = (m: PrintModel) => m.value ** BAL.demandElasticity * m.market * m.seconds;
 /** Figurines of work added by one click. */
 export const precisionSpeed = (s: GameState) => s.precision ? BAL.precisionSpeed : 1;
-export const realizedPrice = (s: GameState) => s.price * (1 + s.stockPremium);
+export const realizedPrice = (s: GameState, id = s.mdl) => stockPrice(s, id) * (1 + premiumFor(s, id));
+export const activeStockWork = (s: GameState) => piecesInStock(s, s.mdl) * model(s).seconds;
 export const clickPower = (s: GameState) => BAL.clickWork * (1 + BAL.clickStep * s.clk) * precisionSpeed(s) / (s.slow || 1);
 /** Print time of one piece of a model in seconds, as the player sees it (longer on a realistic line or in precision mode). */
 export const printSeconds = (s: GameState, m: PrintModel) => m.seconds * (s.slow || 1) / precisionSpeed(s);
@@ -62,16 +64,16 @@ export const eff = (s: GameState) => (drawP(s) ? Math.min(1, supply(s) / drawP(s
 export const trendOn = (s: GameState) => s.goal >= 2;
 export const inTrend = (s: GameState) => trendOn(s) && s.col === s.trend;
 
-export const demand = (s: GameState) =>
+export const demand = (s: GameState, m = model(s), price = s.price) =>
   BAL.demandBase *
-  Math.pow(5 / s.price, BAL.demandElasticity) *
+  Math.pow(5 / price, BAL.demandElasticity) *
   BAL.marketingGrowth ** (s.mkt - 1) *
   s.dem *
   (s.pen > 0 ? BAL.penaltyDemand : 1) *
   (inTrend(s) ? BAL.trendBonus : 1) *
   (1 + 0.15 * patLvl(s, 'brand')) *
-  marketMul(s, 'demand') *
-  modelDemand(model(s)) * materialDemand(material(s), s.mdl);
+  marketMul(s, 'demand', m.id) *
+  modelDemand(m) * materialDemand(material(s), m.id);
 
 export const boostMul = (s: GameState) => (s.boostT > 0 ? BAL.boostMultiplier : 1);
 export const rateBase = (s: GameState) => (s.auto + s.farm * BAL.farmPrinters * eff(s)) * s.spd * boostMul(s) * (1 + 0.15 * patLvl(s, 'speed')) * precisionSpeed(s) / (s.slow || 1);

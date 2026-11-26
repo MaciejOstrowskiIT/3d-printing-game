@@ -3,7 +3,7 @@ import { seededRng } from '../src/core/ctx';
 import { demand, eff, rate1, unitCost } from '../src/core/formulas';
 import { createGame } from '../src/core/game';
 import { EXPORT_PREFIX, exportSave, importSave, migrate } from '../src/core/save';
-import { createState } from '../src/core/state';
+import { createState, SAVE_VERSION } from '../src/core/state';
 
 const newGame = () => createGame({ rng: seededRng(3) });
 
@@ -17,7 +17,7 @@ describe('production and sales', () => {
 
   it('cannot print without filament', () => {
     const g = newGame();
-    g.s.fil = 5;
+    g.s.fil = 0;
     expect(g.act('print')).toBe(false);
   });
 
@@ -80,7 +80,7 @@ describe('save', () => {
     const s = migrate({ total: 1234, zl: 50, auto: 3, done: ['dysza'] });
     expect(s.total).toBe(1234);
     expect(s.auto).toBe(3);
-    expect(s.v).toBe(5);
+    expect(s.v).toBe(SAVE_VERSION);
     expect(s.ordFail).toBe(0);
     expect(s.col).toBe(0);
   });

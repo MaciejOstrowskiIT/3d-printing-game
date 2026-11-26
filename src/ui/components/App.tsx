@@ -61,9 +61,9 @@ export function App() {
   useEffect(() => { document.documentElement.lang = lang; document.title = t('title') + (lang === 'pl' ? ' — gra' : ' — game'); }, [lang]);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      const el = document.activeElement?.tagName;
+      const editing = document.activeElement?.matches('button:enabled, input, textarea, select, [contenteditable]:not([contenteditable="false"])');
       if (screen.value !== 'game' || dialog.value) return;
-      if (e.code === 'Space' && !e.repeat && el !== 'BUTTON' && el !== 'INPUT' && el !== 'TEXTAREA') { e.preventDefault(); act('print'); }
+      if (e.code === 'Space' && !e.repeat && !editing && !e.altKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); act('print'); }
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);

@@ -1,3 +1,4 @@
+import { takeStockWork } from './inventory';
 import { BAL } from '../content/balance';
 import { log, sfx, type Ctx } from '../core/ctx';
 import { boostMul, rateBase } from '../core/formulas';
@@ -42,7 +43,7 @@ export function newDay(s: GameState, ctx: Ctx, day: number): boolean {
 export function deliverDaily(s: GameState, ctx: Ctx): boolean {
   const o = s.dord;
   if (!o || o.done || o.day !== s.dday || s.ph !== 1 || s.inv < o.n) return false;
-  s.inv -= o.n;
+  takeStockWork(s, o.n);
   s.zl += o.pay;
   o.done = true;
   s.dstreak += 1;

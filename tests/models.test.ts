@@ -73,7 +73,7 @@ describe('models', () => {
     expect(s.fil).toBe(1000 - s.g);
     s.mdls = ['fig', 'bust']; s.mdl = 'bust';
     printManual(s, c);
-    expect(s.total).toBe(2);
+    expect(s.total).toBe(1);
     expect(s.mp).toBeCloseTo(1);
     expect(events.filter(e => e.type === 'printed').map(e => (e as { share: number }).share)).toEqual([1, 0.2]);
   });

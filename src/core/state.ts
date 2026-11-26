@@ -1,3 +1,4 @@
+import type { ModelStock } from '../systems/inventory';
 import { DEFAULT_MATERIAL } from '../content/materials';
 import type { DailyOrder } from '../systems/dailyOrder';
 import { BAL } from '../content/balance';
@@ -73,9 +74,11 @@ export interface GameState {
   materialStock: Record<string, number>;
   /** Filament run-out: early warning shown, switch hint shown, switch to a stocked material automatically. */
   lowFil: boolean; matHint: boolean; autoMat: boolean;
+  modelStock: Record<string, ModelStock>;
+  orderStock: Record<string, number>;
 }
 
-export const SAVE_VERSION = 5;
+export const SAVE_VERSION = 6;
 
 export const createState = (): GameState => ({
   v: SAVE_VERSION,
@@ -108,6 +111,7 @@ export const createState = (): GameState => ({
   precision: false, bedCalibrated: false, dryerInstalled: false, stockPremium: 0,
   materialId: DEFAULT_MATERIAL.id, materialStock: {},
   lowFil: false, matHint: false, autoMat: false,
+  modelStock: {}, orderStock: {},
 });
 
 export const has = (s: GameState, id: string) => s.done.includes(id);

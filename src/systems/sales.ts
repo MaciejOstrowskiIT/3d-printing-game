@@ -1,18 +1,29 @@
+import { MODELS } from '../content/models';
 import { demand, realizedPrice } from '../core/formulas';
 import type { GameState } from '../core/state';
+import { modelStock, piecesInStock, stockPrice, takePieces } from './inventory';
 
 export function salesSystem(s: GameState, dt: number) {
   if (s.pen > 0) s.pen -= dt;
   if (s.ph !== 1) return;
-  s.sacc += demand(s) * dt;
-  let k = Math.floor(s.sacc);
-  s.sacc -= k;
-  k = Math.min(k, Math.floor(s.inv));
-  if (k > 0) {
-    s.inv -= k;
-    s.sold += k;
-    s.zl += k * realizedPrice(s);
-    if (s.inv === 0) s.stockPremium = 0;
+
+  for (const m of MODELS) {
+    const stock = piecesInStock(s, m.id);
+    if (!stock && m.id !== s.mdl) continue;
+    const lot = modelStock(s, m.id);
+    lot.price ||= stockPrice(s, m.id);
+    const carry = m.id === 'fig' ? s.sacc : lot.saleCarry;
+    const demandPieces = carry + demand(s, m, stockPrice(s, m.id)) * dt / m.seconds;
+    const wanted = Math.floor(demandPieces);
+    const next = demandPieces - wanted;
+    if (m.id === 'fig') s.sacc = next;
+    else lot.saleCarry = next;
+
+    const count = Math.min(wanted, stock);
+    if (!count) continue;
+    s.zl += count * m.seconds * realizedPrice(s, m.id);
+    s.sold += count;
+    takePieces(s, m.id, count);
   }
 }
 

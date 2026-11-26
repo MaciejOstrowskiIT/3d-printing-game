@@ -1,3 +1,4 @@
+import { piecesInStock, premiumFor, stockPrice } from '../../systems/inventory';
 import { BAL } from '../../content/balance';
 import { MATERIAL, MATERIALS, materialDemand } from '../../content/materials';
 import { COLORS } from '../../content/colors';
@@ -267,8 +268,8 @@ function PrintQuality() {
 
 function Sales() {
   const v = useS(s => ({
-    sold: s.sold, inv: s.inv, dem: demand(s), uc: unitCost(s) * model(s).seconds, price: realizedPrice(s) * model(s).seconds, premium: s.stockPremium, auto: has(s, 'autocena') && !!s.amOn.autocena,
-    slow: rate1(s) > demand(s) * 1.1, fast: s.inv < 1 && s.sold > 0, goal: s.goal, mkt: s.mkt, mktCost: mktCost(s), zl: s.zl,
+    sold: s.sold, inv: piecesInStock(s, s.mdl), name: model(s).name[li()], piecesPerSecond: demand(s) / model(s).seconds, uc: unitCost(s) * model(s).seconds, price: realizedPrice(s) * model(s).seconds, premium: premiumFor(s, s.mdl), auto: has(s, 'autocena') && !!s.amOn.autocena,
+    slow: rate1(s) > demand(s) * 1.1, fast: piecesInStock(s, s.mdl) < 1 && s.sold > 0, goal: s.goal, mkt: s.mkt, mktCost: mktCost(s), zl: s.zl,
   }));
   const loss = v.price < v.uc;
   const hint = loss ? t('hLoss') : v.auto ? t('hAuto') : v.slow ? t('hSlow') : v.fast ? t('hFast') : t('hBase');
@@ -276,8 +277,8 @@ function Sales() {
     <section class="card">
       <CardHead title={t('sales')} aside={t('soldT', fmt(v.sold))} />
       <div class="tiles">
-        <Tile label={t('stock')} value={fmt(Math.floor(v.inv))} />
-        <Tile label={t('buyRateS')} value={t('perS', fmt(v.dem, 1))} />
+        <Tile label={v.name} value={t('modelPieces', fmt(v.inv))} />
+        <Tile label={t('buyRateS')} value={t('perS', fmt(v.piecesPerSecond, 1))} />
         <Tile label={t('unitCostS')} value={money(v.uc)} />
       </div>
       <ColorPicker />
@@ -306,6 +307,10 @@ function Shape({ m, size = 36 }: { m: PrintModel; size?: number }) {
 /** Print models: owned ones can be selected for all printers, visible ones bought as designs. Data: content/models.ts. */
 function Models() {
   const v = useS(s => ({
+    stock: Object.fromEntries(s.mdls.map(id => [id, piecesInStock(s, id)])),
+    printed: Object.fromEntries(s.mdls.map(id => [id, s.modelStock[id]?.printed ?? 0])),
+    prices: Object.fromEntries(s.mdls.map(id => [id, stockPrice(s, id)])),
+    progress: s.modelStock[s.mdl]?.progress ?? 0,
     cur: s.mdl, owned: s.mdls.join(','), zl: s.zl, total: s.total, slow: s.slow || 1,
     visible: MODELS.filter(m => designVisible(s, m)).map(m => m.id).join(','),
   }));
@@ -324,9 +329,12 @@ function Models() {
         return (
           <div key={m.id} class={'item model' + (on ? ' active' : '')}>
             <Shape m={m} />
-            <div class="it"><b>{m.name[li()]}</b><small>{m.desc[li()]}</small><small class="stats">{stats}</small></div>
+            <div class="it"><b>{m.name[li()]}</b><small>{m.desc[li()]}</small><small class="stats">{stats}</small>
+              {have && <small>{t('modelPrinted', fmt(v.printed[m.id]))} · {t('modelPieces', fmt(v.stock[m.id]))} · {t('modelPiecePrice', money(v.prices[m.id] * m.seconds))}</small>}
+              {on && <Meter pct={100 * v.progress / m.seconds} />}
+            </div>
             {have
-              ? <button class={on ? 'on' : ''} disabled={on} onClick={() => act(`mdl:${m.id}`)}>{on ? t('mdlOn') : t('mdlUse')}</button>
+              ? <button class={on ? 'on' : ''} disabled={on} onClick={e => { if (act(`mdl:${m.id}`) && e.detail > 0) e.currentTarget.blur(); }}>{on ? t('mdlOn') : t('mdlUse')}</button>
               : <BuyButton action={`stl:${m.id}`} cost={m.design} have={v.zl} label={money(m.design)} />}
           </div>
         );
