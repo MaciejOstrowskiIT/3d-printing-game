@@ -64,6 +64,7 @@ function PrintButton({ short }: { short?: boolean }) {
 }
 
 function Goal() {
+  const [expanded, setExpanded] = useState(false);
   const g = useS(s => s.goal);
   const prog = useS(s => (s.goal < GOALS.length ? GOALS[s.goal].p(s).map(Math.floor).join('/') : ''));
   if (g >= GOALS.length) {
@@ -74,8 +75,9 @@ function Goal() {
   return (
     <div class="goal" aria-live="polite">
       <div class="gt"><span>{t('goalN', g + 1, GOALS.length)}</span><span>{fmt(Math.min(a, b))} / {fmt(b)}</span></div>
-      <h3>{q.t[li()]}</h3>
-      <p>{q.h[li()]}</p>
+      <h3><span class="goal-title">{q.t[li()]}</span><button class="goal-toggle" aria-expanded={expanded}
+        aria-controls="goal-hint" onClick={() => setExpanded(!expanded)}>{q.t[li()]} <span aria-hidden="true">{expanded ? '▴' : '▾'}</span></button></h3>
+      <p id="goal-hint" class={expanded ? 'expanded' : ''}>{q.h[li()]}</p>
       <div class="meter or"><i style={{ width: Math.min(100, (100 * a) / b) + '%' }} /></div>
     </div>
   );

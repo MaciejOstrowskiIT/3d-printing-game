@@ -1,6 +1,6 @@
 import { useEffect } from 'preact/hooks';
-import { fmt, prefs, t } from '../i18n';
-import { act, dialog, resetGame, screen, useS } from '../store';
+import { fmt, logText, prefs, t } from '../i18n';
+import { act, awayReport, dialog, resetGame, screen, useS } from '../store';
 import { Toasts } from './Achievements';
 import { SaveDialog } from './SaveDialog';
 import { Title } from './Title';
@@ -63,6 +63,10 @@ export function App() {
         <div class="main">
           <Hud />
           <div class="content">
+            {awayReport.value && <div class="away-report">
+              <span role="status">{logText(awayReport.value)}</span>
+              <button aria-label={t('sClose')} onClick={() => { awayReport.value = undefined; }}>×</button>
+            </div>}
             {tab === 'r' ? <Research /> : <Workshop />}
             <Settings class="mset" />
           </div>
