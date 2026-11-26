@@ -19,6 +19,10 @@ npm run build:poki         # dist-poki/index.html with the Poki SDK
 
 The platform is chosen at build time (`--mode crazygames|poki`, see `.env.*`); unused adapters are tree-shaken out. Each adapter loads its SDK, reports loading/gameplay events, mutes audio and pauses the game during ads, and exposes `showRewardedAd()`.
 
+Saves and preferences go through the platform and are read only after `platform.init()` (see `main.tsx`), because a portal SDK may hold them.
+
+**CrazyGames saves** use the SDK data module, so progress follows the player's CrazyGames account across devices (guests keep it in localStorage; the portal reloads the game after a login). On first run an existing localStorage save is copied into the module, so returning players keep their progress. If the module is unavailable, the adapter falls back to localStorage. **In the CrazyGames submission form, set progress saving to "Yes, using the Data Module from the CrazyGames SDK"**, otherwise the module is disabled.
+
 The only rewarded placement so far is **Overtime**: 2× production for 5 minutes, then a 10-minute cooldown. It is hidden where ads are not available. To test the flow without a portal, run `npm run dev` or open the build with `#mockads` in the URL.
 
 ## Deployment
