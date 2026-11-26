@@ -1,4 +1,5 @@
 import { BAL } from '../content/balance';
+import { DEFAULT_MATERIAL, MATERIAL, materialDemand } from '../content/materials';
 import { MARKET_EVENT } from '../content/events';
 import { calendarOn } from '../content/calendar';
 import { DEFAULT_MODEL, MODEL, type PrintModel } from '../content/models';
@@ -29,7 +30,9 @@ export function calendarMul(s: GameState) {
   return m;
 }
 
-export const spoolPrice = (s: GameState) => (s.spoolG > 1000 ? s.spool * 5 * BAL.bulkPackDiscount : s.spool) * marketMul(s, 'spool');
+export const material = (s: GameState) => MATERIAL[s.materialId] ?? DEFAULT_MATERIAL;
+export const spoolPrice = (s: GameState, stock = material(s)) =>
+  (s.spoolG > 1000 ? s.spool * 5 * BAL.bulkPackDiscount : s.spool) * marketMul(s, 'spool') * stock.price;
 /** Selected print model (falls back to the figurine for unknown ids). */
 export const model = (s: GameState): PrintModel => MODEL[s.mdl] ?? DEFAULT_MODEL;
 /** Filament per figurine of work: base nozzle consumption × the model's material factor. */
@@ -68,7 +71,7 @@ export const demand = (s: GameState) =>
   (inTrend(s) ? BAL.trendBonus : 1) *
   (1 + 0.15 * patLvl(s, 'brand')) *
   marketMul(s, 'demand') *
-  modelDemand(model(s));
+  modelDemand(model(s)) * materialDemand(material(s), s.mdl);
 
 export const boostMul = (s: GameState) => (s.boostT > 0 ? BAL.boostMultiplier : 1);
 export const rateBase = (s: GameState) => (s.auto + s.farm * BAL.farmPrinters * eff(s)) * s.spd * boostMul(s) * (1 + 0.15 * patLvl(s, 'speed')) * precisionSpeed(s) / (s.slow || 1);

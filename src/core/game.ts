@@ -4,12 +4,14 @@ import { automationSystem } from '../systems/automation';
 import { activateBoost, boostSystem } from '../systems/boost';
 import { breakdownsSystem, repair } from '../systems/breakdowns';
 import { energySystem } from '../systems/energy';
+import { selectMaterial } from '../systems/materials';
 import { marketSystem, setColor } from '../systems/market';
 import { acceptMarketEvent, declineMarketEvent, marketEventsSystem } from '../systems/marketEvents';
 import { acceptOrder, declineOrder, ordersSystem } from '../systems/orders';
 import { setQualityAction } from '../systems/printQuality';
 import { buySpool, productionSystem } from '../systems/production';
 import { deliverDaily, newDay } from '../systems/dailyOrder';
+import { dismissMessage, storySystem } from '../systems/story';
 import { claimOfflineBonus, grantOfflineBonus, offlineBonusSystem } from '../systems/offlineBonus';
 import { buyClickTool, buyDesign, printManual, selectModel } from '../systems/models';
 import { assignPoint, buyNode, computeSystem, goalsSystem, reputationSystem } from '../systems/research';
@@ -39,6 +41,7 @@ export const SYSTEMS: System[] = [
   goalsSystem,
   achievementsSystem,
   offlineBonusSystem,
+  storySystem,
 ];
 
 /** Player actions. The UI only sends these strings and never mutates game state itself. */
@@ -46,8 +49,8 @@ export type Action =
   | 'calibrate' | 'dryer' | 'precision'
   | 'print' | 'spool' | 'auto' | 'farm' | 'panel' | 'mkt' | 'drone' | 'fab'
   | 'pminus' | 'pplus' | 'oacc' | 'odec' | 'fix' | 'mevyes' | 'mevno' | 'tool'
-  | 'proc1' | 'procmax' | 'mem1' | 'memmax' | 'boost' | 'adfail' | 'prestige' | 'prestigeR' | 'offx2' | 'daily'
-  | `t:${string}` | `col:${number}` | `mdl:${string}` | `stl:${string}` | `day:${number}` | `am:${string}:${0 | 1}` | `pat:${string}`;
+  | 'proc1' | 'procmax' | 'mem1' | 'memmax' | 'boost' | 'adfail' | 'prestige' | 'prestigeR' | 'offx2' | 'daily' | 'msgok'
+  | `t:${string}` | `col:${number}` | `material:${string}` | `mdl:${string}` | `stl:${string}` | `day:${number}` | `am:${string}:${0 | 1}` | `pat:${string}`;
 
 export interface Game {
   readonly s: GameState;
@@ -96,6 +99,7 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
       if (a === 'oacc') { acceptOrder(s); sfx(ctx, 'buy'); return true; }
       if (a === 'odec') { declineOrder(s, ctx); return true; }
       if (a === 'tool') { const ok = buyClickTool(s); if (ok) sfx(ctx, 'buy'); return ok; }
+      if (a.startsWith('material:')) return selectMaterial(s, a.slice('material:'.length));
       if (a.startsWith('stl:')) { const ok = buyDesign(s, ctx, a.slice(4)); if (ok) sfx(ctx, 'buy'); return ok; }
       if (a.startsWith('mdl:')) { const ok = selectModel(s, ctx, a.slice(4)); if (ok) sfx(ctx, 'buy'); return ok; }
       if (a === 'mevyes') { const ok = acceptMarketEvent(s, ctx); if (ok) sfx(ctx, 'buy'); return ok; }
@@ -106,6 +110,7 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
       if (a.startsWith('pat:')) { const ok = buyPatent(s, a.slice(4)); if (ok) sfx(ctx, 'buy'); return ok; }
       if (a === 'adfail') { log(s, ctx, 'boostFail'); return true; }
       if (a === 'daily') return deliverDaily(s, ctx);
+      if (a === 'msgok') return dismissMessage(s);
       if (a.startsWith('day:')) return newDay(s, ctx, Number(a.slice(4)));
       if (a === 'offx2') { const ok = claimOfflineBonus(s, ctx); if (ok) sfx(ctx, 'buy'); return ok; }
       if (a === 'proc1') { assignPoint(s, 'proc'); return true; }

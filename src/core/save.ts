@@ -1,3 +1,4 @@
+import { STORY } from '../content/story';
 import { ACHIEVEMENTS } from '../content/achievements';
 import { NODE } from '../content/tree';
 import { createState, SAVE_VERSION, type GameState } from './state';
@@ -20,6 +21,7 @@ export function migrate(raw: unknown): GameState {
   if (!Number.isInteger(v) || v < 3 || v > SAVE_VERSION) throw new Error('Unsupported save version');
   while (v < SAVE_VERSION) { MIGRATIONS[v]?.(r); v++; }
   const hadAchievements = Array.isArray(r.ach);
+  const hadStory = Array.isArray(r.story);
   const defaults = createState();
   const knownFields = Object.entries(r).filter(([key]) => Object.hasOwn(defaults, key));
   const s = { ...defaults, ...Object.fromEntries(knownFields) } as GameState;
@@ -33,6 +35,8 @@ export function migrate(raw: unknown): GameState {
   s.dMul = researched.dMul;
   s.fMul = researched.fMul;
   if (!hadAchievements) s.ach = ACHIEVEMENTS.filter(a => a.check(s)).map(a => a.id);
+  // Saves from before story messages: milestones already passed count as read, so nobody gets a backlog of notes.
+  if (!hadStory) s.story = STORY.filter(m => m.when(s)).map(m => m.id);
   s.v = SAVE_VERSION;
   return s;
 }
