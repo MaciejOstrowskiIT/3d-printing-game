@@ -1,0 +1,51 @@
+# Self-hosted Umami for game analytics. See README.md in this folder.
+# Runs anywhere Docker runs; on Proxmox, a Debian LXC (nesting=1) or a small VM is enough (1 vCPU, 1 GB RAM).
+services:
+  umami:
+    image: ghcr.io/umami-software/umami:latest   # pin a version (e.g. :v3.x.y) once it works
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://umami:${POSTGRES_PASSWORD}@db:5432/umami
+      APP_SECRET: ${APP_SECRET}
+      # Renamed collect path; generic names get blocked less often. Must match VITE_UMAMI_ENDPOINT in the game build.
+      COLLECT_API_ENDPOINT: ${COLLECT_API_ENDPOINT:-/api/send}
+    ports:
+      # Bound to localhost only: expose it through the tunnel below or your own reverse proxy.
+      - "127.0.0.1:${UMAMI_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/heartbeat || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - umami-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U umami -d umami"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Optional: public HTTPS without opening ports on the router. Start with: docker compose --profile tunnel up -d
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    profiles: [tunnel]
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - umami
+
+volumes:
+  umami-db:

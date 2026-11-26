@@ -48,6 +48,8 @@ export interface GameState {
   boostT: number; boostCd: number;
   /** Unlocked achievement ids, check timer, and a bitmask of filament colours ever used. */
   ach: string[]; achT: number; colorsUsed: number;
+  /** Seconds of active (online) play on this line; offline catch-up does not count. Used for analytics. */
+  play: number;
   /** Market events: pending offer, seconds until the next one, running effects. */
   mev: PendingMarketEvent | null; mevT: number; mfx: MarketEffect[];
   meta: Meta;
@@ -74,6 +76,7 @@ export const createState = (): GameState => ({
   col: 0, trend: 2, trendT: 150,
   boostT: 0, boostCd: 0,
   ach: [], achT: 0, colorsUsed: 1,
+  play: 0,
   mev: null, mevT: BAL.marketEventFirst, mfx: [],
   meta: { patents: 0, earned: 0, runs: 0, pat: {} },
 });
