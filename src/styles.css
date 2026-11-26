@@ -52,7 +52,7 @@ body.space .pic #roomSvg.inset{background:#0d0c1f}
 .pbtn:hover:not(:disabled){border-color:var(--orD);background:var(--orD)}
 .pbtn:disabled{background:#4a4e58;border-color:#4a4e58;color:#c9c7d0;opacity:1}
 .pbtn kbd{font:500 12.5px Barlow,sans-serif;opacity:.6;border:1px solid #ffffff88;border-radius:5px;padding:1px 6px}
-body.space .pbtn{display:none}
+body.space .side .pbtn,body.space .dock .pbtn{display:none}
 .goal{background:var(--card);color:var(--ink);border-radius:14px;padding:12px 14px;box-shadow:0 6px 18px #0002}
 .goal .gt{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--mute)}
 .goal h3{font-size:20px;margin:2px 0 3px;line-height:1.1}

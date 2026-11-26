@@ -11,9 +11,12 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "promo": "npm run build && vite-node promo/snapshots.ts && python3 promo/render.py && python3 promo/video.py"
   },
   "dependencies": {
+    "@fontsource/barlow": "^5.3.0",
+    "@fontsource/barlow-condensed": "^5.3.0",
     "@preact/signals": "^2.0.0",
     "preact": "^10.24.0"
   },
