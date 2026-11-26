@@ -4,6 +4,7 @@ import { MARKET_EVENT } from '../content/events';
 import { MODEL } from '../content/models';
 import { CALENDAR_EVENT } from '../content/calendar';
 import { STORY_MSG } from '../content/story';
+import { MATERIAL } from '../content/materials';
 import { COLORS } from '../content/colors';
 import { en } from '../content/i18n/en';
 import { pl, type Dict } from '../content/i18n/pl';
@@ -55,7 +56,9 @@ export function money(n: number): string {
 }
 
 export const dur = (s: number) =>
-  s >= 3600 ? Math.floor(s / 3600) + ' h ' + Math.floor((s % 3600) / 60) + ' min' : Math.max(1, Math.floor(s / 60)) + ' min';
+  s >= 3600 ? Math.floor(s / 3600) + ' h ' + Math.floor((s % 3600) / 60) + ' min'
+    : s < 60 ? Math.max(1, Math.round(s)) + ' s' // short spans (filament runway) in seconds, not "1 min"
+    : Math.floor(s / 60) + ' min';
 
 /** Countdown as m:ss. */
 export const clock = (s: number) => { const t = Math.max(0, Math.ceil(s)); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); };
@@ -81,6 +84,7 @@ export function logText(e: LogEntry): string {
       case '*': return MODEL[x.slice(1)]?.name[li()] ?? x;
       case '+': return CALENDAR_EVENT[x.slice(1)]?.name[li()] ?? x;
       case '=': return STORY_MSG[x.slice(1)]?.from[li()] ?? x;
+      case '/': return MATERIAL[x.slice(1)]?.name[li()] ?? x;
       default: return x;
     }
   });

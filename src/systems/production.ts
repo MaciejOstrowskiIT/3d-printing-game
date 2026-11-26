@@ -4,6 +4,7 @@ import { log, sfx, type Ctx } from '../core/ctx';
 import { gpu, rate1, spoolPrice } from '../core/formulas';
 import { has, type GameState } from '../core/state';
 import { pickOrderCooldown } from './orders';
+import { stockedAlternative } from './filament';
 
 /** New figurines fill an accepted order first; the rest goes to stock. */
 export function make(s: GameState, ctx: Ctx, n: number) {
@@ -51,8 +52,9 @@ export function productionSystem(s: GameState, dt: number, ctx: Ctx) {
 
   if (s.fil < g && !s.warn && s.total > 0) { s.warn = true; log(s, ctx, 'noFil'); sfx(ctx, 'alert'); }
 
-  // Soft-lock guard: with no filament, no stock and no money, the supplier gives a spool on credit.
-  if (s.fil < g && s.inv < 1 && s.zl < spoolPrice(s) && s.zl > -spoolPrice(s) * 4 && s.total > 0 && !(s.ord && s.ord.acc)) {
+  // Soft-lock guard: with no filament (not even another material in stock), no stock and no money,
+  // the supplier gives a spool on credit.
+  if (s.fil < g && s.inv < 1 && s.zl < spoolPrice(s) && s.zl > -spoolPrice(s) * 4 && s.total > 0 && !(s.ord && s.ord.acc) && !stockedAlternative(s)) {
     s.zl -= spoolPrice(s);
     s.fil += s.spoolG;
     log(s, ctx, 'credit');

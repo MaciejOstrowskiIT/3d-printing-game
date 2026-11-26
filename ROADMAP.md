@@ -12,25 +12,15 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 
 | Card | PR | Notes |
 |---|---|---|
-| Rewarded "double offline earnings" | #17 | Merge first |
-| Realistic mode (new-line challenge) | #18 | Built on #17 |
-| CrazyGames account saves (data module) | #19 | Merge after #18; needs the submission setting below |
-| Order of the day (daily order + streak) | #21 | Built on #18 |
-| Smooth the farm phase | #22 | Independent |
-| Calendar events (Black Week, Christmas, Halloween…) | #23 | Built on #21 |
-| Story messages | #27 | Built on #23 |
-
-## 🛠️ In progress
-
-| Card | Who |
-|---|---|
-| Materials (`feat/materials`) | Codex |
+| Filament run-out: early warning, switch to a material in stock, idle time in the away report | #28 | |
 
 ## 🚦 Next up
 
 | Card | Effort | Owner | Why |
 |---|---|---|---|
-| **Print problems & quality** (after Materials: wet filament depends on the material): bed adhesion, spaghetti, clogged nozzle, wet filament; bed calibration, filament dryer, slow-and-fine mode; quality raises the price | M | Dev | Grows out of today's breakdowns; makes the mid-game active instead of waiting |
+| **Printer types**: resin (small, very detailed figurines), industrial; trade-offs instead of "more of the same" | M | Dev | Builds on materials and models |
+| More rewarded placements (e.g. instant order delivery, skip a breakdown) | S | Dev | More ad revenue; check `ad` events in Umami first |
+| Poki animated thumbnail (1080×1080) | S | Dev | Needed before Poki's global release; `promo/video.py` can record it |
 
 ## 🧑‍🔧 Your side (Maciej)
 
@@ -40,14 +30,12 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 | Set repo variables `UMAMI_HOST` and `UMAMI_WEBSITE_ID`, re-run the deploy | Analytics stays off until then |
 | Playtest with 5–10 people, read Umami after a week | Where players drop off decides the backlog order |
 | CrazyGames submission: progress saving = "Yes, using the Data Module from the CrazyGames SDK" | Without it the data module is disabled (the game falls back to localStorage) |
-| Merge order: #17 → #18 → #19 → #21 → #23 → #27; #22 any time | |
 
 ## 📋 Backlog
 
 ### Gameplay
 | Card | Effort | Notes |
 |---|---|---|
-| **Printer types**: resin (small, very detailed figurines), industrial; trade-offs instead of "more of the same" | M | Pairs with materials |
 | **Second prestige layer**: IPO after a few production lines, shares give permanent bonuses | M | After players reach several lines |
 | **Third phase**: e.g. printing Mars bases from regolith after the asteroid belt | L | Decide after the playtest: only if enough players reach space |
 | Split the fleet between models (instead of one model for all printers) | M | More tycoon-style management |
@@ -55,8 +43,6 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 ### Monetization & portals
 | Card | Effort | Notes |
 |---|---|---|
-| Poki animated thumbnail (1080×1080) | S | Needed before Poki's global release; `promo/video.py` can record it |
-| More rewarded placements (e.g. instant order delivery, skip a breakdown) | S | Check `ad` events in Umami first |
 | CrazyGames leaderboard / achievements integration | M | If the portal features it for idle games |
 
 ### Tech & quality
@@ -84,3 +70,13 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 | Print models and click tools | #14 |
 | Mobile touch fixes | #15 |
 | Early-game rebalance, smooth dynamic pricing | #16 |
+| Rewarded double offline earnings | #17 |
+| Realistic mode | #18 |
+| CrazyGames account saves | #19 |
+| Order of the day | #21 |
+| Smooth farm phase | #22 |
+| Calendar events | #23 |
+| Save dialog keyboard fixes (Codex) | #24 |
+| Materials (Codex) | #25 |
+| Print quality (Codex) | #26 |
+| Story messages | #27 |

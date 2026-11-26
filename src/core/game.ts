@@ -12,6 +12,7 @@ import { setQualityAction } from '../systems/printQuality';
 import { buySpool, productionSystem } from '../systems/production';
 import { deliverDaily, newDay } from '../systems/dailyOrder';
 import { dismissMessage, storySystem } from '../systems/story';
+import { filamentSystem, idleForFilament, toggleAutoMaterial } from '../systems/filament';
 import { claimOfflineBonus, grantOfflineBonus, offlineBonusSystem } from '../systems/offlineBonus';
 import { buyClickTool, buyDesign, printManual, selectModel } from '../systems/models';
 import { assignPoint, buyNode, computeSystem, goalsSystem, reputationSystem } from '../systems/research';
@@ -42,11 +43,12 @@ export const SYSTEMS: System[] = [
   achievementsSystem,
   offlineBonusSystem,
   storySystem,
+  filamentSystem,
 ];
 
 /** Player actions. The UI only sends these strings and never mutates game state itself. */
 export type Action =
-  | 'calibrate' | 'dryer' | 'precision'
+  | 'calibrate' | 'dryer' | 'precision' | 'automat'
   | 'print' | 'spool' | 'auto' | 'farm' | 'panel' | 'mkt' | 'drone' | 'fab'
   | 'pminus' | 'pplus' | 'oacc' | 'odec' | 'fix' | 'mevyes' | 'mevno' | 'tool'
   | 'proc1' | 'procmax' | 'mem1' | 'memmax' | 'boost' | 'adfail' | 'prestige' | 'prestigeR' | 'offx2' | 'daily' | 'msgok'
@@ -57,7 +59,8 @@ export interface Game {
   tick(dt: number): void;
   act(a: Action): boolean;
   /** Simulates time spent away and logs what was produced. */
-  catchUp(seconds: number): LogEntry | undefined;
+  /** Simulates time away; returns the summary line, plus how long printers stood idle without filament. */
+  catchUp(seconds: number): (LogEntry & { idle?: number }) | undefined;
   load(s: GameState): void;
   reset(logKey?: string): void;
   on(fn: (e: GameEvent) => void): () => void;
@@ -111,6 +114,7 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
       if (a === 'adfail') { log(s, ctx, 'boostFail'); return true; }
       if (a === 'daily') return deliverDaily(s, ctx);
       if (a === 'msgok') return dismissMessage(s);
+      if (a === 'automat') return toggleAutoMaterial(s);
       if (a.startsWith('day:')) return newDay(s, ctx, Number(a.slice(4)));
       if (a === 'offx2') { const ok = claimOfflineBonus(s, ctx); if (ok) sfx(ctx, 'buy'); return ok; }
       if (a === 'proc1') { assignPoint(s, 'proc'); return true; }
@@ -127,23 +131,30 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
       const before = { total: s.total, sold: s.sold };
       const elapsed = Math.min(seconds, s.slow > 1 ? BAL.realisticOfflineMax : BAL.offlineMaxSeconds);
       ctx.offline = true;
-      let rem = elapsed, revenue = 0;
+      let rem = elapsed, revenue = 0, idle = 0;
       while (rem > 0) {
         const d = Math.min(1, rem), sold = s.sold, price = s.price;
         game.tick(d);
         revenue += (s.sold - sold) * (price + s.price) / 2;
+        if (idleForFilament(s)) idle += d;
         rem -= d;
       }
       ctx.offline = false;
       const made = Math.floor(s.total - before.total);
       const sold = s.goal >= 1 ? s.sold - before.sold : 0;
       grantOfflineBonus(s, elapsed, revenue, made);
-      if (elapsed < 120 || (!made && !sold)) return;
+      if (elapsed < 120) return;
       const duration = '~' + Math.round(elapsed);
+      const idleNote = idle >= BAL.offlineIdleNoteSeconds ? Math.round(idle) : undefined;
+      if (!made && !sold) {
+        if (!idleNote) return;
+        log(s, ctx, 'offIdle', duration);
+        return { ...s.log[0], idle: idleNote };
+      }
       if (made && sold) log(s, ctx, 'offProductionSales', duration, made, sold);
       else if (sold) log(s, ctx, 'offSales', duration, sold);
       else log(s, ctx, 'off2', duration, made);
-      return s.log[0];
+      return { ...s.log[0], idle: idleNote };
     },
     load(next) { s = next; },
     reset(logKey = 'fresh') { s = createState(); log(s, ctx, logKey); },

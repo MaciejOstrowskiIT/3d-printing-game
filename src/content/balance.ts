@@ -121,4 +121,9 @@ export const BAL = {
   dailyPayMultiplier: 3,   // × the current price per figurine
   dailyStreakStep: 0.15,   // +15% pay per day in a row…
   dailyStreakMax: 7,       // …up to the 7th day (×1.9)
+
+  // running out of filament (systems/filament.ts)
+  filamentWarnSeconds: 30,         // warn when the active spool lasts less than this
+  filamentSwitchMinFigurines: 10,  // another material counts as "in stock" from this many figurines' worth
+  offlineIdleNoteSeconds: 60,      // the away report mentions idle printers from this long
 } as const;

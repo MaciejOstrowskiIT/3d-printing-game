@@ -1,5 +1,5 @@
 import { BAL } from '../../content/balance';
-import { MATERIALS, materialDemand } from '../../content/materials';
+import { MATERIAL, MATERIALS, materialDemand } from '../../content/materials';
 import { COLORS } from '../../content/colors';
 import { AUTOMATIONS, NODE } from '../../content/tree';
 import {
@@ -14,6 +14,7 @@ import { CALENDAR_EVENT, calendarOn } from '../../content/calendar';
 import { MODELS, type PrintModel } from '../../content/models';
 import { qualityUnlocked } from '../../systems/printQuality';
 import { materialStock } from '../../systems/materials';
+import { autobuyOn, filamentRunway, stockedAlternative } from '../../systems/filament';
 import { designVisible } from '../../systems/models';
 import { platform } from '../platform';
 import { act, adPending, useS, watchAdForBoost } from '../store';
@@ -159,6 +160,24 @@ function BoostRow() {
   );
 }
 
+/** Filament about to run out, or out: how long it lasts, and a one-click switch to a material still in stock. */
+function FilamentAlert() {
+  const v = useS(s => {
+    if (s.ph !== 1 || s.total === 0) return null;
+    const out = s.fil < gpu(s), runway = filamentRunway(s);
+    if (!out && (runway >= BAL.filamentWarnSeconds || autobuyOn(s))) return null;
+    const alt = out ? stockedAlternative(s) : null;
+    return { out, runway, mat: material(s).name[li()], alt, altG: alt ? materialStock(s, alt) : 0 };
+  });
+  if (!v) return null;
+  return (
+    <div class={'fil-alert' + (v.out ? ' out' : '')} role="status">
+      <span>{v.out ? t('filOut', v.mat) : t('filLow', dur(Math.max(1, Math.round(v.runway))))}</span>
+      {v.alt && <button onClick={() => act(`material:${v.alt}`)}>{t('filSwitch', MATERIAL[v.alt].name[li()], fmt(v.altG))}</button>}
+    </div>
+  );
+}
+
 function Production() {
   const v = useS(s => ({
     rate: rate1(s), fil: s.fil, g: gpu(s), feedstock: material(s).name[li()], showFeedstock: s.total >= MATERIALS[1].unlockAt, clk: s.clk, clickPow: clickPower(s), clickCost: clickCost(s), printers: s.auto + s.farm * 60, zl: s.zl, bulk: s.spoolG > 1000, spool: spoolPrice(s), spoolD: s.spoolD,
@@ -168,6 +187,7 @@ function Production() {
   return (
     <section class="card">
       <CardHead title={t('production')} aside={t('perS', fmt(v.rate, 1))} />
+      <FilamentAlert />
       <div class="tiles">
         <Tile label={t('filament')} value={fmt(v.fil) + ' g'} warn={v.fil < v.g} />
         <Tile label={t('perFigS')} value={nf(v.g, 1) + ' g'} />
@@ -316,6 +336,16 @@ function Models() {
   );
 }
 
+function AutoMaterialToggle() {
+  const on = useS(s => s.autoMat);
+  return (
+    <label class="am auto-mat">
+      <input type="checkbox" checked={on} onChange={() => act('automat')} />
+      <span>{t('autoMatL')}</span>
+    </label>
+  );
+}
+
 function Materials() {
   const rows = useS(s => MATERIALS.filter(m => s.total >= m.unlockAt).map(m => ({
     material: m, selected: s.materialId === m.id, stock: materialStock(s, m.id),
@@ -326,6 +356,7 @@ function Materials() {
   return (
     <section class="card wide">
       <CardHead title={t('materialsTitle')} />
+      <AutoMaterialToggle />
       {rows.map(({ material: m, selected, stock, price, bonus }) => (
         <Item key={m.id} name={m.name[li()]} sub={[
           t('materialStock', fmt(stock)),

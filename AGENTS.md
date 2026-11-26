@@ -13,7 +13,7 @@ Planned work and its order: `ROADMAP.md` (task board). Pick cards from "Next up"
 - **GameState**: add new fields at the end of the interface and give them a default in `createState()`.
   `migrate()` fills missing fields from the defaults, so most additions need no migration. If a field changes meaning,
   bump `SAVE_VERSION` and append a migration; never edit old ones.
-- Do not reorder `SYSTEMS`, rename existing state fields or change log-arg prefixes (`@ $ # % ~ & ! ^ * + =`):
+- Do not reorder `SYSTEMS`, rename existing state fields or change log-arg prefixes (`@ $ # % ~ & ! ^ * + = /`):
   old saves depend on them.
 - One feature per branch, branched from the latest `main`; rebase before opening the PR.
 

@@ -3,7 +3,7 @@ import type { DailyOrder } from '../systems/dailyOrder';
 import { BAL } from '../content/balance';
 
 /** Log entry argument. String prefixes are kept for compatibility with old saves:
- *  '@id' tree node, '$123' money, '#2' client, '%1' breakdown cause, '~90' duration in s, '&3' colour, '!id' achievement, '^id' market event, '*id' print model, '+id' calendar event, '=id' story message sender, 'pl|en' goal text. */
+ *  '@id' tree node, '$123' money, '#2' client, '%1' breakdown cause, '~90' duration in s, '&3' colour, '!id' achievement, '^id' market event, '*id' print model, '+id' calendar event, '=id' story message sender, '/id' material, 'pl|en' goal text. */
 export type LogArg = string | number;
 export interface LogEntry { k: string; a: LogArg[] }
 
@@ -71,6 +71,8 @@ export interface GameState {
   /** Active feedstock and reserves. fil holds the active feedstock, including PLA in old saves. */
   materialId: string;
   materialStock: Record<string, number>;
+  /** Filament run-out: early warning shown, switch hint shown, switch to a stocked material automatically. */
+  lowFil: boolean; matHint: boolean; autoMat: boolean;
 }
 
 export const SAVE_VERSION = 5;
@@ -105,6 +107,7 @@ export const createState = (): GameState => ({
   meta: { patents: 0, earned: 0, runs: 0, pat: {} },
   precision: false, bedCalibrated: false, dryerInstalled: false, stockPremium: 0,
   materialId: DEFAULT_MATERIAL.id, materialStock: {},
+  lowFil: false, matHint: false, autoMat: false,
 });
 
 export const has = (s: GameState, id: string) => s.done.includes(id);
