@@ -4,15 +4,50 @@ Przeglądarkowa gra incremental w stylu Universal Paperclips, osadzona w świeci
 
 ## Uruchomienie
 
-Gra to jeden plik `index.html` bez zależności i bez budowania. Otwórz go w przeglądarce albo wystaw dowolnym serwerem statycznym:
-
 ```bash
-npx serve .
-# albo
-python3 -m http.server 8080
+npm install
+npm run dev        # serwer deweloperski z hot reload
+npm test           # testy jednostkowe + bot przechodzący całą grę
+npm run build      # dist/index.html: jeden samodzielny plik (portale, GitHub Pages)
 ```
 
-Działa też od razu na GitHub Pages (Settings → Pages → branch `main`, folder `/`).
+## Architektura
+
+Trzy warstwy. Rdzeń nie wie nic o przeglądarce, widok tylko czyta stan i wysyła akcje, a wszystko zależne od miejsca uruchomienia siedzi za interfejsem platformy.
+
+```
+src/
+  core/        rdzeń gry, czysty TypeScript bez DOM
+    state.ts     GameState: zwykły obiekt zapisywany jako JSON
+    formulas.ts  czyste wzory: koszty, popyt, tempo, energia
+    game.ts      pętla (lista SYSTEMS), akcje gracza, nadrabianie offline
+    ctx.ts       kontekst ticku: losowość, zdarzenia, dziennik, dźwięki
+    save.ts      wersje zapisu i migracje
+  systems/     jedna mechanika = jeden plik, sygnatura (state, dt, ctx) => void
+  content/     dane gry: balance.ts (wszystkie liczby), tree.ts, goals.ts, colors.ts, i18n/
+  ui/          Preact + @preact/signals
+    store.ts     instancja gry, pętla 10 Hz, useS() (selektor stanu), zapis
+    components/  App, Side, Hud, Workshop, Research, common
+    scene/       hala izometryczna i animacja drukarki (imperatywne SVG)
+  platform/    interfejs Platform + adapter local (localStorage); tu dojdą Poki i CrazyGames
+legacy/        poprzednia wersja jednoplikowa, do porównania
+tests/         testy systemów i bot balansu
+```
+
+### Jak dodać nową mechanikę
+
+1. Nowy plik w `src/systems/` z funkcją `(s, dt, ctx) => void`.
+2. Wpis na liście `SYSTEMS` w `src/core/game.ts`.
+3. Nowe pola stanu w `GameState` i `createState()`. Jeśli zmieniasz znaczenie istniejących pól, podbij `SAVE_VERSION` i dopisz migrację w `save.ts`.
+4. Liczby do `content/balance.ts`, teksty do `content/i18n/pl.ts` i `en.ts`.
+5. Odpal `npm test`: bot balansu pokaże, czy tempo gry się nie rozjechało.
+
+### Zasady
+
+- **UI nie zmienia stanu gry samo.** Wysyła akcje przez `act('...')`. Wyjątek: stan czysto widokowy (zakładka, gałąź drzewka) przez `ui(fn)`.
+- **Losowość tylko przez `ctx.rng()`**, dzięki temu testy są powtarzalne.
+- **Zdarzenia zamiast wywołań na krzyż.** Rdzeń emituje `log`, `sfx`, `printed`, `goal`, `order`, `phase`, `end`. Słuchają ich dziennik, dźwięk, animacja i analityka (`platform.track`).
+- **Zapis zgodny wstecz.** Klucz `drukarnia-v3` w localStorage, stare zapisy wczytują się przez migracje.
 
 ## Co jest w grze
 
@@ -23,16 +58,9 @@ Działa też od razu na GitHub Pages (Settings → Pages → branch `main`, fold
 - Drzewko rozwoju: Produkcja, Sprzedaż, Automatyka, Kosmos.
 - 17 celów prowadzących przez całą grę.
 - Faza kosmiczna: drony, orbitalne fabryki, pas asteroid.
-- Scena izometryczna (garaż → pracownia → hala → orbita) z okienkiem zbliżenia na drukarkę i animacją warstw (kliknięcie okienka zamienia widoki).
-- PL / EN, dźwięk (WebAudio), postęp offline do 8 h, zapis w `localStorage`.
+- Scena izometryczna (garaż → pracownia → hala → orbita) z okienkiem zbliżenia na drukarkę i animacją warstw.
+- PL / EN, dźwięk (WebAudio), postęp offline do 8 h.
 
-## Notatki techniczne
+## Balans
 
-- Cały kod jest w jednym `<script>` na końcu `index.html`: stan `S`, ekonomia, drzewko `T`, cele `G`, `tick()`, `render()`, animacje.
-- Zapis: klucz `drukarnia-v3` (stan gry) i `drukarnia-pref` (język, dźwięk, widok).
-- `window.__drk` udostępnia stan i funkcje do testów i symulacji balansu. **Usuń przed wydaniem na portal**, bo pozwala oszukiwać z konsoli.
-- Balans sprawdzany botem: ok. 75–90 min gry dla bota, szacunkowo 2–3 h dla człowieka.
-
-## Plan
-
-Zobacz dokument „Drukarnia: plan rozwoju i monetyzacji”. Najbliższe kroki: test na 5 osobach, integracja SDK portalu (reklamy z nagrodą, zapis w chmurze), zgłoszenie do Poki lub CrazyGames.
+Bot z `tests/bot.ts` przechodzi grę w ok. 78–89 minut (lot w kosmos po 42–52 min). Człowiek gra wolniej, szacunkowo 2–3 godziny. Test `balance.sim.test.ts` pilnuje, żeby te czasy nie wyszły poza ustalone widełki.

@@ -1,0 +1,54 @@
+import type { ComponentChildren } from 'preact';
+import { useEffect, useRef } from 'preact/hooks';
+import type { Action } from '../../core/game';
+import { act } from '../store';
+
+/** Przytrzymanie przycisku powtarza akcję (druk, zmiana ceny). Klawiatura działa zwykłym kliknięciem. */
+export function useHold(action: Action) {
+  const timers = useRef<{ t?: number; i?: number }>({});
+  const stop = () => { clearTimeout(timers.current.t); clearInterval(timers.current.i); timers.current = {}; };
+  useEffect(() => {
+    window.addEventListener('pointerup', stop);
+    window.addEventListener('pointercancel', stop);
+    window.addEventListener('blur', stop);
+    return () => { stop(); window.removeEventListener('pointerup', stop); window.removeEventListener('pointercancel', stop); window.removeEventListener('blur', stop); };
+  }, []);
+  return {
+    'data-hold': true,
+    onPointerDown: (e: PointerEvent) => {
+      if (e.button > 0 || (e.currentTarget as HTMLButtonElement).disabled) return;
+      act(action);
+      stop();
+      timers.current.t = window.setTimeout(() => { timers.current.i = window.setInterval(() => { if (!act(action)) stop(); }, 170); }, 380);
+    },
+    onClick: (e: MouseEvent) => { if (e.detail === 0) act(action); },
+    onContextMenu: (e: Event) => e.preventDefault(),
+  };
+}
+
+/** Przycisk zakupu: wypełnia się kolorem w miarę zbierania pieniędzy, pomarańczowy, gdy stać cię na zakup. */
+export function BuyButton({ cost, have, label, action }: { cost: number; have: number; label: string; action: Action }) {
+  const ok = have >= cost;
+  const pct = Math.min(100, (100 * have) / cost).toFixed(1) + '%';
+  return (
+    <button class={'buy' + (ok ? ' ok' : '')} disabled={!ok} style={{ '--pp': pct }} onClick={() => act(action)}>
+      {label}
+    </button>
+  );
+}
+
+export const Tile = ({ label, value, warn }: { label: string; value: string; warn?: boolean }) => (
+  <div class={'tile' + (warn ? ' warn' : '')}><small>{label}</small><b>{value}</b></div>
+);
+
+export const Item = ({ name, sub, children }: { name: string; sub: string; children: ComponentChildren }) => (
+  <div class="item"><div class="it"><b>{name}</b><small>{sub}</small></div>{children}</div>
+);
+
+export const Meter = ({ pct, tone, style }: { pct: number; tone?: 'or' | 'bad'; style?: Record<string, string> }) => (
+  <div class={'meter' + (tone ? ' ' + tone : '')} style={style}><i style={{ width: Math.max(0, Math.min(100, pct)) + '%' }} /></div>
+);
+
+export const CardHead = ({ title, aside }: { title: string; aside?: string }) => (
+  <div class="ch"><h2>{title}</h2>{aside !== undefined && <span>{aside}</span>}</div>
+);
