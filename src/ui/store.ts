@@ -16,9 +16,11 @@ const saved = loadSaved();
 export const game = createGame({ state: saved });
 export const awayReport = signal<ReturnType<typeof game.catchUp>>(undefined);
 let lastT = Date.now();
+// Keep the latest settled wall-clock time across clock rollbacks and reloads.
+let settledThrough = Math.max(lastT, saved?.ts ?? 0);
 if (saved?.ts) {
   awayReport.value = game.catchUp((lastT - saved.ts) / 1000);
-  platform.saveGame(serialize(game.s, lastT));
+  platform.saveGame(serialize(game.s, settledThrough));
 }
 
 /** State version counter, bumped after every tick and action. Components read state through useS, which depends on it. */
@@ -33,7 +35,10 @@ export function useS<T>(fn: (s: GameState) => T): T {
   return c.value;
 }
 
-const save = () => platform.saveGame(serialize(game.s, lastT));
+const save = () => {
+  settledThrough = Math.max(settledThrough, lastT);
+  platform.saveGame(serialize(game.s, settledThrough));
+};
 
 export function act(a: Action) { const ok = game.act(a); bump(); return ok; }
 /** View-only state changes (active tab, research branch). */
@@ -111,25 +116,27 @@ export function loadImported(s: GameState) {
 
 export function startLoop() {
   let suspended = false;
-  let lastSave = lastT;
+  let lastSave = performance.now();
 
   function advance(resuming = false) {
     const now = Date.now();
     const dt = (now - lastT) / 1000;
+    const offlineSeconds = Math.max(0, now - settledThrough) / 1000;
+    settledThrough = Math.max(settledThrough, now);
     lastT = now;
     if (screen.value !== 'game' || adState.playing || dt <= 0) return;
 
     // A long gap with a visible tab can also mean the device was asleep.
     if (resuming || dt > 2) {
-      const report = game.catchUp(dt);
+      const report = game.catchUp(offlineSeconds);
       if (report) awayReport.value = report;
     } else {
       game.tick(dt);
     }
     bump();
-    if (resuming || now - lastSave >= 5000) {
+    if (resuming || performance.now() - lastSave >= 5000) {
       save();
-      lastSave = now;
+      lastSave = performance.now();
     }
   }
 
@@ -138,7 +145,7 @@ export function startLoop() {
     advance();
     suspended = true;
     suspendedDuringAd = adState.playing;
-    save();
+    if (screen.value === 'game') save();
   }
 
   function resume() {
