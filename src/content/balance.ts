@@ -25,8 +25,8 @@ export const BAL = {
   trendEvery: [150, 240],
 
   // production
-  printerCost: 200,          // first printer ~1 min of clicking for a person, ~30 s for the bot
-  printerCostGrowth: 1.15,
+  printerCost: 275,          // Keep the first printer attainable with manual sales.
+  printerCostGrowth: 1.22,   // Delay workshop expansion more than the first purchase.
   farmCost: 50000,           // a farm is 60 printers: cheap per printer, so the price climbs fast to avoid a
   farmCostGrowth: 1.3,       // runaway (was 20,000 x 1.1: 77 -> 4,700 figurines/s within 7 minutes)
   farmPrinters: 60,
