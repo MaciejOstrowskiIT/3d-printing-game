@@ -14,6 +14,12 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 |---|---|---|
 | Big research tree: 69 nodes in 8 branches on two pages, data-driven research modifiers, 3 new automations | #33 | Pacing: liftoff ~60 min, end ~90 min (bot) |
 
+## In progress
+
+| Card | Branch | Owner |
+|---|---|---|
+| Split the fleet between two models | `feat/fleet-split` | Codex |
+
 ## 🚦 Next up
 
 | Card | Effort | Owner | Why |
@@ -38,7 +44,6 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 |---|---|---|
 | **Second prestige layer**: IPO after a few production lines, shares give permanent bonuses | M | After players reach several lines |
 | **Third phase**: e.g. printing Mars bases from regolith after the asteroid belt | L | Decide after the playtest: only if enough players reach space |
-| Split the fleet between models (instead of one model for all printers) | M | More tycoon-style management |
 
 ### Monetization & portals
 | Card | Effort | Notes |

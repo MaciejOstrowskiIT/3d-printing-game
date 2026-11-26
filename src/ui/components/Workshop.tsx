@@ -1,3 +1,4 @@
+import { primaryRate, secondaryRate, splitUnlocked } from '../../systems/fleet';
 import { stockGrowth } from '../../systems/workshopStats';
 import { piecesInStock, premiumFor, stockPrice } from '../../systems/inventory';
 import { BAL } from '../../content/balance';
@@ -309,7 +310,44 @@ function Shape({ m, size = 36 }: { m: PrintModel; size?: number }) {
   );
 }
 
-/** Print models: owned ones can be selected for all printers, visible ones bought as designs. Data: content/models.ts. */
+function FleetSplit() {
+  const v = useS(s => ({
+    unlocked: splitUnlocked(s), main: model(s), selected: s.fleetModel,
+    printers: s.fleetPrinters, total: s.auto,
+    available: MODELS.filter(m => m.id !== s.mdl && s.mdls.includes(m.id)),
+    primaryRate: primaryRate(s), secondaryRate: secondaryRate(s),
+  }));
+  if (!v.unlocked) return null;
+
+  const secondary = v.available.find(m => m.id === v.selected);
+  return (
+    <details class="fleet-split">
+      <summary>{t('fleetTitle')}{secondary && <small>{secondary.name[li()]} · {t('fleetCount', v.printers)}</small>}</summary>
+      <div class="fleet-controls">
+        <div>
+          <label for="fleet-model">{t('fleetSecond')}</label>
+          <select id="fleet-model" value={v.selected} onChange={e => act(`fleet-model:${e.currentTarget.value}`)}>
+            <option value="">{t('fleetNone')}</option>
+            {v.available.map(m => <option key={m.id} value={m.id}>{m.name[li()]}</option>)}
+          </select>
+        </div>
+        {secondary && <>
+          <label>{t('fleetCount', v.printers)}
+            <input type="range" min="1" max={v.total - 1} step="1" value={v.printers}
+              disabled={v.total === 2} onInput={e => act(`fleet-count:${e.currentTarget.valueAsNumber}`)} />
+          </label>
+          <div class="fleet-rates">
+            <span>{v.main.name[li()]} · {t('fleetCount', v.total - v.printers)} · {t('fleetRate', nf(60 * v.primaryRate / v.main.seconds, 1))}</span>
+            <span>{secondary.name[li()]} · {t('fleetCount', v.printers)} · {t('fleetRate', nf(60 * v.secondaryRate / secondary.seconds, 1))}</span>
+          </div>
+        </>}
+        <p class="hint">{t('fleetHint')}</p>
+      </div>
+    </details>
+  );
+}
+
+/** Print models: owned ones can be selected for the main group, visible ones bought as designs. Data: content/models.ts. */
 function Models() {
   const v = useS(s => ({
     stock: Object.fromEntries(s.mdls.map(id => [id, piecesInStock(s, id)])),
@@ -327,6 +365,7 @@ function Models() {
     <section class="card models">
       <CardHead title={t('mdlTitle')} aside={t('mdlAside', cur.name[li()])} />
       <p class="hint">{t('mdlHint')}</p>
+      <FleetSplit />
       {visible.map(m => {
         const have = v.owned.split(',').includes(m.id), on = m.id === v.cur;
         const secs = m.seconds * v.slow;

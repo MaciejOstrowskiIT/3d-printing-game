@@ -38,7 +38,7 @@ export const spoolPrice = (s: GameState, stock = material(s)) =>
 /** Selected print model (falls back to the figurine for unknown ids). */
 export const model = (s: GameState): PrintModel => MODEL[s.mdl] ?? DEFAULT_MODEL;
 /** Filament per figurine of work: base nozzle consumption × the model's material factor. */
-export const gpu = (s: GameState) => s.g * model(s).material * mod(s, 'filament');
+export const gpu = (s: GameState, m = model(s)) => s.g * m.material * mod(s, 'filament');
 /** Market size of a model in figurines/s at the same price per figurine (see content/models.ts). */
 export const modelDemand = (m: PrintModel) => m.value ** BAL.demandElasticity * m.market * m.seconds;
 /** Figurines of work added by one click. */
@@ -54,7 +54,7 @@ export const clickCost = (s: GameState) => BAL.clickCost * BAL.clickGrowth ** s.
 export const clearingPrice = (s: GameState, sales: number) =>
   s.price * (demand(s) / Math.max(sales, 1e-6)) ** (1 / BAL.demandElasticity);
 
-export const unitCost = (s: GameState) => (spoolPrice(s) / s.spoolG) * gpu(s);
+export const unitCost = (s: GameState, m = model(s)) => (spoolPrice(s) / s.spoolG) * gpu(s, m);
 export const droneCost = (s: GameState) => BAL.droneCost * BAL.droneCostGrowth ** s.drones;
 export const fabCost = (s: GameState) => BAL.fabCost * BAL.fabCostGrowth ** s.fabs;
 

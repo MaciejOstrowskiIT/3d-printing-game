@@ -79,6 +79,8 @@ export interface GameState {
   orderStock: Record<string, number>;
   financeTime: number;
   finance: CashPeriod[];
+  fleetModel: string;
+  fleetPrinters: number;
   /** Production planner automation: seconds since its last check. */
   planT: number;
 }
@@ -118,6 +120,7 @@ export const createState = (): GameState => ({
   lowFil: false, matHint: false, autoMat: false,
   modelStock: {}, orderStock: {},
   financeTime: 0, finance: [],
+  fleetModel: '', fleetPrinters: 0,
   planT: 0,
 });
 

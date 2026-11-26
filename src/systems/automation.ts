@@ -1,8 +1,9 @@
 import { bookCash } from './workshopStats';
+import { primaryRate } from './fleet';
 import { BAL } from '../content/balance';
 import { TREE } from '../content/tree';
 import type { Ctx } from '../core/ctx';
-import { activeStockWork, autoCost, drawP, fabCap, farmCost, freePts, mining, mktCost, panelCost, rate1, spoolPrice, supply, unitCost, droneCost, fabCost, gpu, clearingPrice } from '../core/formulas';
+import { activeStockWork, autoCost, drawP, fabCap, farmCost, freePts, mining, mktCost, panelCost, spoolPrice, supply, unitCost, droneCost, fabCost, gpu, clearingPrice } from '../core/formulas';
 import { has, type GameState } from '../core/state';
 import { acceptOrder } from './orders';
 import { acceptMarketEvent, canAfford } from './marketEvents';
@@ -19,7 +20,7 @@ export const savingForLiftoff = (s: GameState) => !has(s, 'replik') && TREE.some
  *  extra stock (never more than autoPriceMaxDrain × production), and moves there by at most autoPriceStep a second.
  *  A smooth controller: the old one overshot, piled up stock, then crashed the price and dumped it all at once. */
 export function autoPrice(s: GameState) {
-  const rate = rate1(s) > 0 && s.fil >= gpu(s) ? rate1(s) : 0;
+  const rate = s.fil >= gpu(s) ? primaryRate(s) : 0;
   const target = Math.max(10, rate * BAL.autoPriceStockSeconds);
   const stock = activeStockWork(s);
   const drain = Math.min(BAL.autoPriceMaxDrain, Math.max(0.5, 1 + (stock - target) / (target * 4)));
