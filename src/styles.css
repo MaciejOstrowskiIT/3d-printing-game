@@ -193,7 +193,6 @@ h2{font-size:21px;margin:0;line-height:1.1}
   .goal{padding:10px 12px;box-shadow:none}
   .goal h3{font-size:18px}
   .log{min-height:0;max-height:2.2em;padding:6px 12px;flex:none}
-  .log.open{max-height:none}
   .hud{padding:8px 14px;top:0}
   .hud .tabs{display:none}
   .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
@@ -298,8 +297,6 @@ body.space .title-screen{background:#14122b}
   .goal{padding:6px 12px}
   .goal-title,.goal p:not(.expanded){display:none}
   .goal-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;padding:0;min-height:32px;font:inherit;text-align:left;background:transparent;border:0}
-  .log:not(.open) li{display:none}
-  .log:not(.open) li:first-child{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 }
 @media(min-width:1520px){
   .hud{max-width:1180px}
@@ -452,3 +449,43 @@ body.space .title-screen{background:#14122b}
 .sales-model{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:8px;margin-bottom:8px;font-size:13px;color:var(--mute)}
 .sales-model select{width:100%;min-height:36px;padding:4px 8px;font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px}
 .sales-auto-price{display:flex;align-items:center;min-height:44px;margin-top:10px}
+
+/* The sidebar uses the same surfaces and accents as the workshop dashboard. */
+.side{background:var(--bg);color:var(--ink);border-inline-end:1px solid var(--line)}
+body.space .side{background-color:var(--bg);color:var(--ink)}
+.side .goal,.side-journal{border:1px solid var(--line);background:var(--card);box-shadow:var(--sh);border-radius:14px}
+.side-journal{min-height:0}
+.side-journal h2{font-size:18px;padding:10px 12px 6px}
+.side-journal .log{background:transparent;color:var(--mute);min-height:0;overflow-wrap:anywhere;flex:none;cursor:default;padding:0 12px 10px}
+.side-journal .log li{opacity:1;padding:4px 0}
+.side-journal .log li+li{border-top:1px solid var(--line)}
+.side-journal .log li:first-child{color:var(--ink)}
+.settings button{background:var(--card);border-color:var(--line)}
+.settings button:hover:not(:disabled){background:var(--sub);border-color:var(--acc)}
+.side .settings{padding-top:4px}
+.station-readout,.journal-toggle{display:none}
+@media(min-width:821px){
+  .side{padding:10px 14px 14px;gap:10px;height:100dvh}
+  .side .brand{padding:12px;border:1px solid var(--line);background:var(--card);box-shadow:var(--sh);border-radius:14px;gap:10px}
+  .side .brand h1{grid-row:1;font-size:24px}
+  .side .pic{aspect-ratio:16/10;border:1px solid var(--line);border-radius:10px}
+  .side .count{flex-direction:row;align-items:baseline;gap:8px}
+  .side .count .num{font-size:36px;color:var(--acc)}
+  .side .count small{color:var(--mute);opacity:1}
+  .station-readout{display:grid;gap:4px;padding:8px 10px;border:1px solid var(--line);background:var(--sub);border-radius:9px;font-size:13px}
+  .station-status,.station-rate{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 8px}
+  .station-status > span:first-child{font-weight:700}
+  .station-state,.station-rate>span{color:var(--mute)}
+  .station-state::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;margin-inline-end:5px;vertical-align:.14em}
+  .station-state.stationRunning{color:var(--acc)}
+  .station-state:is(.stationEmpty,.stationFault){color:var(--bad)}
+  .station-rate strong{font-variant-numeric:tabular-nums}
+  .station-rate small{font-weight:500}
+}
+@media(max-width:820px){
+  .side{border-inline-end:0;border-bottom:1px solid var(--line)}
+  .side-journal h2,.side-journal:not(.open) .log{display:none}
+  .journal-toggle{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:32px;padding:4px 10px;border:0;background:transparent;text-align:left;font-size:13px}
+  .journal-toggle span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .side-journal.open .log{max-height:none}
+}
