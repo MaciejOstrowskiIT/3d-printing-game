@@ -1,5 +1,7 @@
 import { ACHIEVEMENTS } from '../content/achievements';
+import { NODE } from '../content/tree';
 import { createState, SAVE_VERSION, type GameState } from './state';
+import { validSave } from './saveValidation';
 
 type Migration = (raw: Record<string, unknown>) => void;
 
@@ -15,9 +17,21 @@ export function migrate(raw: unknown): GameState {
   if (!raw || typeof raw !== 'object') return createState();
   const r = { ...(raw as Record<string, unknown>) };
   let v = typeof r.v === 'number' ? r.v : 3;
+  if (!Number.isInteger(v) || v < 3 || v > SAVE_VERSION) throw new Error('Unsupported save version');
   while (v < SAVE_VERSION) { MIGRATIONS[v]?.(r); v++; }
   const hadAchievements = Array.isArray(r.ach);
-  const s = Object.assign(createState(), r) as GameState;
+  const defaults = createState();
+  const knownFields = Object.entries(r).filter(([key]) => Object.hasOwn(defaults, key));
+  const s = { ...defaults, ...Object.fromEntries(knownFields) } as GameState;
+  if (!validSave(s, defaults)) throw new Error('Invalid saved progress');
+  // These multipliers come exclusively from research. Rebuild them from the
+  // purchased projects, on a scratch state so one-time rewards never replay.
+  const researched = createState();
+  for (const id of s.done) NODE[id].fx(researched);
+  s.spd = researched.spd;
+  s.dem = researched.dem;
+  s.dMul = researched.dMul;
+  s.fMul = researched.fMul;
   if (!hadAchievements) s.ach = ACHIEVEMENTS.filter(a => a.check(s)).map(a => a.id);
   s.v = SAVE_VERSION;
   return s;
@@ -40,10 +54,10 @@ export const exportSave = (s: GameState) => EXPORT_PREFIX + toBase64(serialize(s
 
 /** Parses a save code (or raw save JSON). Returns null for anything that does not look like a save. */
 export function importSave(text: string): GameState | null {
-  const code = text.trim().replace(/\s+/g, '');
+  const code = text.trim();
   if (!code) return null;
   try {
-    const json = code.startsWith(EXPORT_PREFIX) ? fromBase64(code.slice(EXPORT_PREFIX.length)) : code;
+    const json = code.startsWith(EXPORT_PREFIX) ? fromBase64(code.slice(EXPORT_PREFIX.length).replace(/\s+/g, '')) : code;
     const raw = JSON.parse(json) as Record<string, unknown>;
     if (!raw || typeof raw !== 'object' || typeof raw.total !== 'number' || !Array.isArray(raw.done)) return null;
     return migrate(raw);

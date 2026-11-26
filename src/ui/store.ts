@@ -8,6 +8,7 @@ import { play } from './audio';
 import { prefs } from './i18n';
 import { platform } from './platform';
 import { setTrackContext, track } from './analytics';
+import { serverTime, WorkshopClock } from './workshopClock';
 
 function loadSaved() {
   try { const raw = platform.loadGame(); return raw ? migrate(JSON.parse(raw)) : undefined; } catch { return undefined; }
@@ -16,11 +17,8 @@ function loadSaved() {
 const saved = loadSaved();
 export const game = createGame({ state: saved });
 export const awayReport = signal<ReturnType<typeof game.catchUp>>(undefined);
-let lastT = Date.now();
-if (saved?.ts) {
-  awayReport.value = game.catchUp((lastT - saved.ts) / 1000);
-  platform.saveGame(serialize(game.s, lastT));
-}
+let lastT = performance.now();
+let clock = new WorkshopClock(saved?.serverThrough ?? 0, lastT);
 
 /** State version counter, bumped after every tick and action. Components read state through useS, which depends on it. */
 export const ver = signal(0);
@@ -34,14 +32,18 @@ export function useS<T>(fn: (s: GameState) => T): T {
   return c.value;
 }
 
-const save = () => platform.saveGame(serialize(game.s, lastT));
+const save = () => {
+  game.s.serverThrough = clock.checkpoint(lastT);
+  platform.saveGame(serialize(game.s));
+};
 
 export function act(a: Action) { const ok = game.act(a); bump(); return ok; }
 /** View-only state changes (active tab, research branch). */
 export function ui(fn: (s: GameState) => void) { fn(game.s); bump(); }
 export function resetGame(logKey?: string) {
   game.reset(logKey);
-  lastT = Date.now();
+  restartClock();
+  lastT = performance.now();
   awayReport.value = undefined;
   save();
   bump();
@@ -70,7 +72,7 @@ export async function watchAdForBoost() {
     track('ad', { placement: 'boost', watched: ok });
   } finally {
     if (suspendedDuringAd) {
-      lastT = Date.now();
+      lastT = performance.now();
       save();
       suspendedDuringAd = false;
     }
@@ -109,7 +111,7 @@ export const dialog = signal<null | 'save'>(null);
 export function startGame(fresh = false) {
   const resumed = game.s.total > 0 || game.s.meta.runs > 0;
   if (fresh) resetGame('fresh');
-  lastT = Date.now();
+  lastT = performance.now();
   screen.value = 'game';
   track('session', { kind: fresh ? 'new' : resumed ? 'continue' : 'first' });
   platform.gameplayStart();
@@ -117,12 +119,41 @@ export function startGame(fresh = false) {
 
 /** Replaces the running game with an imported save. */
 export function loadImported(s: GameState) {
-  lastT = Date.now();
+  lastT = performance.now();
   awayReport.value = undefined;
   game.load(s);
+  restartClock();
   save();
   bump();
   track('import');
+}
+
+let pendingSync: WorkshopClock | null = null;
+
+function restartClock() {
+  clock = new WorkshopClock(0, performance.now());
+  void synchronizeClock();
+}
+
+async function synchronizeClock() {
+  const current = clock;
+  if (pendingSync === current) return;
+  pendingSync = current;
+  try {
+    const sample = await serverTime();
+    if (sample === null || current !== clock) return;
+    const now = performance.now();
+    const missing = clock.synchronize(sample, now);
+    if (missing > 0 && !adState.playing && !suspendedDuringAd) {
+      const report = game.catchUp(missing);
+      if (report) awayReport.value = report;
+      bump();
+    }
+    // The next tick still owns the monotonic interval since lastT.
+    save();
+  } finally {
+    if (pendingSync === current) pendingSync = null;
+  }
 }
 
 /** Count only foreground simulation time toward the active-play heartbeat. */
@@ -130,17 +161,29 @@ const HEARTBEAT_S = 300;
 
 export function startLoop() {
   let suspended = false;
-  let lastSave = lastT;
+  let lastSave = performance.now();
+  let lastWall = Date.now();
+  let lastClockCheck = lastSave;
   let sinceBeat = 0;
 
   function advance(resuming = false) {
-    const now = Date.now();
+    const now = performance.now();
     const dt = (now - lastT) / 1000;
+    // Some mobile clocks pause during sleep. The device date is only a hint
+    // to fetch a new sample; its delta never enters the simulation.
+    const wall = Date.now();
+    const gap = Math.abs((wall - lastWall) / 1000 - dt);
+    lastWall = wall;
+    if (gap > 5 || now - lastClockCheck > 5 * 60_000) {
+      lastClockCheck = now;
+      void synchronizeClock();
+    }
     lastT = now;
     if (screen.value !== 'game' || adState.playing || dt <= 0) return;
 
     // A long gap with a visible tab can also mean the device was asleep.
     if (resuming || dt > 2) {
+      void synchronizeClock();
       const report = game.catchUp(dt);
       if (report) awayReport.value = report;
     } else {
@@ -152,9 +195,9 @@ export function startLoop() {
       }
     }
     bump();
-    if (resuming || now - lastSave >= 5000) {
+    if (resuming || performance.now() - lastSave >= 5000) {
       save();
-      lastSave = now;
+      lastSave = performance.now();
     }
   }
 
@@ -163,7 +206,7 @@ export function startLoop() {
     advance();
     suspended = true;
     suspendedDuringAd = adState.playing;
-    save();
+    if (screen.value === 'game') save();
   }
 
   function resume() {
@@ -176,5 +219,7 @@ export function startLoop() {
   document.addEventListener('visibilitychange', () => document.hidden ? suspend() : resume());
   window.addEventListener('pagehide', suspend);
   window.addEventListener('pageshow', resume);
+  window.addEventListener('online', synchronizeClock);
+  void synchronizeClock();
   if (document.hidden) suspend();
 }

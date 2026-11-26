@@ -14,21 +14,16 @@ More than one agent works on this repo in parallel (Claude, Codex). Read this be
 - Do not reorder `SYSTEMS`, rename existing state fields or change log-arg prefixes (`@ $ # % ~ & ! ^`):
   old saves depend on them.
 - One feature per branch, branched from the latest `main`; rebase before opening the PR.
+- **PRs target `main`.** A PR based on another feature branch lands in that branch, not in `main`, once the base is
+  merged first (this happened with #4 and #11). If you stack PRs, retarget the top one to `main` after the bottom one merges.
 
 ## In flight
 | PR / branch | Agent | Touches |
 |---|---|---|
-| #12 `feat/market-events` | Claude | `content/events.ts`, `systems/marketEvents.ts` (new); `GameState.mev/mevT/mfx`; `formulas.ts` (`marketMul` in `demand` and `spoolPrice`); `GameEvent` `market`; actions `mevyes/mevno`; i18n `L.mev*`, `mevExp`, `fx*`; `Workshop.tsx` Events; `ui/store.ts` (one `track` line); `tests/bot.ts` |
-| #11 `feat/offline-mobile` (on top of #10 `feat/workshop-discovery`) | Codex | `core/saveValidation.ts` (new), `save.ts` (`migrate` validates, rebuilds research multipliers), `catchUp` return value, `GameState.serverThrough`, `ui/store.ts`, `ui/workshopClock.ts`, `Research.tsx`, `Side.tsx`, `App.tsx`, `styles.css` |
+| `chore/land-save-validation` | Claude | brings #11 (Codex: save validation, verified offline clock) to `main`; hooks `validMarketState()` and `play >= 0` into `validSave()` |
 
-Merged: #8 analytics, #9 portal assets.
-
-Cross-branch notes:
-- `feat/offline-mobile` + `feat/market-events` merge cleanly (checked locally: typecheck OK, 46 tests pass).
-- **For `saveValidation.ts`:** call `validMarketState(s)` from `systems/marketEvents.ts` in `validSave()`. The generic
-  number/boolean check does not cover `mev` (object or null) or `mfx` (array); a tampered `mev.cost < 0` would pay out
-  on accept (acceptance now refuses non-positive prices too, but the save should be rejected).
-- `GameState.play` (from #8) is a plain number: active seconds on the current line.
+Merged: #8 analytics, #9 portal assets, #10 workshop discovery, #12 market events. #11 was merged into
+`feat/workshop-discovery` only; the branch above lands it.
 
 Waiting for the cheat-proofing work: rewarded "double offline earnings" and CrazyGames account saves (both touch
 `save.ts`, offline catch-up and the platform save API).

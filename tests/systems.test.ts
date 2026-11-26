@@ -190,6 +190,7 @@ describe('save export and import', () => {
     Object.assign(g.s, { total: 12345, auto: 7, zl: 99.5, col: 4 });
     g.s.done.push('dysza');
     g.s.meta.patents = 3;
+    g.s.meta.earned = 3;
     const code = exportSave(g.s);
     expect(code.startsWith(EXPORT_PREFIX)).toBe(true);
     const s = importSave(code)!;
@@ -204,6 +205,29 @@ describe('save export and import', () => {
     const code = exportSave(createState());
     expect(importSave(`  ${code.slice(0, 20)}\n${code.slice(20)}  `)).not.toBeNull();
     expect(importSave(JSON.stringify({ total: 5, done: [] }))!.total).toBe(5);
+  });
+
+  it('rejects impossible patents, boost duration and research prerequisites', () => {
+    for (const overrides of [
+      { meta: { patents: 10, earned: 1, runs: 1, pat: {} } },
+      { meta: { patents: 0, earned: 99, runs: 1, pat: { speed: 99 } } },
+      { boostT: 9999 }, { done: ['fw'] }, { rep: -1 }, { goal: -1 },
+    ]) {
+      expect(importSave(JSON.stringify({ ...createState(), ...overrides }))).toBeNull();
+    }
+  });
+
+  it('derives production speed from purchased research on load and import', () => {
+    const raw = { ...createState(), done: ['dysza', 'fw'], spd: 999 };
+    expect(migrate(raw).spd).toBe(1.25);
+    expect(importSave(JSON.stringify(raw))?.spd).toBe(1.25);
+  });
+
+  it('accepts automation inherited from a previous line', () => {
+    const s = createState();
+    s.meta = { patents: 0, earned: 3, runs: 1, pat: { keep: 1 } };
+    s.done = ['kamera', 'autobuy'];
+    expect(importSave(exportSave(s))?.meta).toEqual(s.meta);
   });
 
   it('rejects garbage', () => {
