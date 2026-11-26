@@ -418,3 +418,34 @@ body.space .title-screen{background:#14122b}
   .workshop-production .item>.buy,.workshop-sales .item>.buy{flex-basis:104px}
   .workshop-production .tile b,.workshop-sales .tile b{font-size:clamp(14px,4.2vw,17px)}
 }
+
+/* Workshop columns flow independently so a tall card doesn't reserve a row across the dashboard. */
+.app:has(.workshop-layout){max-inline-size:2280px;margin-inline:auto}
+.main:has(.workshop-layout) > :is(.content,.hud){max-width:none}
+.main:has(.workshop-layout) .hud .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin}
+.main:has(.workshop-layout) .hud .chip{flex:none}
+.workshop-board,.workshop-core,.workshop-tools,.workshop-stack{display:grid;gap:14px;align-items:start;align-content:start}
+.workshop-core,.workshop-tools,.workshop-stack{grid-template-columns:minmax(0,1fr)}
+.workshop-board .rprev{margin:0}
+.workshop-support > summary{display:none;min-height:44px;padding:10px 12px;background:var(--card);border:1px solid var(--line);border-radius:10px;font-weight:600;cursor:pointer}
+@media(max-width:1739px){
+  .workshop-support.compact > summary{display:list-item}
+  .workshop-support.compact[open] > .workshop-stack{margin-top:10px}
+}
+@media(max-width:820px){
+  .workshop-board,.workshop-core,.workshop-tools,.workshop-stack{gap:10px}
+  .workshop-support > summary{display:list-item}
+  .workshop-support[open] > .workshop-stack{margin-top:10px}
+}
+@media(min-width:1020px){
+  .workshop-board:has(.workshop-tools){grid-template-columns:repeat(2,minmax(0,1fr))}
+  .workshop-board:not(:has(.workshop-tools)) .workshop-core:has(.workshop-sales){grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(min-width:1400px){
+  .workshop-board:has(.workshop-tools){grid-template-columns:minmax(0,2fr) minmax(0,1fr)}
+  .workshop-core:has(.workshop-sales){grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(min-width:1740px){
+  .workshop-board:has(.workshop-tools){grid-template-columns:repeat(2,minmax(0,1fr))}
+  .workshop-tools:has(.workshop-stack + .workshop-support){grid-template-columns:repeat(2,minmax(0,1fr))}
+}

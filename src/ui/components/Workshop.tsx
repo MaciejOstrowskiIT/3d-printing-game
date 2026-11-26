@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef } from 'preact/hooks';
 import { primaryRate, secondaryRate, splitUnlocked } from '../../systems/fleet';
 import { stockGrowth } from '../../systems/workshopStats';
 import { piecesInStock, premiumFor, stockPrice } from '../../systems/inventory';
@@ -514,24 +515,63 @@ function Automation() {
   );
 }
 
-export function Workshop() {
-  const v = useS(s => ({ sp: s.ph === 2, g: s.goal, farmOn: s.farmOn }));
-  const research = useResearchUnlocked();
+function WorkshopSupport({ research, farm, compact }: { research: boolean; farm: boolean; compact: boolean }) {
+  const panel = useRef<HTMLDetailsElement>(null);
+  useLayoutEffect(() => {
+    const screen = matchMedia(compact ? '(min-width: 1740px)' : '(min-width: 821px)');
+    const apply = () => { if (panel.current) panel.current.open = screen.matches; };
+    apply();
+    screen.addEventListener('change', apply);
+    return () => screen.removeEventListener('change', apply);
+  }, [compact]);
+
   return (
+    <details class={'workshop-support' + (compact ? ' compact' : '')} ref={panel}>
+      <summary>{t(research ? 'workshopSupportResearch' : 'workshopSupport')}</summary>
+      <div class="workshop-stack">
+        {research && <ResearchPreview />}
+        <PrintQuality />
+        {farm && <Energy />}
+        <Automation />
+      </div>
+    </details>
+  );
+}
+
+export function Workshop() {
+  const v = useS(s => ({
+    sp: s.ph === 2, sales: s.goal >= 1, farm: s.farmOn,
+    designs: MODELS.some(m => m.design > 0 && designVisible(s, m)) || s.total >= MATERIALS[1].unlockAt,
+    support: qualityUnlocked(s) || s.farmOn || AUTOMATIONS.some(id => has(s, id)),
+  }));
+  const research = useResearchUnlocked();
+
+  if (v.sp) return (
     <div>
       <Events />
       <div class="grid">
-        {!v.sp && <Production />}
-        {!v.sp && v.g >= 1 && <Sales />}
-        {!v.sp && v.g >= 1 && <WorkshopStats />}
         {research && <ResearchPreview />}
-        {!v.sp && <Models />}
-        {!v.sp && <Materials />}
-        {!v.sp && <PrintQuality />}
-        {!v.sp && v.farmOn && <Energy />}
-        {v.sp && <Space />}
-        {v.sp && <PrestigeCard />}
+        <Space />
+        <PrestigeCard />
         <Automation />
+      </div>
+    </div>
+  );
+
+  const support = research || v.support;
+  return (
+    <div class="workshop-layout">
+      <Events />
+      <div class="workshop-board">
+        <div class="workshop-core">
+          <Production />
+          {v.sales && <Sales />}
+          {v.sales && <WorkshopStats />}
+        </div>
+        {(v.designs || support) && <div class="workshop-tools">
+          {v.designs && <div class="workshop-stack"><Models /><Materials /></div>}
+          {support && <WorkshopSupport research={research} farm={v.farm} compact={v.designs} />}
+        </div>}
       </div>
     </div>
   );
