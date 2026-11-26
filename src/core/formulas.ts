@@ -26,6 +26,10 @@ export const modelDemand = (m: PrintModel) => m.value ** BAL.demandElasticity * 
 /** Figurines of work added by one click. */
 export const clickPower = (s: GameState) => BAL.clickWork * (1 + BAL.clickStep * s.clk);
 export const clickCost = (s: GameState) => BAL.clickCost * BAL.clickGrowth ** s.clk;
+/** Price per figurine at which demand would be `sales` figurines/s (demand ∝ price^-elasticity). */
+export const clearingPrice = (s: GameState, sales: number) =>
+  s.price * (demand(s) / Math.max(sales, 1e-6)) ** (1 / BAL.demandElasticity);
+
 export const unitCost = (s: GameState) => (spoolPrice(s) / s.spoolG) * gpu(s);
 export const droneCost = (s: GameState) => BAL.droneCost * BAL.droneCostGrowth ** s.drones;
 export const fabCost = (s: GameState) => BAL.fabCost * BAL.fabCostGrowth ** s.fabs;

@@ -18,7 +18,9 @@ More than one agent works on this repo in parallel (Claude, Codex). Read this be
 ## In flight
 | PR / branch | Agent | Touches |
 |---|---|---|
-| `feat/print-models` | Claude | `content/models.ts`, `systems/models.ts`, `tests/models.test.ts` (new); `GameState.mdl/mdls/clk/mp`; `formulas.ts` (`model`, `gpu`, `modelDemand` in `demand`, `clickPower`); manual printing moved from `systems/production.ts` to `systems/models.ts`; `printed` event `share`; actions `tool`, `mdl:*`, `stl:*`; log prefix `*`; `Workshop.tsx` (Models card, tools row, prices per piece); `Side.tsx` print label; `scene/printer.ts` shapes; `tests/bot.ts` |
+| #14 `feat/print-models` | Claude | `content/models.ts`, `systems/models.ts`, `tests/models.test.ts` (new); `GameState.mdl/mdls/clk/mp`; `formulas.ts` (`model`, `gpu`, `modelDemand` in `demand`, `clickPower`); manual printing moved from `systems/production.ts` to `systems/models.ts`; `printed` event `share`; actions `tool`, `mdl:*`, `stl:*`; log prefix `*`; `Workshop.tsx` (Models card, tools row, prices per piece); `Side.tsx` print label; `scene/printer.ts` shapes; `tests/bot.ts` |
+| `fix/early-balance` (on top of #14) | Claude | `systems/automation.ts` (`autoPrice` controller), `formulas.ts` (`clearingPrice`), `balance.ts` (printer cost, `autoPrice*`), `tree.ts` (`autocena` gating/text), `goals.ts` (goal 2 = sell 30), `tests/bot.ts`, `tests/autoPrice.test.ts` |
+| #15 `fix/mobile-touch` | Claude | `styles.css` (touch rules at the top, one media query at the end) |
 
 Merged: #8 analytics, #9 portal assets, #10 workshop discovery, #11 save validation (via #13), #12 market events.
 

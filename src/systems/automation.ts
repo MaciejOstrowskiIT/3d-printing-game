@@ -1,11 +1,26 @@
+import { BAL } from '../content/balance';
 import { TREE } from '../content/tree';
 import type { Ctx } from '../core/ctx';
-import { autoCost, drawP, fabCap, farmCost, freePts, mining, mktCost, panelCost, rate1, spoolPrice, supply, unitCost, droneCost, fabCost, gpu } from '../core/formulas';
+import { autoCost, drawP, fabCap, farmCost, freePts, mining, mktCost, panelCost, rate1, spoolPrice, supply, unitCost, droneCost, fabCost, gpu, clearingPrice } from '../core/formulas';
 import { has, type GameState } from '../core/state';
 import { acceptOrder } from './orders';
 import { buyNode, nodeStatus, reserveWyd } from './research';
 
 const on = (s: GameState, id: string) => has(s, id) && !!s.amOn[id];
+
+/** Dynamic pricing, once per second. Aims for the price that sells what the printers make, plus a slow drain of
+ *  extra stock (never more than autoPriceMaxDrain × production), and moves there by at most autoPriceStep a second.
+ *  A smooth controller: the old one overshot, piled up stock, then crashed the price and dumped it all at once. */
+export function autoPrice(s: GameState) {
+  const rate = rate1(s) > 0 && s.fil >= gpu(s) ? rate1(s) : 0;
+  const target = Math.max(10, rate * BAL.autoPriceStockSeconds);
+  const drain = Math.min(BAL.autoPriceMaxDrain, Math.max(0.5, 1 + (s.inv - target) / (target * 4)));
+  const sales = rate > 0 ? rate * drain : Math.max(s.inv / 60, 0.1);
+  const want = clearingPrice(s, sales);
+  const step = s.price * BAL.autoPriceStep;
+  const next = s.price + Math.max(-step, Math.min(step, want - s.price));
+  s.price = Math.min(500, Math.max(Math.round(next * 1000) / 1000, Math.ceil(unitCost(s) * 1.3 * 1000) / 1000));
+}
 
 /** All automations unlocked in the research tree. Each runs only while the player keeps it enabled. */
 export function automationSystem(s: GameState, dt: number, ctx: Ctx) {
@@ -15,13 +30,7 @@ export function automationSystem(s: GameState, dt: number, ctx: Ctx) {
       s.amT = 0;
       const free = s.zl - spoolPrice(s) * 3;
 
-      if (on(s, 'autocena')) {
-        const target = Math.max(5, rate1(s) * 3);
-        const making = rate1(s) > 0 && s.fil >= gpu(s);
-        if (s.inv > target * 2) s.price = Math.max(0.1, s.price * 0.97);
-        else if (s.inv < target && making) s.price = Math.min(500, s.price * 1.03);
-        s.price = Math.max(Math.round(s.price * 100) / 100, Math.ceil(unitCost(s) * 1.3 * 100) / 100);
-      }
+      if (on(s, 'autocena')) autoPrice(s);
 
       // Once liftoff is within reach, the agencies stop buying so the player can save up for it.
       const saving = has(s, 'slicer') && !has(s, 'replik') && s.farm >= 5;
