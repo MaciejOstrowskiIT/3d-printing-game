@@ -27,6 +27,11 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+        env:
+          # Analytics for the GitHub Pages build only; empty variables keep it disabled. See infra/umami/README.md.
+          VITE_UMAMI_HOST: ${{ vars.UMAMI_HOST }}
+          VITE_UMAMI_WEBSITE_ID: ${{ vars.UMAMI_WEBSITE_ID }}
+          VITE_UMAMI_ENDPOINT: ${{ vars.UMAMI_ENDPOINT }}
       - uses: actions/upload-pages-artifact@v3
         if: github.ref == 'refs/heads/main'
         with:

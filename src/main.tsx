@@ -2,6 +2,7 @@ import { render } from 'preact';
 import './styles.css';
 import { App } from './ui/components/App';
 import { platform } from './ui/platform';
+import { initAnalytics } from './ui/analytics';
 import { game, startLoop } from './ui/store';
 
 async function boot() {
@@ -9,6 +10,7 @@ async function boot() {
   render(<App />, document.getElementById('app')!);
   startLoop();
   platform.loadingFinished();
+  initAnalytics();
 }
 void boot();
 

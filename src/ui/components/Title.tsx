@@ -40,6 +40,7 @@ export function Title() {
           <button onClick={() => setPrefs({ mute: !prefs.value.mute })}>{prefs.value.mute ? t('mOff') : t('mOn')}</button>
         </div>
       </div>
+      <p class="build-id">v{__BUILD__}</p>
     </div>
   );
 }

@@ -70,6 +70,7 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
     get s() { return s; },
     tick(dt) {
       if (s.end) return;
+      if (!ctx.offline) s.play += dt;
       for (const sys of SYSTEMS) sys(s, dt, ctx);
     },
     act(a) {
