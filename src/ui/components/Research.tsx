@@ -1,9 +1,8 @@
 import { useEffect, useLayoutEffect, useRef } from 'preact/hooks';
 import { BRANCHES, TREE, type TreeNode } from '../../content/tree';
 import { freePts, opsCap, opsRate, repNext, repPrev } from '../../core/formulas';
-import { has } from '../../core/state';
 import { nodeStatus, nodeZl } from '../../systems/research';
-import { fmt, li, money, nodeName, prefs, t } from '../i18n';
+import { fmt, li, money, prefs, t } from '../i18n';
 import { act, game, ui, useS } from '../store';
 import { AchievementsCard } from './Achievements';
 import { PatentsCard } from './Prestige';
@@ -41,16 +40,14 @@ function costText(n: TreeNode) {
 function Node({ n, hidden }: { n: TreeNode; hidden: boolean }) {
   const st = useS(s => nodeStatus(s, n));
   const needVal = useS(s => (n.need ? Math.floor(n.need.value(s)) : 0));
-  const missing = useS(s => (n.req ?? []).filter(r => !has(s, r)).join(','));
-  const liftoff = useS(s => has(s, 'replik'));
-  let rq = '';
-  if (st === 'locked') rq = n.col === 3 && !liftoff ? t('firstSpace') : t('first', missing.split(',').map(nodeName).join(', '));
-  else if (st === 'need' && n.need) rq = t('needs', n.need.label[li()], fmt(needVal), fmt(n.need.target));
+  const requirement = st === 'need' && n.need
+    ? t('needs', n.need.label[li()], fmt(needVal), fmt(n.need.target))
+    : '';
   return (
     <button id={'n-' + n.id} class={'node ' + st + (hidden ? ' off' : '')} style={{ gridColumn: n.col + 1, gridRow: n.row + 1 }}
       disabled={st !== 'ready' && st !== 'done'} onClick={() => act(`t:${n.id}`)}>
       <b>{n.n[li()]}</b><small>{n.d[li()]}</small>
-      <em class="rq">{rq}</em>
+      <em class="rq">{requirement}</em>
       <em class="cs">{st === 'done' ? t('done') : costText(n)}</em>
     </button>
   );
@@ -84,9 +81,12 @@ function useTreeLines(treeRef: { current: HTMLDivElement | null }, svgRef: { cur
 }
 
 function Tree() {
-  const br = useS(s => s.br);
+  const selectedBranch = useS(s => s.br);
   const doneKey = useS(s => s.done.join(','));
   const ready = useS(s => [0, 1, 2, 3].map(c => TREE.filter(n => n.col === c && nodeStatus(s, n) === 'ready').length).join(','));
+  const visibleNodes = TREE.filter(n => nodeStatus(game.s, n) !== 'locked');
+  const branches = BRANCHES.map((_, i) => i).filter(i => visibleNodes.some(n => n.col === i));
+  const br = branches.includes(selectedBranch) ? selectedBranch : branches[0];
   const counts = ready.split(',').map(Number);
   const treeRef = useRef<HTMLDivElement>(null), svgRef = useRef<SVGSVGElement>(null);
   useTreeLines(treeRef, svgRef, doneKey + '|' + br + '|' + prefs.value.lang);
@@ -100,19 +100,19 @@ function Tree() {
         <span><i style={{ borderColor: 'var(--acc)', background: 'var(--accS)' }} />{t('lgDone')}</span>
       </div>
       <div class="brsel">
-        {BRANCHES.map((b, i) => (
-          <button key={i} aria-pressed={i === br} onClick={() => ui(s => { s.br = i; })}>{b[li()][0]}{counts[i] ? ` (${counts[i]})` : ''}</button>
+        {branches.map(i => (
+          <button key={i} aria-pressed={i === br} onClick={() => ui(s => { s.br = i; })}>{BRANCHES[i][li()][0]}{counts[i] ? ` (${counts[i]})` : ''}</button>
         ))}
       </div>
       <div class="tscroll">
-        <div class="tree" ref={treeRef}>
+        <div class="tree" ref={treeRef} style={{ '--branch-count': branches.length }}>
           <svg ref={svgRef} />
-          {BRANCHES.map((b, i) => (
+          {branches.map(i => (
             <div key={'h' + i} class={'bh' + (i !== br ? ' off' : '')} style={{ gridColumn: i + 1, gridRow: 1 }}>
-              {b[li()][0]}<small>{b[li()][1]}</small>
+              {BRANCHES[i][li()][0]}<small>{BRANCHES[i][li()][1]}</small>
             </div>
           ))}
-          {TREE.map(n => <Node key={n.id} n={n} hidden={n.col !== br} />)}
+          {visibleNodes.map(n => <Node key={n.id} n={n} hidden={n.col !== br} />)}
         </div>
       </div>
     </section>

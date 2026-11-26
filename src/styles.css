@@ -142,7 +142,7 @@ h2{font-size:21px;margin:0;line-height:1.1}
 .legend{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;color:var(--mute);margin:0 0 12px}
 .legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px;border:2px solid}
 .tscroll{overflow-x:auto;padding-bottom:4px}
-.tree{position:relative;display:grid;grid-template-columns:repeat(4,minmax(160px,1fr));gap:22px 12px;min-width:680px}
+.tree{position:relative;display:grid;grid-template-columns:repeat(var(--branch-count),minmax(160px,1fr));gap:22px 12px;min-width:680px}
 .tree svg{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
 .tree path{fill:none;stroke:var(--line);stroke-width:2;stroke-dasharray:4 4}
 .tree path.on{stroke:var(--acc);stroke-dasharray:none}
@@ -154,7 +154,6 @@ h2{font-size:21px;margin:0;line-height:1.1}
 .node em{font-style:normal;font-size:12.5px;font-weight:600;margin-top:3px}
 .node .rq{color:var(--orD);margin-top:2px}.node .rq:empty{display:none}
 .node:disabled{opacity:1;cursor:default}
-.node.locked{opacity:.5;border-style:dashed}
 .node.need{border-style:dashed}
 .node.avail{border-color:color-mix(in srgb,var(--acc) 45%,var(--line))}
 .node.ready{border-color:var(--or);background:var(--orS);box-shadow:0 0 0 3px color-mix(in srgb,var(--or) 22%,transparent);cursor:pointer}
