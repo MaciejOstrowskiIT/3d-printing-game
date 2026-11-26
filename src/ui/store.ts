@@ -62,14 +62,15 @@ function pushToast(id: string) {
 export const adPending = signal(false);
 let suspendedDuringAd = false;
 
-/** Shows a rewarded ad and grants the boost only if the platform confirms it was watched. */
-export async function watchAdForBoost() {
+/** Shows a rewarded ad and runs `reward` only if the platform confirms it was watched. */
+export async function watchAd(placement: string, reward: Action, failed?: Action) {
   if (adPending.value || !platform.rewardedAvailable) return;
   adPending.value = true;
   try {
     const ok = await platform.showRewardedAd();
-    act(ok ? 'boost' : 'adfail');
-    track('ad', { placement: 'boost', watched: ok });
+    if (ok) act(reward);
+    else if (failed) act(failed);
+    track('ad', { placement, watched: ok });
   } finally {
     if (suspendedDuringAd) {
       lastT = performance.now();
@@ -79,6 +80,10 @@ export async function watchAdForBoost() {
     adPending.value = false;
   }
 }
+
+export const watchAdForBoost = () => watchAd('boost', 'boost', 'adfail');
+/** "Watch an ad: ×2" on the away report. */
+export const watchAdForOfflineBonus = () => watchAd('offline', 'offx2');
 
 /** Core event listeners: sound, printer animation and analytics. */
 /** Called with the share of a piece each manual click printed (1 = a whole piece). */

@@ -96,4 +96,9 @@ export const BAL = {
   autoPriceStockSeconds: 20,  // stock it aims to keep, in seconds of production
   autoPriceMaxDrain: 1.5,     // sells at most this × production while the stock is above target
   autoPriceStep: 0.02,        // max price change per second
+
+  // rewarded "double offline earnings" (systems/offlineBonus.ts)
+  offlineBonusMinSeconds: 120,     // shorter absences get no offer
+  offlineBonusMult: 1,             // the ad adds this × what was earned while away
+  offlineBonusClaimSeconds: 600,   // the offer stays for 10 minutes of play
 } as const;
