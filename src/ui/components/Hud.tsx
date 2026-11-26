@@ -9,7 +9,7 @@ const Chip = ({ label, value, warn, show = true }: { label: string; value: strin
   show ? <div class={'chip' + (warn ? ' warn' : '')}><small>{label}</small><b>{value}</b></div> : null;
 
 /** Whether the Research tab is unlocked yet. */
-export const useResearchUnlocked = () => useS(s => s.goal >= 5 || s.rep > 0 || s.done.length > 0);
+export const useResearchUnlocked = () => useS(s => s.goal >= 5 || s.rep > 0 || s.done.length > 0 || s.meta.runs > 0 || s.meta.patents > 0);
 
 /** Pending items in Research (buyable nodes + free points) and the Workshop alert flag. */
 export function useBadges() {

@@ -70,6 +70,10 @@ export const BAL = {
   boostMultiplier: 2,
   boostCooldown: 600,       // seconds from activation until the next ad can be watched
 
+  // prestige: patents = floor(scale * log10(total / base)^1.5)
+  prestigeBase: 1e5,
+  prestigeScale: 2,
+
   // offline
   offlineMaxSeconds: 8 * 3600,
 } as const;

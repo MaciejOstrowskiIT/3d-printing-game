@@ -10,6 +10,7 @@ import { platform } from '../platform';
 import { act, adPending, useS, watchAdForBoost } from '../store';
 import { clock, colorName, dict, dur, fmt, li, money, nf, t } from '../i18n';
 import { BuyButton, CardHead, Item, Meter, Tile, useHold } from './common';
+import { PrestigeCard } from './Prestige';
 
 function Events() {
   const o = useS(s => (s.ph === 1 && s.ord ? { ...s.ord } : null));
@@ -228,6 +229,7 @@ export function Workshop() {
         {!v.sp && v.g >= 1 && <Sales />}
         {!v.sp && v.farmOn && <Energy />}
         {v.sp && <Space />}
+        {v.sp && <PrestigeCard />}
         <Automation />
       </div>
     </div>

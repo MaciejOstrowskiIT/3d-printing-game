@@ -23,10 +23,10 @@ export function automationSystem(s: GameState, dt: number, ctx: Ctx) {
         s.price = Math.max(Math.round(s.price * 100) / 100, Math.ceil(unitCost(s) * 1.3 * 100) / 100);
       }
 
-      if (on(s, 'automkt') && mktCost(s) < free * 0.2) { s.zl -= mktCost(s); s.mkt++; }
-
-      // Once liftoff is within reach, the manager stops buying so the player can save up for it.
+      // Once liftoff is within reach, the agencies stop buying so the player can save up for it.
       const saving = has(s, 'slicer') && !has(s, 'replik') && s.farm >= 5;
+      if (on(s, 'automkt') && !saving && mktCost(s) < free * 0.2) { s.zl -= mktCost(s); s.mkt++; }
+
       if (on(s, 'autodruk') && free > 0 && !saving) {
         if (s.farmOn && supply(s) < drawP(s) + 20 && panelCost(s) < free * 0.25) { s.zl -= panelCost(s); s.panels++; }
         else if (s.farmOn && farmCost(s) < free * 0.25 && supply(s) >= drawP(s) + 20) { s.zl -= farmCost(s); s.farm++; }

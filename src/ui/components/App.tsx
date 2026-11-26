@@ -2,6 +2,7 @@ import { useEffect } from 'preact/hooks';
 import { fmt, prefs, t } from '../i18n';
 import { act, resetGame, useS } from '../store';
 import { Toasts } from './Achievements';
+import { PrestigeButton } from './Prestige';
 import { Hud, Tabs } from './Hud';
 import { Research } from './Research';
 import { PrintButton, Settings, Side } from './Side';
@@ -25,7 +26,10 @@ function End() {
       <div>
         <h2>{t('endTitle')}</h2>
         <p>{t('endTxt', fmt(total))}</p>
-        <button class="btn-main" onClick={() => resetGame('again')}>{t('again')}</button>
+        <div class="end-actions">
+          <PrestigeButton class="btn-main big" />
+          <button onClick={() => resetGame('again')}>{t('again')}</button>
+        </div>
       </div>
     </div>
   );

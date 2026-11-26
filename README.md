@@ -74,7 +74,8 @@ tests/         system tests and the balance bot
 - 17 goals guiding the player through the whole game.
 - Space phase: drones, orbital factories, asteroid belt.
 - Isometric scene (garage → workshop → factory floor → orbit) with a printer close-up inset and layer-by-layer animation.
-- 18 achievements (one hidden) with toasts; older saves unlock earned ones silently.
+- 20 achievements (one hidden) with toasts; older saves unlock earned ones silently.
+- Prestige: after liftoff, start a new production line for patents (`floor(2 · log10(total / 1e5)^1.5)`), spent on 9 permanent upgrades in `content/patents.ts`.
 - PL / EN, sound (WebAudio), offline progress up to 8 h.
 
 ## Balance
