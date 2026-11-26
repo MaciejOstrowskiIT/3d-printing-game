@@ -1,4 +1,5 @@
 import type { Sfx } from '../core/ctx';
+import { adState } from '../platform/Platform';
 import { prefs } from './i18n';
 
 let ac: AudioContext | null = null;
@@ -14,7 +15,7 @@ const SEQ: Record<Sfx, [number, number, number][]> = {
 
 /** Short WebAudio blips, no audio files. */
 export function play(k: Sfx) {
-  if (prefs.value.mute) return;
+  if (prefs.value.mute || adState.playing) return;
   try {
     const W = window as unknown as { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext };
     ac ??= new (W.AudioContext ?? W.webkitAudioContext!)();

@@ -1,4 +1,5 @@
 import { signal, useComputed } from '@preact/signals';
+import { adState } from '../platform/Platform';
 import { useRef } from 'preact/hooks';
 import { createGame, type Action } from '../core/game';
 import { migrate, serialize } from '../core/save';
@@ -34,6 +35,21 @@ export function act(a: Action) { const ok = game.act(a); bump(); return ok; }
 export function ui(fn: (s: GameState) => void) { fn(game.s); bump(); }
 export function resetGame(logKey?: string) { game.reset(logKey); save(); bump(); }
 
+/** True while a rewarded ad is being requested or shown. */
+export const adPending = signal(false);
+
+/** Shows a rewarded ad and grants the boost only if the platform confirms it was watched. */
+export async function watchAdForBoost() {
+  if (adPending.value || !platform.rewardedAvailable) return;
+  adPending.value = true;
+  try {
+    const ok = await platform.showRewardedAd();
+    act(ok ? 'boost' : 'adfail');
+  } finally {
+    adPending.value = false;
+  }
+}
+
 /** Core event listeners: sound, printer animation and analytics. */
 export const printedListeners = new Set<() => void>();
 game.on(e => {
@@ -50,6 +66,7 @@ export function startLoop() {
   setInterval(() => {
     const now = performance.now(), dt = Math.min(1, (now - lastT) / 1000);
     lastT = now;
+    if (adState.playing) return; // the game is paused while an ad plays
     game.tick(dt);
     bump();
     sinceSave += dt;

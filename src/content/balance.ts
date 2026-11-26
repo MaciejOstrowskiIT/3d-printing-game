@@ -65,6 +65,11 @@ export const BAL = {
   fabThroughput: 1,         // t/s
   figurinesPerTon: 50000,
 
+  // rewarded boost ("overtime")
+  boostSeconds: 300,
+  boostMultiplier: 2,
+  boostCooldown: 600,       // seconds from activation until the next ad can be watched
+
   // offline
   offlineMaxSeconds: 8 * 3600,
 } as const;

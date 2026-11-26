@@ -1,5 +1,6 @@
 import { BAL } from '../content/balance';
 import { automationSystem } from '../systems/automation';
+import { activateBoost, boostSystem } from '../systems/boost';
 import { breakdownsSystem, repair } from '../systems/breakdowns';
 import { energySystem } from '../systems/energy';
 import { marketSystem, setColor } from '../systems/market';
@@ -16,6 +17,7 @@ export type System = (s: GameState, dt: number, ctx: Ctx) => void;
 
 /** System order within one tick. A new mechanic = a new file in systems/ plus an entry here. */
 export const SYSTEMS: System[] = [
+  boostSystem,
   computeSystem,
   productionSystem,
   energySystem,
@@ -33,7 +35,7 @@ export const SYSTEMS: System[] = [
 export type Action =
   | 'print' | 'spool' | 'auto' | 'farm' | 'panel' | 'mkt' | 'drone' | 'fab'
   | 'pminus' | 'pplus' | 'oacc' | 'odec' | 'fix'
-  | 'proc1' | 'procmax' | 'mem1' | 'memmax'
+  | 'proc1' | 'procmax' | 'mem1' | 'memmax' | 'boost' | 'adfail'
   | `t:${string}` | `col:${number}` | `am:${string}:${0 | 1}`;
 
 export interface Game {
@@ -81,6 +83,8 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
       if (a === 'oacc') { acceptOrder(s); sfx(ctx, 'buy'); return true; }
       if (a === 'odec') { declineOrder(s, ctx); return true; }
       if (a === 'fix') { repair(s, ctx); sfx(ctx, 'buy'); return true; }
+      if (a === 'boost') return activateBoost(s, ctx);
+      if (a === 'adfail') { log(s, ctx, 'boostFail'); return true; }
       if (a === 'proc1') { assignPoint(s, 'proc'); return true; }
       if (a === 'procmax') { assignPoint(s, 'proc', true); return true; }
       if (a === 'mem1') { assignPoint(s, 'mem'); return true; }

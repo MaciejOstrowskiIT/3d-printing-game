@@ -1,6 +1,6 @@
 import { BAL } from '../content/balance';
 import { log, pick, sfx, type Ctx } from '../core/ctx';
-import { rateBase } from '../core/formulas';
+import { boostMul, rateBase } from '../core/formulas';
 import { has, type GameState } from '../core/state';
 
 const CLIENTS = 7;
@@ -8,7 +8,8 @@ const CLIENTS = 7;
 export const pickOrderCooldown = (ctx: Ctx) => pick(ctx, BAL.orderEvery);
 
 function spawnOrder(s: GameState, ctx: Ctx) {
-  const cap = Math.max(1.5, rateBase(s));
+  // Size orders on the un-boosted rate so a boost does not leave the player with an impossible order.
+  const cap = Math.max(1.5, rateBase(s) / boostMul(s));
   const n = Math.max(15, Math.round((cap * (20 + ctx.rng() * 20)) / 5) * 5);
   const time = Math.ceil((n / cap) * 1.6 + 20);
   const c = Math.floor(ctx.rng() * CLIENTS);

@@ -209,3 +209,7 @@ h2{font-size:21px;margin:0;line-height:1.1}
   .mset button{min-height:36px;font-size:13.5px}
 }
 @media(max-width:420px){.tiles{grid-template-columns:repeat(3,minmax(0,1fr))}.tile{padding:6px 8px}.tile b{font-size:17px}.buy{min-width:104px}}
+/* rewarded boost row */
+.item.boost .buy.ok:disabled{background:var(--sub);border-color:var(--line);color:var(--mute)}
+.item.boost.active{background:var(--accS);border-radius:10px;margin-left:-8px;margin-right:-8px;padding:10px 8px 10px;border-top-color:transparent}
+.item.boost.active small{color:var(--acc);font-weight:600}

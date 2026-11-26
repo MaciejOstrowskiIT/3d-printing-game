@@ -27,6 +27,8 @@ export interface GameState {
   brk: number; brkC: number; brkT: number; fixT: number; fails: number;
   panels: number; pwWarn: boolean; ts: number;
   col: number; trend: number; trendT: number;
+  /** Rewarded boost: seconds left, and seconds until it can be activated again. */
+  boostT: number; boostCd: number;
 }
 
 export const SAVE_VERSION = 4;
@@ -48,6 +50,7 @@ export const createState = (): GameState => ({
   brk: 0, brkC: 0, brkT: 120, fixT: 0, fails: 0,
   panels: 0, pwWarn: false, ts: 0,
   col: 0, trend: 2, trendT: 150,
+  boostT: 0, boostCd: 0,
 });
 
 export const has = (s: GameState, id: string) => s.done.includes(id);

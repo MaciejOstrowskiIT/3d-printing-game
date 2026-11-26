@@ -10,8 +10,16 @@ A browser incremental game in the spirit of Universal Paperclips, set in the wor
 npm install
 npm run dev        # dev server with hot reload
 npm test           # unit tests + a bot that plays the whole game
-npm run build      # dist/index.html: one self-contained file (portals, GitHub Pages)
+npm run build      # dist/index.html: one self-contained file (GitHub Pages)
+npm run build:crazygames   # dist-crazygames/index.html with the CrazyGames SDK
+npm run build:poki         # dist-poki/index.html with the Poki SDK
 ```
+
+### Portals and rewarded ads
+
+The platform is chosen at build time (`--mode crazygames|poki`, see `.env.*`); unused adapters are tree-shaken out. Each adapter loads its SDK, reports loading/gameplay events, mutes audio and pauses the game during ads, and exposes `showRewardedAd()`.
+
+The only rewarded placement so far is **Overtime**: 2× production for 5 minutes, then a 10-minute cooldown. It is hidden where ads are not available. To test the flow without a portal, run `npm run dev` or open the build with `#mockads` in the URL.
 
 ## Deployment
 
