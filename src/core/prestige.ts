@@ -1,3 +1,4 @@
+import { bookCash } from '../systems/workshopStats';
 import { BAL } from '../content/balance';
 import { KEPT_AUTOMATION, PATENT } from '../content/patents';
 import { log, sfx, type Ctx } from './ctx';
@@ -64,7 +65,7 @@ export function buyPatent(s: GameState, id: string): boolean {
   s.meta.patents -= p.cost(lvl);
   s.meta.pat[id] = lvl + 1;
   // Patents that act on the starting state also apply to the running line.
-  if (id === 'start') s.zl += 500;
+  if (id === 'start') bookCash(s, 'bonus', 500);
   if (id === 'nozzle') s.g *= filamentFactor(lvl + 1) / filamentFactor(lvl);
   if (id === 'keep') keepAutomation(s);
   return true;

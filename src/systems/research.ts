@@ -1,3 +1,4 @@
+import { bookCash } from './workshopStats';
 import { GOALS } from '../content/goals';
 import { NODE, TREE, type TreeNode } from '../content/tree';
 import { log, sfx, type Ctx } from '../core/ctx';
@@ -22,7 +23,7 @@ export function buyNode(s: GameState, ctx: Ctx, id: string, logKey = 'node'): bo
   const n = NODE[id];
   if (!n || nodeStatus(s, n) !== 'ready') return false;
   s.ops -= n.ops;
-  s.zl -= nodeZl(s, n);
+  bookCash(s, 'other', nodeZl(s, n));
   s.inv -= n.wyd ?? 0;
   s.done.push(n.id);
   n.fx(s);

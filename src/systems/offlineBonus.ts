@@ -1,3 +1,4 @@
+import { bookCash } from './workshopStats';
 import { BAL } from '../content/balance';
 import { log, type Ctx } from '../core/ctx';
 import type { GameState } from '../core/state';
@@ -22,7 +23,7 @@ export function grantOfflineBonus(s: GameState, seconds: number, revenue: number
 
 export function claimOfflineBonus(s: GameState, ctx: Ctx): boolean {
   if (!offlineBonusReady(s)) return false;
-  s.zl += s.offB;
+  bookCash(s, 'bonus', s.offB);
   s.inv += s.offBi;
   if (s.offB) log(s, ctx, 'offx2', '$' + s.offB);
   else log(s, ctx, 'offx2f', Math.round(s.offBi));
