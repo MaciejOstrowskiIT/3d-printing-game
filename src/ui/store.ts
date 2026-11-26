@@ -14,11 +14,20 @@ function loadSaved() {
   try { const raw = platform.loadGame(); return raw ? migrate(JSON.parse(raw)) : undefined; } catch { return undefined; }
 }
 
-const saved = loadSaved();
-export const game = createGame({ state: saved });
+/** The game starts empty; loadSavedGame() fills it once the platform is ready (a portal SDK may hold the save). */
+export const game = createGame();
 export const awayReport = signal<ReturnType<typeof game.catchUp>>(undefined);
 let lastT = performance.now();
-let clock = new WorkshopClock(saved?.serverThrough ?? 0, lastT);
+let clock = new WorkshopClock(0, lastT);
+
+/** Loads the save through the platform. Call after platform.init(), before the first render. */
+export function loadSavedGame() {
+  const saved = loadSaved();
+  if (!saved) return;
+  game.load(saved);
+  lastT = performance.now();
+  clock = new WorkshopClock(saved.serverThrough ?? 0, lastT);
+}
 
 /** State version counter, bumped after every tick and action. Components read state through useS, which depends on it. */
 export const ver = signal(0);
