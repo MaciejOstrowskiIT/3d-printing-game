@@ -10,7 +10,7 @@ import { AUTOMATIONS, NODE } from '../../content/tree';
 import {
   autoCost, clickCost, clickPower, demand, drawP, gpu, material, model, droneCost, eff, fabCost, farmCost, inTrend, mktCost, panelCost, rate1, realizedPrice, spaceRate, spoolPrice, supply, trendOn, unitCost,
 } from '../../core/formulas';
-import { has } from '../../core/state';
+import { has, type GameState } from '../../core/state';
 import { boostUnlocked } from '../../systems/boost';
 import { canAfford } from '../../systems/marketEvents';
 import { MARKET_EVENT } from '../../content/events';
@@ -108,45 +108,67 @@ function StoryCard() {
   );
 }
 
+function filamentNotice(s: GameState) {
+  if (s.ph !== 1 || s.total === 0) return null;
+  const out = s.fil < gpu(s), runway = filamentRunway(s);
+  if (!out && (runway >= BAL.filamentWarnSeconds || autobuyOn(s))) return null;
+  const alt = out ? stockedAlternative(s) : null;
+  return { out, runway, mat: material(s).name[li()], alt, altG: alt ? materialStock(s, alt) : 0 };
+}
+
 function Events() {
   const o = useS(s => (s.ph === 1 && s.ord ? { ...s.ord } : null));
   const brk = useS(s => (s.ph === 1 && s.brk > 0 ? { brk: s.brk, c: s.brkC, fixT: s.fixT, cam: has(s, 'kamera') && !!s.amOn.kamera } : null));
   const market = useS(s => s.ph === 1 && (!!s.mev || s.mfx.length > 0 || calendarOn(s.today).length > 0));
   const daily = useS(s => s.ph === 1 && !!s.dord && s.dord.day === s.dday);
   const msg = useS(s => !!s.msg);
-  if (!o && !brk && !market && !daily && !msg) return null;
+  const filament = useS(s => !!filamentNotice(s));
+  const count = Number(!!o) + Number(!!brk) + Number(market) + Number(daily) + Number(msg) + Number(filament);
+  const notice = brk ? t('brkTitle') : filament ? t('workshopNoticeFilament') : o ? t('workshopNoticeOrder')
+    : msg ? t('workshopNoticeMessage') : daily ? t('dTitle') : market ? t('fxTitle') : '';
   return (
-    <div class="events">
-      <StoryCard />
-      <DailyOrderCard />
-      <MarketEffects />
-      <MarketOffer />
-      {o && (
-        <div class="ev">
-          <div class="evt">
-            <b>{t('oFrom', dict().clients[o.c])}</b>
-            <p>{o.acc ? t('oProg', fmt(o.got), fmt(o.n), fmt(Math.ceil(o.left)), money(o.pay)) : t('oOffer', fmt(o.n), fmt(o.time), money(o.pay), fmt(Math.ceil(o.offer)))}</p>
-            <Meter tone="or" pct={o.acc ? (100 * o.got) / o.n : (100 * o.offer) / BAL.orderOffer} />
-            {o.acc && <p class="hint">{t('oHint')}</p>}
-          </div>
-          {!o.acc && (
-            <div class="evb">
-              <button class="btn-main" onClick={() => act('oacc')}>{t('accept')}</button>
-              <button onClick={() => act('odec')}>{t('decline')}</button>
+    <details class="workshop-notices">
+      <summary>
+        <span>{t('workshopNotices')}</span>
+        <span class="workshop-notice-status" aria-live="polite">
+          {count > 0 && <><span class="workshop-notice-name">{notice}</span><b>{count}</b></>}
+        </span>
+      </summary>
+      <div class="workshop-notice-body" tabIndex={0} role="region" aria-label={t('workshopNotices')}>
+        {count ? <div class="events">
+          <FilamentAlert />
+          <StoryCard />
+          <DailyOrderCard />
+          <MarketEffects />
+          <MarketOffer />
+          {o && (
+            <div class="ev">
+              <div class="evt">
+                <b>{t('oFrom', dict().clients[o.c])}</b>
+                <p>{o.acc ? t('oProg', fmt(o.got), fmt(o.n), fmt(Math.ceil(o.left)), money(o.pay)) : t('oOffer', fmt(o.n), fmt(o.time), money(o.pay), fmt(Math.ceil(o.offer)))}</p>
+                <Meter tone="or" pct={o.acc ? (100 * o.got) / o.n : (100 * o.offer) / BAL.orderOffer} />
+                {o.acc && <p class="hint">{t('oHint')}</p>}
+              </div>
+              {!o.acc && (
+                <div class="evb">
+                  <button class="btn-main" onClick={() => act('oacc')}>{t('accept')}</button>
+                  <button onClick={() => act('odec')}>{t('decline')}</button>
+                </div>
+              )}
             </div>
           )}
-        </div>
-      )}
-      {brk && (
-        <div class="ev bad">
-          <div class="evt">
-            <b>{t('brkTitle')}</b>
-            <p>{t('bDesc', Math.round(brk.brk * 100), dict().causes[brk.c])}{brk.cam ? ' ' + t('bAuto', Math.ceil(Math.max(0, brk.fixT))) : ''}</p>
-          </div>
-          {!brk.cam && <button class="btn-main" onClick={() => act('fix')}>{t('repair')}</button>}
-        </div>
-      )}
-    </div>
+          {brk && (
+            <div class="ev bad">
+              <div class="evt">
+                <b>{t('brkTitle')}</b>
+                <p>{t('bDesc', Math.round(brk.brk * 100), dict().causes[brk.c])}{brk.cam ? ' ' + t('bAuto', Math.ceil(Math.max(0, brk.fixT))) : ''}</p>
+              </div>
+              {!brk.cam && <button class="btn-main" onClick={() => act('fix')}>{t('repair')}</button>}
+            </div>
+          )}
+        </div> : <p class="hint">{t('workshopNoNotices')}</p>}
+      </div>
+    </details>
   );
 }
 
@@ -168,13 +190,7 @@ function BoostRow() {
 
 /** Filament about to run out, or out: how long it lasts, and a one-click switch to a material still in stock. */
 function FilamentAlert() {
-  const v = useS(s => {
-    if (s.ph !== 1 || s.total === 0) return null;
-    const out = s.fil < gpu(s), runway = filamentRunway(s);
-    if (!out && (runway >= BAL.filamentWarnSeconds || autobuyOn(s))) return null;
-    const alt = out ? stockedAlternative(s) : null;
-    return { out, runway, mat: material(s).name[li()], alt, altG: alt ? materialStock(s, alt) : 0 };
-  });
+  const v = useS(filamentNotice);
   if (!v) return null;
   return (
     <div class={'fil-alert' + (v.out ? ' out' : '')} role="status">
@@ -191,16 +207,15 @@ function Production() {
   }));
   const spoolSub = !v.spoolD ? t('spoolSub') : t(v.spoolD > 0 ? 'spoolUp' : 'spoolDn', Math.abs(Math.round(v.spoolD * 100)));
   return (
-    <section class="card">
+    <section class="card workshop-production">
       <CardHead title={t('production')} aside={t('perS', fmt(v.rate, 1))} />
-      <FilamentAlert />
       <div class="tiles">
         <Tile label={t('filament')} value={fmt(v.fil) + ' g'} warn={v.fil < v.g} />
         <Tile label={t('perFigS')} value={nf(v.g, 1) + ' g'} />
         <Tile label={t('printersS')} value={fmt(v.printers)} />
       </div>
       <BoostRow />
-      <Item name={t(v.bulk ? 'spool5Item' : 'spoolItem')} sub={v.showFeedstock ? v.feedstock + ' · ' + spoolSub : spoolSub}>
+      <Item className="spool-row" name={t(v.bulk ? 'spool5Item' : 'spoolItem')} sub={v.showFeedstock ? v.feedstock + ' · ' + spoolSub : spoolSub}>
         <BuyButton action="spool" cost={v.spool} have={v.zl} label={money(v.spool)} />
       </Item>
       {v.goal >= 1 && (
@@ -277,20 +292,25 @@ function Sales() {
     growth: piecesInStock(s, s.mdl) > 0 ? stockGrowth(s, s.mdl) : null, fast: piecesInStock(s, s.mdl) < 1 && s.sold > 0, goal: s.goal, mkt: s.mkt, mktCost: mktCost(s), zl: s.zl,
   }));
   const loss = v.price < v.uc;
-  const hint = loss ? t('hLoss') : v.auto ? t('hAuto') : v.fast ? t('hFast') : t('hBase');
+  const hint = loss ? t('hLoss') : v.premium > 0 ? t('qualityPrice', money(v.price)) : v.auto ? t('hAuto') : t('hBase');
   return (
-    <section class="card">
+    <section class="card workshop-sales">
       <CardHead title={t('sales')} aside={t('soldT', fmt(v.sold))} />
       <div class="tiles">
-        <Tile label={v.name} value={t('modelPieces', fmt(v.inv))} />
+        <Tile label={v.name} value={t('statsPiecesSold', fmt(v.inv))} />
         <Tile label={t('buyRateS')} value={t('perS', fmt(v.piecesPerSecond, 1))} />
         <Tile label={t('unitCostS')} value={money(v.uc)} />
       </div>
       <ColorPicker />
       {!v.auto && <PriceStepper />}
-      {v.growth && <p class="stock-growth">{t('statsStockGrowth', fmt(v.growth.stocked), fmt(v.growth.sold))}</p>}
-      {v.premium > 0 && <p class="hint">{t('qualityPrice', money(v.price))}</p>}
-      <p class={'hint' + (loss ? ' bad' : '')}>{hint}</p>
+      <div class="sales-notes">
+        <div class="sales-flow">
+          {v.growth
+            ? <p class="stock-growth">{t('statsStockGrowth', fmt(v.growth.stocked), fmt(v.growth.sold))}</p>
+            : v.fast && <p class="hint">{t('hFast')}</p>}
+        </div>
+        <p class={'hint' + (loss ? ' bad' : '')}>{hint}</p>
+      </div>
       {v.goal >= 4 && (
         <Item name={t('mktItem')} sub={t('mktSub', v.mkt)}>
           <BuyButton action="mkt" cost={v.mktCost} have={v.zl} label={money(v.mktCost)} />
@@ -500,11 +520,11 @@ export function Workshop() {
   return (
     <div>
       <Events />
-      {research && <ResearchPreview />}
       <div class="grid">
         {!v.sp && <Production />}
         {!v.sp && v.g >= 1 && <Sales />}
         {!v.sp && v.g >= 1 && <WorkshopStats />}
+        {research && <ResearchPreview />}
         {!v.sp && <Models />}
         {!v.sp && <Materials />}
         {!v.sp && <PrintQuality />}
