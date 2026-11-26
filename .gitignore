@@ -4,3 +4,5 @@ dist
 .DS_Store
 dist-crazygames
 dist-poki
+promo/out
+__pycache__
