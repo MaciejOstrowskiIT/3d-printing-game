@@ -18,13 +18,13 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 | Order of the day (daily order + streak) | #21 | Built on #18 |
 | Smooth the farm phase | #22 | Independent |
 | Calendar events (Black Week, Christmas, Halloween…) | #23 | Built on #21 |
+| Story messages | #24 | Built on #23 |
 
 ## 🛠️ In progress
 
 | Card | Who |
 |---|---|
 | Materials (`feat/materials`) | Codex |
-| Story messages | Claude |
 
 ## 🚦 Next up
 
@@ -40,7 +40,7 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 | Set repo variables `UMAMI_HOST` and `UMAMI_WEBSITE_ID`, re-run the deploy | Analytics stays off until then |
 | Playtest with 5–10 people, read Umami after a week | Where players drop off decides the backlog order |
 | CrazyGames submission: progress saving = "Yes, using the Data Module from the CrazyGames SDK" | Without it the data module is disabled (the game falls back to localStorage) |
-| Merge order: #17 → #18 → #19 → #21 → #23; #22 any time | |
+| Merge order: #17 → #18 → #19 → #21 → #23 → #24; #22 any time | |
 
 ## 📋 Backlog
 
@@ -48,7 +48,6 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 | Card | Effort | Notes |
 |---|---|---|
 | **Printer types**: resin (small, very detailed figurines), industrial; trade-offs instead of "more of the same" | M | Pairs with materials |
-| **Story messages** from clients, competitors and the "AI board" (Paperclips-style narrative) | S | Cheap; gives the game character |
 | **Second prestige layer**: IPO after a few production lines, shares give permanent bonuses | M | After players reach several lines |
 | **Third phase**: e.g. printing Mars bases from regolith after the asteroid belt | L | Decide after the playtest: only if enough players reach space |
 | Split the fleet between models (instead of one model for all printers) | M | More tycoon-style management |

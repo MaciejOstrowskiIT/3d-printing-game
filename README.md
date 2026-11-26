@@ -71,6 +71,8 @@ Content lives in `src/content/` as plain lists. Each list has one place that rea
 |---|---|---|
 | Print models (figurine, bust, dragon…) | `content/models.ts` | `tests/models.test.ts` (numbers, shape fits the printer, PL/EN texts, unlock order) |
 | Market events | `content/events.ts` | `tests/marketEvents.test.ts` |
+| Calendar events (real dates) | `content/calendar.ts` | `tests/calendar.test.ts` |
+| Story messages | `content/story.ts` | `tests/story.test.ts` (texts, and the bot sees every message in a full game) |
 | Achievements | `content/achievements.ts` | — |
 | Patents | `content/patents.ts` | `tests/prestige.test.ts` |
 | Research tree | `content/tree.ts` | `tests/systems.test.ts` |
