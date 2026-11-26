@@ -18,8 +18,8 @@ More than one agent works on this repo in parallel (Claude, Codex). Read this be
 ## In flight
 | PR / branch | Agent | Touches |
 |---|---|---|
-| #10 `feat/market-events` | Claude | `content/events.ts`, `systems/marketEvents.ts` (new); `GameState.mev/mevT/mfx`; `formulas.ts` (`marketMul` in `demand` and `spoolPrice`); `GameEvent` `market`; actions `mevyes/mevno`; i18n `L.mev*`, `mevExp`, `fx*`; `Workshop.tsx` Events; `ui/store.ts` (one `track` line); `tests/bot.ts` |
-| `feat/offline-mobile` (incl. `feat/workshop-discovery`) | Codex | `core/saveValidation.ts` (new), `save.ts` (`migrate` validates, rebuilds research multipliers), `catchUp` return value, `GameState.serverThrough`, `ui/store.ts`, `ui/workshopClock.ts`, `Research.tsx`, `Side.tsx`, `App.tsx`, `styles.css` |
+| #12 `feat/market-events` | Claude | `content/events.ts`, `systems/marketEvents.ts` (new); `GameState.mev/mevT/mfx`; `formulas.ts` (`marketMul` in `demand` and `spoolPrice`); `GameEvent` `market`; actions `mevyes/mevno`; i18n `L.mev*`, `mevExp`, `fx*`; `Workshop.tsx` Events; `ui/store.ts` (one `track` line); `tests/bot.ts` |
+| #11 `feat/offline-mobile` (on top of #10 `feat/workshop-discovery`) | Codex | `core/saveValidation.ts` (new), `save.ts` (`migrate` validates, rebuilds research multipliers), `catchUp` return value, `GameState.serverThrough`, `ui/store.ts`, `ui/workshopClock.ts`, `Research.tsx`, `Side.tsx`, `App.tsx`, `styles.css` |
 
 Merged: #8 analytics, #9 portal assets.
 
