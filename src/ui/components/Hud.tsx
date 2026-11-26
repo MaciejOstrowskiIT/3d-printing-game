@@ -33,7 +33,7 @@ export function Tabs({ class: cls }: { class?: string }) {
       </button>
       {unlocked && (
         <button class={'tab tabR ' + (cls ?? '')} role="tab" aria-selected={tab === 'r'} onClick={() => ui(s => { s.tab = 'r'; })}>
-          <span>{t('tabR')}</span>{b.research > 0 && <span class="dot">{b.research}</span>}
+          <span>{t('tabR')}</span>{b.research > 0 && <span class="dot" key={b.research}>{b.research}</span>}
         </button>
       )}
     </>

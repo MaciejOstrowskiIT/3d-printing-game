@@ -307,3 +307,29 @@ body.space .title-screen{background:#14122b}
 }
 /* iOS zooms into any focused field under 16px. */
 @media (pointer:coarse){.modal-box textarea,.modal-box input{font-size:16px}}
+/* Research preview in the Workshop: the next few nodes side by side, with progress and a direct unlock button. */
+.rprev{margin-bottom:14px}
+.rprev .rp-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.rprev .rp-head h2{display:flex;align-items:center;gap:8px;margin:0}
+.rprev .rp-badge{font:600 12px Barlow,sans-serif;color:#fff;background:var(--or);border-radius:999px;padding:2px 9px}
+.rprev .rp-all{min-height:32px;padding:4px 12px;background:transparent;font-size:14px}
+.rprev .rp-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.rprev .rp-row{display:flex;flex-direction:column;gap:8px;justify-content:space-between;padding:10px 12px;border:1.5px solid var(--line);border-radius:12px;background:var(--sub)}
+.rprev .rp-row.ready{border-color:var(--or);background:var(--orS)}
+.rprev .rp-row .it{min-width:0}
+.rprev .rp-row .it small{display:block}
+.rprev .rp-row .meter{margin:6px 0 2px}
+.rprev .rp-info{color:var(--mute);font-variant-numeric:tabular-nums}
+.rprev .rp-info.bad{color:var(--bad)}
+.rprev .rp-pct{align-self:flex-end;color:var(--mute);font-variant-numeric:tabular-nums;font-weight:600;font-size:13px}
+.rprev .rp-row .buy{align-self:stretch}
+.rprev .rp-points{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px 10px;margin-bottom:10px;padding:8px 10px;border-radius:10px;background:var(--accS);font-weight:600}
+.rprev .rp-points .pts{display:flex;gap:6px}
+/* Finished tree nodes collapse to their name, so what you can still buy is easy to find. */
+.tree .node.done{padding-top:6px;padding-bottom:6px;min-height:0}
+.tree .node.done small,.tree .node.done .rq,.tree .node.done .cs{display:none}
+.tree .node.done b::before{content:'✓ ';color:var(--acc)}
+/* The research count on the tab pulses briefly when it changes (the element is re-keyed). */
+.tab .dot{animation:dotPulse .9s ease-out 3}
+@keyframes dotPulse{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.tab .dot{animation:none}}
