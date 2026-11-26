@@ -30,6 +30,11 @@ export function piecesInStock(s: GameState, id: string) {
 
 export const stockPrice = (s: GameState, id: string) =>
   id === s.mdl ? s.price : s.modelStock[id]?.price || s.price * MODEL[id].value / MODEL[s.mdl].value;
+export function setStockPrice(s: GameState, id: string, price: number) {
+  if (id === s.mdl) s.price = price;
+  else modelStock(s, id).price = price;
+}
+
 export const premiumFor = (s: GameState, id: string) => id === 'fig' ? s.stockPremium : s.modelStock[id]?.premium ?? 0;
 
 export function putPieces(s: GameState, id: string, count: number, premium: number, cost: number | null = null) {

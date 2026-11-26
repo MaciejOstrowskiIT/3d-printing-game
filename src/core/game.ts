@@ -21,7 +21,7 @@ import { assignPoint, buyNode, computeSystem, goalsSystem, reputationSystem } fr
 import { changePrice, salesSystem } from '../systems/sales';
 import { buyDrone, buyFab, spaceSystem } from '../systems/space';
 import { log, sfx, type Ctx, type GameEvent } from './ctx';
-import { autoCost, farmCost, mktCost, model, panelCost } from './formulas';
+import { autoCost, farmCost, mktCost, panelCost } from './formulas';
 import { buyPatent, prestige } from './prestige';
 import { createState, type GameState, type LogEntry } from './state';
 import { mod } from './mods';
@@ -55,7 +55,7 @@ export type Action =
   | 'print' | 'spool' | 'auto' | 'farm' | 'panel' | 'mkt' | 'drone' | 'fab'
   | 'pminus' | 'pplus' | 'oacc' | 'odec' | 'fix' | 'mevyes' | 'mevno' | 'tool'
   | 'proc1' | 'procmax' | 'mem1' | 'memmax' | 'boost' | 'adfail' | 'prestige' | 'prestigeR' | 'offx2' | 'daily' | 'msgok'
-  | `t:${string}` | `col:${number}` | `material:${string}` | `fleet-model:${string}` | `fleet-count:${number}` | `mdl:${string}` | `stl:${string}` | `day:${number}` | `am:${string}:${0 | 1}` | `pat:${string}`;
+  | `t:${string}` | `col:${number}` | `material:${string}` | `price-up:${string}` | `price-down:${string}` | `fleet-model:${string}` | `fleet-count:${number}` | `mdl:${string}` | `stl:${string}` | `day:${number}` | `am:${string}:${0 | 1}` | `pat:${string}`;
 
 export interface Game {
   readonly s: GameState;
@@ -101,8 +101,10 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
       if (a === 'mkt') return spend(mktCost(s), () => { s.mkt++; log(s, ctx, 'mkt', s.mkt); }, 'other');
       if (a === 'drone') { const ok = buyDrone(s); if (ok) sfx(ctx, 'buy'); return ok; }
       if (a === 'fab') { const ok = buyFab(s); if (ok) sfx(ctx, 'buy'); return ok; }
-      if (a === 'pminus') { changePrice(s, -0.1 / model(s).seconds); return true; }
-      if (a === 'pplus') { changePrice(s, 0.1 / model(s).seconds); return true; }
+      if (a === 'pminus') return changePrice(s, -0.1);
+      if (a === 'pplus') return changePrice(s, 0.1);
+      if (a.startsWith('price-up:')) return changePrice(s, 0.1, a.slice('price-up:'.length));
+      if (a.startsWith('price-down:')) return changePrice(s, -0.1, a.slice('price-down:'.length));
       if (a === 'oacc') { acceptOrder(s); sfx(ctx, 'buy'); return true; }
       if (a === 'odec') { declineOrder(s, ctx); return true; }
       if (a === 'tool') { const ok = buyClickTool(s); if (ok) sfx(ctx, 'buy'); return ok; }
