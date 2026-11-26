@@ -37,7 +37,7 @@ export interface GameState {
   goal: number; tab: 'w' | 'r'; br: number; warn: boolean;
   ord: Order | null; ordT: number; ordDone: number; ordFail: number; pen: number;
   brk: number; brkC: number; brkT: number; fixT: number; fails: number;
-  panels: number; pwWarn: boolean; ts: number;
+  panels: number; pwWarn: boolean; ts: number; serverThrough: number;
   col: number; trend: number; trendT: number;
   /** Rewarded boost: seconds left, and seconds until it can be activated again. */
   boostT: number; boostCd: number;
@@ -63,7 +63,7 @@ export const createState = (): GameState => ({
   goal: 0, tab: 'w', br: 0, warn: false,
   ord: null, ordT: 45, ordDone: 0, ordFail: 0, pen: 0,
   brk: 0, brkC: 0, brkT: 120, fixT: 0, fails: 0,
-  panels: 0, pwWarn: false, ts: 0,
+  panels: 0, pwWarn: false, ts: 0, serverThrough: 0,
   col: 0, trend: 2, trendT: 150,
   boostT: 0, boostCd: 0,
   ach: [], achT: 0, colorsUsed: 1,
