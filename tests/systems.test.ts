@@ -147,3 +147,14 @@ describe('achievements', () => {
     expect(s.ach).not.toContain('b1');
   });
 });
+
+describe('filament auto-buy', () => {
+  it('keeps large farms supplied within a single tick', () => {
+    const g = newGame();
+    g.s.done.push('autobuy'); g.s.amOn.autobuy = true;
+    g.s.farm = 20; g.s.panels = 20; g.s.spd = 8; g.s.zl = 1e7; g.s.fil = 0; g.s.brkT = 1e9;
+    const before = g.s.total;
+    g.tick(1);
+    expect(g.s.total - before).toBeGreaterThan(9000);
+  });
+});

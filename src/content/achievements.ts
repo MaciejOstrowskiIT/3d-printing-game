@@ -33,6 +33,8 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'robots', n: ['Firma bez ludzi', 'Nobody at the wheel'], d: ['Odblokuj wszystkie automatyzacje na Ziemi.', 'Unlock every automation on Earth.'], check: s => AUTOMATIONS.filter(id => id !== 'autobud').every(id => has(s, id)) },
   { id: 'liftoff', n: ['Houston, drukujemy', 'Houston, we are printing'], d: ['Wyślij drukarnię w kosmos.', 'Send the print shop into space.'], check: s => s.ph === 2 },
   { id: 'half', n: ['Połowa pasa', 'Half the belt'], d: ['Przetwórz połowę pasa asteroid.', 'Process half of the asteroid belt.'], check: s => s.ph === 2 && s.mat <= s.mat0 / 2 },
+  { id: 'line2', n: ['Druga linia', 'Second line'], d: ['Zacznij nową linię produkcyjną.', 'Start a new production line.'], check: s => s.meta.runs >= 1 },
+  { id: 'patents20', n: ['Kancelaria patentowa', 'Patent office'], d: ['Zdobądź łącznie 20 patentów.', 'Earn 20 patents in total.'], check: s => s.meta.earned >= 20 },
   { id: 'end', n: ['Wszystko jest figurką', 'Everything is a figurine'], d: ['Ukończ grę.', 'Finish the game.'], hidden: true, check: s => s.end },
 ];
 

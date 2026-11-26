@@ -1,5 +1,5 @@
 import { BAL } from '../content/balance';
-import type { GameState } from './state';
+import { patLvl, type GameState } from './state';
 
 /** Pure formulas derived from state. No side effects: used by core, UI and tests. */
 
@@ -25,18 +25,21 @@ export const demand = (s: GameState) =>
   BAL.marketingGrowth ** (s.mkt - 1) *
   s.dem *
   (s.pen > 0 ? BAL.penaltyDemand : 1) *
-  (inTrend(s) ? BAL.trendBonus : 1);
+  (inTrend(s) ? BAL.trendBonus : 1) *
+  (1 + 0.15 * patLvl(s, 'brand'));
 
 export const boostMul = (s: GameState) => (s.boostT > 0 ? BAL.boostMultiplier : 1);
-export const rateBase = (s: GameState) => (s.auto + s.farm * BAL.farmPrinters * eff(s)) * s.spd * boostMul(s);
+export const rateBase = (s: GameState) => (s.auto + s.farm * BAL.farmPrinters * eff(s)) * s.spd * boostMul(s) * (1 + 0.15 * patLvl(s, 'speed'));
 export const rate1 = (s: GameState) => rateBase(s) * (1 - s.brk);
 
-export const repNext = (s: GameState) => BAL.repThreshold * (s.rep + 1) ** 2;
-export const repPrev = (s: GameState) => (s.rep ? BAL.repThreshold * s.rep ** 2 : 0);
+const repBase = (s: GameState) => BAL.repThreshold * 0.9 ** patLvl(s, 'fame');
+export const repNext = (s: GameState) => repBase(s) * (s.rep + 1) ** 2;
+export const repPrev = (s: GameState) => (s.rep ? repBase(s) * s.rep ** 2 : 0);
 export const freePts = (s: GameState) => s.rep - (s.proc + s.mem - 2);
 export const opsCap = (s: GameState) => s.mem * BAL.opsPerMemory;
-export const opsRate = (s: GameState) => s.proc * BAL.opsPerProcessor;
+export const opsRate = (s: GameState) => s.proc * BAL.opsPerProcessor * (1 + 0.25 * patLvl(s, 'compute'));
 
-export const mining = (s: GameState) => s.drones * BAL.droneMining * s.dMul * boostMul(s);
-export const fabCap = (s: GameState) => s.fabs * BAL.fabThroughput * s.fMul * boostMul(s);
+const patSpeed = (s: GameState) => 1 + 0.15 * patLvl(s, 'speed');
+export const mining = (s: GameState) => s.drones * BAL.droneMining * s.dMul * boostMul(s) * patSpeed(s);
+export const fabCap = (s: GameState) => s.fabs * BAL.fabThroughput * s.fMul * boostMul(s) * patSpeed(s);
 export const spaceRate = (s: GameState) => Math.min(mining(s), fabCap(s)) * BAL.figurinesPerTon;

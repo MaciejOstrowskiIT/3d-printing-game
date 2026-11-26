@@ -2,10 +2,11 @@ import { useEffect, useLayoutEffect, useRef } from 'preact/hooks';
 import { BRANCHES, TREE, type TreeNode } from '../../content/tree';
 import { freePts, opsCap, opsRate, repNext, repPrev } from '../../core/formulas';
 import { has } from '../../core/state';
-import { nodeStatus } from '../../systems/research';
+import { nodeStatus, nodeZl } from '../../systems/research';
 import { fmt, li, money, nodeName, prefs, t } from '../i18n';
-import { act, ui, useS } from '../store';
+import { act, game, ui, useS } from '../store';
 import { AchievementsCard } from './Achievements';
+import { PatentsCard } from './Prestige';
 import { CardHead, Meter } from './common';
 
 function Computer() {
@@ -32,7 +33,7 @@ function Computer() {
 
 function costText(n: TreeNode) {
   const c = [t('cOps', fmt(n.ops))];
-  if (n.zl) c.push(money(n.zl));
+  if (n.zl) c.push(money(nodeZl(game.s, n)));
   if (n.wyd) c.push(t('cFig', fmt(n.wyd)));
   return c.join(' · ');
 }
@@ -119,5 +120,5 @@ function Tree() {
 }
 
 export function Research() {
-  return (<div><Computer /><Tree /><AchievementsCard /></div>);
+  return (<div><Computer /><PatentsCard /><Tree /><AchievementsCard /></div>);
 }

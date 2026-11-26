@@ -47,7 +47,11 @@ export function productionSystem(s: GameState, dt: number, ctx: Ctx) {
   s.acc += rate1(s) * dt;
   let n = Math.floor(s.acc);
   s.acc -= n;
-  if (s.amOn.autobuy && has(s, 'autobuy') && s.fil < s.g * Math.max(1, n * 3)) buySpool(s);
+  if (s.amOn.autobuy && has(s, 'autobuy')) {
+    // Buy as many packs as this tick needs; one pack per tick starves large farms.
+    const need = s.g * Math.max(1, n * 3);
+    while (s.fil < need && buySpool(s)) { /* keep buying */ }
+  }
   n = Math.min(n, Math.floor(s.fil / s.g));
   if (n > 0) { s.fil -= n * s.g; make(s, ctx, n); }
 

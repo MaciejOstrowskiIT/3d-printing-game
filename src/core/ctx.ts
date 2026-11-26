@@ -12,6 +12,7 @@ export type GameEvent =
   | { type: 'phase'; phase: 1 | 2 }
   | { type: 'order'; result: 'offered' | 'delivered' | 'failed' | 'expired' }
   | { type: 'achievement'; id: string }
+  | { type: 'prestige'; gain: number }
   | { type: 'end' };
 
 export interface Ctx {

@@ -2,11 +2,14 @@ import { GOALS } from '../content/goals';
 import { NODE, TREE, type TreeNode } from '../content/tree';
 import { log, sfx, type Ctx } from '../core/ctx';
 import { freePts, opsCap, opsRate, repNext } from '../core/formulas';
-import { has, type GameState } from '../core/state';
+import { has, patLvl, type GameState } from '../core/state';
 
 export type NodeStatus = 'done' | 'locked' | 'need' | 'ready' | 'avail';
 
-export const canBuy = (s: GameState, n: TreeNode) => s.ops >= n.ops && s.zl >= (n.zl ?? 0) && s.inv >= (n.wyd ?? 0);
+/** Money cost of a node, after patents (Investor discounts liftoff). */
+export const nodeZl = (s: GameState, n: TreeNode) => (n.zl ?? 0) * (n.liftoff ? 1 - 0.15 * patLvl(s, 'investor') : 1);
+
+export const canBuy = (s: GameState, n: TreeNode) => s.ops >= n.ops && s.zl >= nodeZl(s, n) && s.inv >= (n.wyd ?? 0);
 
 export function nodeStatus(s: GameState, n: TreeNode): NodeStatus {
   if (has(s, n.id)) return 'done';
@@ -19,12 +22,13 @@ export function buyNode(s: GameState, ctx: Ctx, id: string, logKey = 'node'): bo
   const n = NODE[id];
   if (!n || nodeStatus(s, n) !== 'ready') return false;
   s.ops -= n.ops;
-  s.zl -= n.zl ?? 0;
+  s.zl -= nodeZl(s, n);
   s.inv -= n.wyd ?? 0;
   s.done.push(n.id);
   n.fx(s);
   ctx.emit({ type: 'node', id });
   if (n.liftoff) {
+    s.drones += 3 * patLvl(s, 'fleet');
     log(s, ctx, 'space');
     ctx.emit({ type: 'phase', phase: 2 });
   } else log(s, ctx, logKey, '@' + n.id);

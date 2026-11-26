@@ -5,6 +5,18 @@ import { BAL } from '../content/balance';
 export type LogArg = string | number;
 export interface LogEntry { k: string; a: LogArg[] }
 
+/** Progress that survives a new production line (prestige). */
+export interface Meta {
+  /** Patents available to spend. */
+  patents: number;
+  /** Patents earned over all lines. */
+  earned: number;
+  /** Completed resets. */
+  runs: number;
+  /** Bought patent levels by id. */
+  pat: Record<string, number>;
+}
+
 export interface Order {
   n: number; got: number; time: number; left: number; offer: number; acc: boolean; c: number; pay: number;
 }
@@ -31,6 +43,7 @@ export interface GameState {
   boostT: number; boostCd: number;
   /** Unlocked achievement ids, check timer, and a bitmask of filament colours ever used. */
   ach: string[]; achT: number; colorsUsed: number;
+  meta: Meta;
 }
 
 export const SAVE_VERSION = 5;
@@ -54,6 +67,8 @@ export const createState = (): GameState => ({
   col: 0, trend: 2, trendT: 150,
   boostT: 0, boostCd: 0,
   ach: [], achT: 0, colorsUsed: 1,
+  meta: { patents: 0, earned: 0, runs: 0, pat: {} },
 });
 
 export const has = (s: GameState, id: string) => s.done.includes(id);
+export const patLvl = (s: GameState, id: string) => s.meta?.pat?.[id] ?? 0;
