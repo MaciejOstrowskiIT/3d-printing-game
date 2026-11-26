@@ -9,6 +9,7 @@ import { has } from '../../core/state';
 import { boostUnlocked } from '../../systems/boost';
 import { canAfford } from '../../systems/marketEvents';
 import { MARKET_EVENT } from '../../content/events';
+import { STORY_MSG } from '../../content/story';
 import { CALENDAR_EVENT, calendarOn } from '../../content/calendar';
 import { MODELS, type PrintModel } from '../../content/models';
 import { materialStock } from '../../systems/materials';
@@ -86,14 +87,29 @@ function DailyOrderCard() {
   );
 }
 
+/** The open story message (content/story.ts), dismissed with OK. */
+function StoryCard() {
+  const id = useS(s => s.msg);
+  const m = id ? STORY_MSG[id] : null;
+  if (!m) return null;
+  return (
+    <div class="ev story" role="status">
+      <div class="evt"><b>✉️ {m.from[li()]}</b><p>{m.text[li()]}</p></div>
+      <div class="evb"><button onClick={() => act('msgok')}>{t('msgOk')}</button></div>
+    </div>
+  );
+}
+
 function Events() {
   const o = useS(s => (s.ph === 1 && s.ord ? { ...s.ord } : null));
   const brk = useS(s => (s.ph === 1 && s.brk > 0 ? { brk: s.brk, c: s.brkC, fixT: s.fixT, cam: has(s, 'kamera') && !!s.amOn.kamera } : null));
   const market = useS(s => s.ph === 1 && (!!s.mev || s.mfx.length > 0 || calendarOn(s.today).length > 0));
   const daily = useS(s => s.ph === 1 && !!s.dord && s.dord.day === s.dday);
-  if (!o && !brk && !market && !daily) return null;
+  const msg = useS(s => !!s.msg);
+  if (!o && !brk && !market && !daily && !msg) return null;
   return (
     <div class="events">
+      <StoryCard />
       <DailyOrderCard />
       <MarketEffects />
       <MarketOffer />

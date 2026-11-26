@@ -3,7 +3,7 @@ import type { DailyOrder } from '../systems/dailyOrder';
 import { BAL } from '../content/balance';
 
 /** Log entry argument. String prefixes are kept for compatibility with old saves:
- *  '@id' tree node, '$123' money, '#2' client, '%1' breakdown cause, '~90' duration in s, '&3' colour, '!id' achievement, '^id' market event, '*id' print model, '+id' calendar event, 'pl|en' goal text. */
+ *  '@id' tree node, '$123' money, '#2' client, '%1' breakdown cause, '~90' duration in s, '&3' colour, '!id' achievement, '^id' market event, '*id' print model, '+id' calendar event, '=id' story message sender, 'pl|en' goal text. */
 export type LogArg = string | number;
 export interface LogEntry { k: string; a: LogArg[] }
 
@@ -64,6 +64,8 @@ export interface GameState {
   dday: number; dord: DailyOrder | null; dstreak: number; dbest: number;
   /** Latest local day number reported by the UI; calendar events follow it. */
   today: number;
+  /** Story messages already shown, the one open on screen, and a 1 s check timer. */
+  story: string[]; msg: string | null; msgT: number;
   meta: Meta;
   /** Active feedstock and reserves. fil holds the active feedstock, including PLA in old saves. */
   materialId: string;
@@ -98,6 +100,7 @@ export const createState = (): GameState => ({
   slow: 1,
   dday: 0, dord: null, dstreak: 0, dbest: 0,
   today: 0,
+  story: [], msg: null, msgT: 0,
   meta: { patents: 0, earned: 0, runs: 0, pat: {} },
   materialId: DEFAULT_MATERIAL.id, materialStock: {},
 });

@@ -3,6 +3,7 @@ import { ACH } from '../content/achievements';
 import { MARKET_EVENT } from '../content/events';
 import { MODEL } from '../content/models';
 import { CALENDAR_EVENT } from '../content/calendar';
+import { STORY_MSG } from '../content/story';
 import { COLORS } from '../content/colors';
 import { en } from '../content/i18n/en';
 import { pl, type Dict } from '../content/i18n/pl';
@@ -79,6 +80,7 @@ export function logText(e: LogEntry): string {
       case '^': return MARKET_EVENT[x.slice(1)]?.name[li()] ?? x;
       case '*': return MODEL[x.slice(1)]?.name[li()] ?? x;
       case '+': return CALENDAR_EVENT[x.slice(1)]?.name[li()] ?? x;
+      case '=': return STORY_MSG[x.slice(1)]?.from[li()] ?? x;
       default: return x;
     }
   });

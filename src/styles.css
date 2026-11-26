@@ -282,6 +282,8 @@ body.space .title-screen{background:#14122b}
 .away-report .ad-x2{white-space:nowrap}
 .real-offer{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
 .real-offer .hint{margin:4px 0 8px}
+.ev.story{border-color:var(--line);background:var(--card)}
+.ev.story p{font-style:italic}
 .ev.daily{border-color:var(--or)}
 .ev.daily .dstreak{font-weight:500;font-size:13px;color:var(--mute);margin-left:6px}
 .ev.daily.done{opacity:.75}

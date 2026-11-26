@@ -36,6 +36,7 @@ export function playthrough(seed = 1, maxHours = 6, dt = 0.25, meta?: Partial<Me
   while (t < maxHours * 3600 && !game.s.end) {
     const s = game.s;
     if (Math.abs(t - Math.round(t)) < 1e-6) {
+      if (s.msg) game.act('msgok'); // reads story messages in any phase
       if (s.ph === 1) {
         if (s.auto < 15) for (let i = 0; i < 4; i++) game.act('print');
         if (s.fil < gpu(s) * Math.max(10, rate1(s) * 15) && s.zl >= spoolPrice(s)) game.act('spool');
