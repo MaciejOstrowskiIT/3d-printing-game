@@ -7,6 +7,7 @@ import type { GameState } from '../core/state';
 import { play } from './audio';
 import { prefs } from './i18n';
 import { platform } from './platform';
+import { setTrackContext, track } from './analytics';
 import { serverTime, WorkshopClock } from './workshopClock';
 
 function loadSaved() {
@@ -68,6 +69,7 @@ export async function watchAdForBoost() {
   try {
     const ok = await platform.showRewardedAd();
     act(ok ? 'boost' : 'adfail');
+    track('ad', { placement: 'boost', watched: ok });
   } finally {
     if (suspendedDuringAd) {
       lastT = performance.now();
@@ -83,12 +85,22 @@ export const printedListeners = new Set<() => void>();
 game.on(e => {
   if (e.type === 'sfx') play(e.name);
   if (e.type === 'printed') printedListeners.forEach(fn => fn());
-  if (e.type === 'goal') platform.track('goal', { index: e.index });
-  if (e.type === 'phase') platform.track('liftoff');
-  if (e.type === 'order') platform.track('order', { result: e.result });
-  if (e.type === 'end') platform.track('end', { total: game.s.total });
-  if (e.type === 'achievement') { pushToast(e.id); platform.track('achievement', { id: e.id }); }
+  if (e.type === 'goal') track('goal', { index: e.index });
+  if (e.type === 'phase') track('liftoff');
+  if (e.type === 'order') track('order', { result: e.result });
+  if (e.type === 'end') track('end', { total: Math.floor(game.s.total) });
+  if (e.type === 'prestige') track('prestige', { gain: e.gain });
+  if (e.type === 'achievement') { pushToast(e.id); track('achievement', { id: e.id }); }
 });
+
+/** Context attached to every analytics event: where in the run the player is. */
+setTrackContext(() => ({
+  min: Math.floor(game.s.play / 60),
+  line: game.s.meta.runs + 1,
+  goal: game.s.goal,
+  platform: platform.name,
+  build: __BUILD__,
+}));
 
 /** Title screen first; the simulation only runs on the game screen. */
 export const screen = signal<'title' | 'game'>('title');
@@ -96,9 +108,11 @@ export const screen = signal<'title' | 'game'>('title');
 export const dialog = signal<null | 'save'>(null);
 
 export function startGame(fresh = false) {
+  const resumed = game.s.total > 0 || game.s.meta.runs > 0;
   if (fresh) resetGame('fresh');
   lastT = performance.now();
   screen.value = 'game';
+  track('session', { kind: fresh ? 'new' : resumed ? 'continue' : 'first' });
   platform.gameplayStart();
 }
 
@@ -110,6 +124,7 @@ export function loadImported(s: GameState) {
   restartClock();
   save();
   bump();
+  track('import');
 }
 
 let pendingSync: WorkshopClock | null = null;
@@ -140,11 +155,15 @@ async function synchronizeClock() {
   }
 }
 
+/** Count only foreground simulation time toward the active-play heartbeat. */
+const HEARTBEAT_S = 300;
+
 export function startLoop() {
   let suspended = false;
   let lastSave = performance.now();
   let lastWall = Date.now();
   let lastClockCheck = lastSave;
+  let sinceBeat = 0;
 
   function advance(resuming = false) {
     const now = performance.now();
@@ -168,6 +187,11 @@ export function startLoop() {
       if (report) awayReport.value = report;
     } else {
       game.tick(dt);
+      sinceBeat += dt;
+      if (sinceBeat >= HEARTBEAT_S) {
+        sinceBeat -= HEARTBEAT_S;
+        track('heartbeat');
+      }
     }
     bump();
     if (resuming || performance.now() - lastSave >= 5000) {
