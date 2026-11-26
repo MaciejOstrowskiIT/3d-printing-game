@@ -27,11 +27,16 @@ export function WorkshopStats() {
   const peak = Math.max(1, ...periods.map(p => Math.max(income(p), expenses(p))));
   const detail = periods.find(p => p.index === selected) ?? [...periods].reverse().find(p => income(p) || expenses(p));
   const periodLabel = (index: number) => current === index ? t('statsNow') : t('statsAgo', (current - index) * PERIOD_SECONDS);
-  const models = MODELS.map(m => ({
-    id: m.id, name: m.name[li()],
-    pieces: history.reduce((sum, p) => sum + (p.models[m.id]?.pieces ?? 0), 0),
-    revenue: history.reduce((sum, p) => sum + (p.models[m.id]?.revenue ?? 0), 0),
-  })).filter(m => m.pieces > 0);
+  const models = MODELS.flatMap(m => {
+    const sales = history.flatMap(p => p.models[m.id]?.pieces ? [p.models[m.id]] : []);
+    if (!sales.length) return [];
+    return [{
+      id: m.id, name: m.name[li()],
+      pieces: sales.reduce((sum, p) => sum + p.pieces, 0),
+      revenue: sales.reduce((sum, p) => sum + p.revenue, 0),
+      cost: sales.some(p => p.cost == null) ? null : sales.reduce((sum, p) => sum + (p.cost ?? 0), 0),
+    }];
+  });
 
   return (
     <section class="card wide workshop-stats" aria-labelledby="workshop-stats-title">
@@ -42,7 +47,7 @@ export function WorkshopStats() {
         </button>
       </h2>
       <div id="workshop-stats-body" hidden={!open}>
-        {!history.length ? <p class="stats-empty">{t('statsEmpty')}</p> : <>
+        {!(receipts || costs) ? <p class="stats-empty">{t('statsEmpty')}</p> : <>
           <div class="stats-totals">
             <div><small>{t('statsNet')}</small><strong class={'stats-money' + netClass}>{signedMoney(net)}</strong></div>
             <div><small>{t('statsIncome')}</small><strong class="stats-money gain">{money(receipts)}</strong></div>
@@ -63,11 +68,19 @@ export function WorkshopStats() {
             <strong>{periodLabel(detail.index)}</strong>
             <span>{CASH_KINDS.filter(kind => detail.cash[kind] > 0).map(kind => t(`statsDetail_${kind}`, money(detail.cash[kind]))).join(' · ') || t('statsNoMovement')}</span>
           </div>}
-          {models.length > 0 && <table class="stats-models">
-            <caption>{t('statsByModel')}</caption>
-            <thead><tr><th scope="col">{t('statsModel')}</th><th scope="col">{t('statsSold')}</th><th scope="col">{t('statsIncome')}</th></tr></thead>
-            <tbody>{models.map(m => <tr key={m.id}><th scope="row">{m.name}</th><td>{fmt(m.pieces)}</td><td>{money(m.revenue)}</td></tr>)}</tbody>
-          </table>}
+          {models.length > 0 && <>
+            <table class="stats-models stats-margins">
+              <caption>{t('statsByModel')}</caption>
+              <thead><tr><th scope="col">{t('statsModel')}</th><th scope="col">{t('statsIncome')}</th><th scope="col">{t('statsFilamentCost')}</th><th scope="col">{t('statsMargin')}</th></tr></thead>
+              <tbody>{models.map(m => <tr key={m.id}>
+                <th scope="row">{m.name}<small>{t('statsPiecesSold', fmt(m.pieces))}</small></th>
+                <td>{money(m.revenue)}</td><td>{m.cost === null ? '—' : money(m.cost)}</td>
+                <td class={m.cost !== null && m.revenue < m.cost ? 'loss' : ''}>{m.cost === null ? '—' : signedMoney(m.revenue - m.cost)}</td>
+              </tr>)}</tbody>
+            </table>
+            <p class="stats-detail">{t('statsCostBasis')}{models.some(m => m.cost === null) ? ' ' + t('statsUnknownCost') : ''}</p>
+          </>}
+
         </>}
       </div>
     </section>

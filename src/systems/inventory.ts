@@ -1,3 +1,4 @@
+import { recordStockShipment } from './workshopStats';
 import { BAL } from '../content/balance';
 import { MODEL, MODELS } from '../content/models';
 import type { GameState } from '../core/state';
@@ -10,6 +11,10 @@ export interface ModelStock {
   progress: number;
   progressPremium: number;
   printed: number;
+  knownCostPieces?: number;
+  filamentCost?: number;
+  progressCost?: number | null;
+  reservedCost?: number | null;
 }
 
 export function modelStock(s: GameState, id: string): ModelStock {
@@ -27,13 +32,17 @@ export const stockPrice = (s: GameState, id: string) =>
   id === s.mdl ? s.price : s.modelStock[id]?.price || s.price * MODEL[id].value / MODEL[s.mdl].value;
 export const premiumFor = (s: GameState, id: string) => id === 'fig' ? s.stockPremium : s.modelStock[id]?.premium ?? 0;
 
-export function putPieces(s: GameState, id: string, count: number, premium: number) {
+export function putPieces(s: GameState, id: string, count: number, premium: number, cost: number | null = null) {
   if (count <= 0) return;
+  const lot = modelStock(s, id);
+  if (cost !== null) {
+    lot.knownCostPieces = (lot.knownCostPieces ?? 0) + count;
+    lot.filamentCost = (lot.filamentCost ?? 0) + cost;
+  }
   const previous = piecesInStock(s, id);
   const blended = (previous * premiumFor(s, id) + count * premium) / (previous + count);
   if (id === 'fig') s.stockPremium = blended;
   else {
-    const lot = modelStock(s, id);
     lot.price ||= stockPrice(s, id);
     lot.pieces += count;
     lot.premium = blended;
@@ -42,12 +51,21 @@ export function putPieces(s: GameState, id: string, count: number, premium: numb
 }
 
 export function takePieces(s: GameState, id: string, count: number) {
+  const lot = modelStock(s, id);
+  const known = lot.knownCostPieces ?? 0;
+  // Legacy pieces with no cost information are sold first.
+  const knownTaken = Math.max(0, count - (piecesInStock(s, id) - known));
+  const cost = knownTaken ? (lot.filamentCost ?? 0) * knownTaken / known : 0;
+  if (knownTaken) {
+    lot.knownCostPieces = known - knownTaken;
+    lot.filamentCost = lot.knownCostPieces ? (lot.filamentCost ?? 0) - cost : 0;
+  }
   s.inv -= count * MODEL[id].seconds;
   if (id !== 'fig') {
-    const lot = modelStock(s, id);
     lot.pieces -= count;
     if (!lot.pieces) lot.premium = 0;
   } else if (!piecesInStock(s, id)) s.stockPremium = 0;
+  return knownTaken === count ? cost : null;
 }
 
 export function takeStockWork(s: GameState, work: number) {
@@ -56,6 +74,7 @@ export function takeStockWork(s: GameState, work: number) {
     const count = Math.min(piecesInStock(s, m.id), Math.ceil(work / m.seconds));
     if (!count) continue;
     takePieces(s, m.id, count);
+    recordStockShipment(s, m.id, count);
     work -= count * m.seconds;
   }
 }
@@ -79,6 +98,13 @@ export function validInventory(s: GameState) {
   for (const [id, count] of Object.entries(s.orderStock)) {
     if (!s.mdls.includes(id) || id === 'fig' || !Number.isSafeInteger(count) || count <= 0) return false;
     reserved += count * MODEL[id].seconds;
+  }
+  for (const [id, lot] of Object.entries(s.modelStock)) {
+    const known = lot.knownCostPieces ?? 0;
+    if (!Number.isSafeInteger(known) || known < 0 ||
+        known > (id === 'fig' ? Math.floor(s.inv - work + 1e-9) : lot.pieces) ||
+        ![lot.filamentCost, lot.progressCost, lot.reservedCost].every(cost =>
+          cost == null || (Number.isFinite(cost) && cost >= 0))) return false;
   }
   return work <= s.inv + 1e-9 && reserved <= (s.ord?.got ?? 0) + 1e-9;
 }

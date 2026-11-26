@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { createGame } from '../src/core/game';
-import { autoCost, spoolPrice } from '../src/core/formulas';
+import { autoCost, spoolPrice, unitCost } from '../src/core/formulas';
 import { exportSave, importSave } from '../src/core/save';
 import { putPieces } from '../src/systems/inventory';
 import { salesSystem } from '../src/systems/sales';
-import { expenses, income, PERIOD_COUNT, PERIOD_SECONDS } from '../src/systems/workshopStats';
+import { expenses, income, PERIOD_COUNT, PERIOD_SECONDS, stockGrowth } from '../src/systems/workshopStats';
 
 describe('workshop cash flow', () => {
   it('keeps sale receipts by model separate from purchases in the same period', () => {
@@ -39,6 +39,43 @@ describe('workshop cash flow', () => {
     expect(g.s.finance).toHaveLength(PERIOD_COUNT);
     expect(g.s.finance[0].index).toBe(1);
     expect(g.s.finance.at(-1)?.models.fig.pieces).toBe(1);
+  });
+
+  it('values prints at the filament quote before sale, including partial work and later price changes', () => {
+    const g = createGame();
+    g.s.mdls.push('bust');
+    g.act('mdl:bust');
+    const initial = unitCost(g.s);
+    g.act('print');
+    g.s.spool *= 2;
+    for (let i = 0; i < 4; i++) g.act('print');
+    const resumed = importSave(exportSave(g.s))!;
+    resumed.spool *= 2;
+    salesSystem(resumed, 100);
+    expect(resumed.finance[0].models.bust.cost).toBeCloseTo(initial * 9);
+    expect(resumed.finance[0].models.bust.pieces).toBe(1);
+  });
+
+  it('leaves old inventory unpriced and records known costs after it sells', () => {
+    const g = createGame();
+    putPieces(g.s, 'fig', 1, 0);
+    g.act('print');
+    salesSystem(g.s, 0.25);
+    expect(g.s.finance[0].models.fig.cost).toBeNull();
+    g.s.financeTime = PERIOD_SECONDS;
+    salesSystem(g.s, 0.25);
+    expect(g.s.finance[1].models.fig.cost).toBeCloseTo(unitCost(g.s));
+  });
+
+  it('shows growth only after a completed period and accounts for shipments', () => {
+    const g = createGame();
+    for (let i = 0; i < 5; i++) g.act('print');
+    salesSystem(g.s, 0.5);
+    expect(stockGrowth(g.s, 'fig')).toBeNull();
+    g.s.financeTime = PERIOD_SECONDS;
+    expect(stockGrowth(g.s, 'fig')).toEqual({ stocked: 10, sold: 4 });
+    g.s.finance[0].models.fig.shipped = 3;
+    expect(stockGrowth(g.s, 'fig')).toBeNull();
   });
 
   it('rejects improperly formed records and starts old saves with no history', () => {
