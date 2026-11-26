@@ -70,3 +70,32 @@ export function assignPoint(s: GameState, to: 'proc' | 'mem', all = false) {
   if (f <= 0) return;
   s[to] += all ? f : 1;
 }
+
+export interface ResearchPick {
+  node: TreeNode;
+  status: NodeStatus;
+  /** 0..1 progress toward compute, money and the "need" condition (1 when not required). */
+  ops: number; zl: number; need: number;
+  /** The node needs more compute than memory can hold: the player must add memory first. */
+  memoryShort: boolean;
+}
+
+/** The research worth showing next to the game: ready nodes first, then the ones closest to affordable,
+ *  then the ones waiting for a condition. Space nodes appear only in the space phase. */
+export function nextResearch(s: GameState, limit = 3): ResearchPick[] {
+  const order: Record<NodeStatus, number> = { ready: 0, avail: 1, need: 2, locked: 9, done: 9 };
+  const picks = TREE.map(n => {
+    const status = nodeStatus(s, n);
+    const zlCost = n.zl ? nodeZl(s, n) : 0;
+    return {
+      node: n, status,
+      ops: n.ops ? Math.min(1, s.ops / n.ops) : 1,
+      zl: zlCost ? Math.min(1, Math.max(0, s.zl) / zlCost) : 1,
+      need: n.need ? Math.min(1, n.need.value(s) / n.need.target) : 1,
+      memoryShort: n.ops > opsCap(s),
+    };
+  }).filter(p => order[p.status] < 9 && (s.ph === 2 || p.node.col !== 3));
+  const closeness = (p: ResearchPick) => (p.status === 'need' ? p.need : Math.min(p.ops, p.zl));
+  return picks.sort((a, b) => order[a.status] - order[b.status] || closeness(b) - closeness(a)).slice(0, limit);
+}
+

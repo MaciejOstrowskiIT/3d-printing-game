@@ -1,5 +1,7 @@
 import { BAL } from '../../content/balance';
 import { MATERIAL, MATERIALS, materialDemand } from '../../content/materials';
+import { ResearchPreview } from './Research';
+import { useResearchUnlocked } from './Hud';
 import { COLORS } from '../../content/colors';
 import { AUTOMATIONS, NODE } from '../../content/tree';
 import {
@@ -444,9 +446,11 @@ function Automation() {
 
 export function Workshop() {
   const v = useS(s => ({ sp: s.ph === 2, g: s.goal, farmOn: s.farmOn }));
+  const research = useResearchUnlocked();
   return (
     <div>
       <Events />
+      {research && <ResearchPreview />}
       <div class="grid">
         {!v.sp && <Production />}
         {!v.sp && v.g >= 1 && <Sales />}
