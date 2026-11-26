@@ -1,3 +1,4 @@
+import { stockPrints } from './printQuality';
 import { BAL } from '../content/balance';
 import { log, pick, sfx, type Ctx } from '../core/ctx';
 import { boostMul, rateBase } from '../core/formulas';
@@ -44,7 +45,7 @@ export function ordersSystem(s: GameState, dt: number, ctx: Ctx) {
   } else {
     o.left -= dt;
     if (o.left <= 0) {
-      s.inv += o.got;
+      stockPrints(s, o.got);
       s.ord = null;
       s.pen = BAL.penaltySeconds;
       s.ordFail++;

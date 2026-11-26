@@ -2,7 +2,10 @@ import { BAL } from '../content/balance';
 import { log, pick, sfx, type Ctx } from '../core/ctx';
 import { has, type GameState } from '../core/state';
 
-const CAUSES = 5;
+const BED_ADHESION = 1;
+const SPAGHETTI = 5;
+const WET_FILAMENT = 6;
+const BASE_CAUSES = 5;
 
 export function repair(s: GameState, ctx: Ctx) {
   if (s.brk <= 0) return;
@@ -16,8 +19,16 @@ export function breakdownsSystem(s: GameState, dt: number, ctx: Ctx) {
   if (s.brk === 0) {
     s.brkT -= dt;
     if (s.brkT <= 0) {
-      s.brk = Math.round(pick(ctx, BAL.breakdownShare) * 100) / 100;
-      s.brkC = Math.floor(ctx.rng() * CAUSES);
+      const share = Math.round(pick(ctx, BAL.breakdownShare) * 100) / 100;
+      const causeCount = s.goal >= BAL.qualityUnlockGoal ? WET_FILAMENT + 1 : BASE_CAUSES;
+      const cause = Math.floor(ctx.rng() * causeCount);
+      if ((s.bedCalibrated && (cause === BED_ADHESION || cause === SPAGHETTI)) ||
+          (s.dryerInstalled && cause === WET_FILAMENT)) {
+        s.brkT = pick(ctx, BAL.breakdownEvery);
+        return;
+      }
+      s.brk = share;
+      s.brkC = cause;
       s.fails++;
       s.fixT = BAL.cameraFix;
       log(s, ctx, 'brk', '%' + s.brkC);

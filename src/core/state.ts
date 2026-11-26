@@ -55,6 +55,7 @@ export interface GameState {
   /** Print models (content/models.ts): selected model, owned designs, click tool level, manual progress on the current piece. */
   mdl: string; mdls: string[]; clk: number; mp: number;
   meta: Meta;
+  precision: boolean; bedCalibrated: boolean; dryerInstalled: boolean; stockPremium: number;
 }
 
 export const SAVE_VERSION = 5;
@@ -82,6 +83,7 @@ export const createState = (): GameState => ({
   mev: null, mevT: BAL.marketEventFirst, mfx: [],
   mdl: 'fig', mdls: ['fig'], clk: 0, mp: 0,
   meta: { patents: 0, earned: 0, runs: 0, pat: {} },
+  precision: false, bedCalibrated: false, dryerInstalled: false, stockPremium: 0,
 });
 
 export const has = (s: GameState, id: string) => s.done.includes(id);
