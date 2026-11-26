@@ -55,6 +55,13 @@ export const BAL = {
   breakdownShare: [0.2, 0.35],
   cameraFix: 5,
 
+  // print quality
+  qualityUnlockGoal: 5,
+  bedCalibrationCost: 300,
+  filamentDryerCost: 650,
+  precisionSpeed: 0.75,
+  precisionPremium: 0.4,
+
   // space
   beltMatter: 4e7,
   droneCost: 2e5,

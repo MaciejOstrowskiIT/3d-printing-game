@@ -3,7 +3,7 @@ import { MATERIALS, materialDemand } from '../../content/materials';
 import { COLORS } from '../../content/colors';
 import { AUTOMATIONS, NODE } from '../../content/tree';
 import {
-  autoCost, clickCost, clickPower, demand, drawP, gpu, material, model, droneCost, eff, fabCost, farmCost, inTrend, mktCost, panelCost, rate1, spaceRate, spoolPrice, supply, trendOn, unitCost,
+  autoCost, clickCost, clickPower, demand, drawP, gpu, material, model, droneCost, eff, fabCost, farmCost, inTrend, mktCost, panelCost, rate1, realizedPrice, spaceRate, spoolPrice, supply, trendOn, unitCost,
 } from '../../core/formulas';
 import { has } from '../../core/state';
 import { boostUnlocked } from '../../systems/boost';
@@ -12,6 +12,7 @@ import { MARKET_EVENT } from '../../content/events';
 import { STORY_MSG } from '../../content/story';
 import { CALENDAR_EVENT, calendarOn } from '../../content/calendar';
 import { MODELS, type PrintModel } from '../../content/models';
+import { qualityUnlocked } from '../../systems/printQuality';
 import { materialStock } from '../../systems/materials';
 import { designVisible } from '../../systems/models';
 import { platform } from '../platform';
@@ -223,9 +224,30 @@ function PriceStepper() {
   );
 }
 
+function PrintQuality() {
+  const v = useS(s => ({ unlocked: qualityUnlocked(s), precision: s.precision, bed: s.bedCalibrated, dryer: s.dryerInstalled, money: s.zl }));
+  if (!v.unlocked) return null;
+  return (
+    <section class="card wide">
+      <CardHead title={t('qualityTitle')} />
+      <Item name={t('calibrateBed')} sub={t('calibrateHint')}>
+        {v.bed ? t('qualityInstalled') : <BuyButton action="calibrate" cost={BAL.bedCalibrationCost} have={v.money} label={money(BAL.bedCalibrationCost)} />}
+      </Item>
+      <Item name={t('filamentDryer')} sub={t('dryerHint')}>
+        {v.dryer ? t('qualityInstalled') : <BuyButton action="dryer" cost={BAL.filamentDryerCost} have={v.money} label={money(BAL.filamentDryerCost)} />}
+      </Item>
+      <Item name={t('precisionTitle')} sub={t('precisionHint', Math.round((1 - BAL.precisionSpeed) * 100), Math.round(BAL.precisionPremium * 100))}>
+        <button aria-label={t('precisionTitle')} aria-pressed={v.precision} onClick={() => act('precision')}>
+          {t(v.precision ? 'qualityOn' : 'qualityOff')}
+        </button>
+      </Item>
+    </section>
+  );
+}
+
 function Sales() {
   const v = useS(s => ({
-    sold: s.sold, inv: s.inv, dem: demand(s), uc: unitCost(s) * model(s).seconds, price: s.price * model(s).seconds, auto: has(s, 'autocena') && !!s.amOn.autocena,
+    sold: s.sold, inv: s.inv, dem: demand(s), uc: unitCost(s) * model(s).seconds, price: realizedPrice(s) * model(s).seconds, premium: s.stockPremium, auto: has(s, 'autocena') && !!s.amOn.autocena,
     slow: rate1(s) > demand(s) * 1.1, fast: s.inv < 1 && s.sold > 0, goal: s.goal, mkt: s.mkt, mktCost: mktCost(s), zl: s.zl,
   }));
   const loss = v.price < v.uc;
@@ -240,6 +262,7 @@ function Sales() {
       </div>
       <ColorPicker />
       {!v.auto && <PriceStepper />}
+      {v.premium > 0 && <p class="hint">{t('qualityPrice', money(v.price))}</p>}
       <p class={'hint' + (loss ? ' bad' : '')}>{hint}</p>
       {v.goal >= 4 && (
         <Item name={t('mktItem')} sub={t('mktSub', v.mkt)}>
@@ -398,6 +421,7 @@ export function Workshop() {
         {!v.sp && v.g >= 1 && <Sales />}
         {!v.sp && <Models />}
         {!v.sp && <Materials />}
+        {!v.sp && <PrintQuality />}
         {!v.sp && v.farmOn && <Energy />}
         {v.sp && <Space />}
         {v.sp && <PrestigeCard />}

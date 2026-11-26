@@ -1,3 +1,5 @@
+import { BAL } from '../content/balance';
+import { stockPrints } from './printQuality';
 import { log, sfx, type Ctx } from '../core/ctx';
 import { gpu, rate1, spoolPrice } from '../core/formulas';
 import { has, type GameState } from '../core/state';
@@ -21,7 +23,7 @@ export function make(s: GameState, ctx: Ctx, n: number) {
       sfx(ctx, 'goal');
     }
   }
-  s.inv += n;
+  stockPrints(s, n, s.precision && s.ph === 1 ? BAL.precisionPremium : 0);
 }
 
 export function buySpool(s: GameState): boolean {

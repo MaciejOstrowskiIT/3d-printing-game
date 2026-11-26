@@ -8,6 +8,7 @@ import { selectMaterial } from '../systems/materials';
 import { marketSystem, setColor } from '../systems/market';
 import { acceptMarketEvent, declineMarketEvent, marketEventsSystem } from '../systems/marketEvents';
 import { acceptOrder, declineOrder, ordersSystem } from '../systems/orders';
+import { setQualityAction } from '../systems/printQuality';
 import { buySpool, productionSystem } from '../systems/production';
 import { deliverDaily, newDay } from '../systems/dailyOrder';
 import { dismissMessage, storySystem } from '../systems/story';
@@ -45,6 +46,7 @@ export const SYSTEMS: System[] = [
 
 /** Player actions. The UI only sends these strings and never mutates game state itself. */
 export type Action =
+  | 'calibrate' | 'dryer' | 'precision'
   | 'print' | 'spool' | 'auto' | 'farm' | 'panel' | 'mkt' | 'drone' | 'fab'
   | 'pminus' | 'pplus' | 'oacc' | 'odec' | 'fix' | 'mevyes' | 'mevno' | 'tool'
   | 'proc1' | 'procmax' | 'mem1' | 'memmax' | 'boost' | 'adfail' | 'prestige' | 'prestigeR' | 'offx2' | 'daily' | 'msgok'
@@ -83,6 +85,7 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
       for (const sys of SYSTEMS) sys(s, dt, ctx);
     },
     act(a) {
+      if (a === 'calibrate' || a === 'dryer' || a === 'precision') return setQualityAction(s, a);
       if (a === 'print') return printManual(s, ctx);
       if (a === 'spool') { const ok = buySpool(s); if (ok) sfx(ctx, 'buy'); return ok; }
       if (a === 'auto') return spend(autoCost(s), () => { s.auto++; if (s.auto === 1) log(s, ctx, 'firstPr'); });

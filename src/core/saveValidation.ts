@@ -53,6 +53,7 @@ export function validSave(s: GameState, defaults: GameState) {
   const kept = KEPT_AUTOMATION[s.meta.pat.keep ?? 0];
   if (s.done.some(id => !kept.includes(id) && NODE[id].req?.some(req => !s.done.includes(req)))) return false;
   if (!validMarketState(s) || !validModelState(s) || !validMaterialState(s) || !validOfflineBonus(s) || ![1, BAL.realisticSlow].includes(s.slow) || !validDailyState(s) || !validStoryState(s) || s.play < 0) return false;
+  if (s.stockPremium < 0 || s.stockPremium > BAL.precisionPremium + 1e-9) return false;
   return s.boostT >= 0 && s.boostT <= BAL.boostSeconds &&
     s.boostCd >= s.boostT && s.boostCd <= BAL.boostCooldown;
 }

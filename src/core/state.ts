@@ -67,6 +67,7 @@ export interface GameState {
   /** Story messages already shown, the one open on screen, and a 1 s check timer. */
   story: string[]; msg: string | null; msgT: number;
   meta: Meta;
+  precision: boolean; bedCalibrated: boolean; dryerInstalled: boolean; stockPremium: number;
   /** Active feedstock and reserves. fil holds the active feedstock, including PLA in old saves. */
   materialId: string;
   materialStock: Record<string, number>;
@@ -102,6 +103,7 @@ export const createState = (): GameState => ({
   today: 0,
   story: [], msg: null, msgT: 0,
   meta: { patents: 0, earned: 0, runs: 0, pat: {} },
+  precision: false, bedCalibrated: false, dryerInstalled: false, stockPremium: 0,
   materialId: DEFAULT_MATERIAL.id, materialStock: {},
 });
 
