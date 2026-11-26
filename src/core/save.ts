@@ -23,7 +23,7 @@ export function migrate(raw: unknown): GameState {
   return s;
 }
 
-export const serialize = (s: GameState) => JSON.stringify({ ...s, ts: Date.now() });
+export const serialize = (s: GameState, ts = Date.now()) => JSON.stringify({ ...s, ts });
 
 /** Prefix of exported save codes; bump the number if the code format (not the state) ever changes. */
 export const EXPORT_PREFIX = 'DRK1:';

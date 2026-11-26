@@ -13,7 +13,7 @@ import { buyDrone, buyFab, spaceSystem } from '../systems/space';
 import { log, sfx, type Ctx, type GameEvent } from './ctx';
 import { autoCost, farmCost, mktCost, panelCost } from './formulas';
 import { buyPatent, prestige } from './prestige';
-import { createState, type GameState } from './state';
+import { createState, type GameState, type LogEntry } from './state';
 
 export type System = (s: GameState, dt: number, ctx: Ctx) => void;
 
@@ -46,7 +46,7 @@ export interface Game {
   tick(dt: number): void;
   act(a: Action): boolean;
   /** Simulates time spent away and logs what was produced. */
-  catchUp(seconds: number): void;
+  catchUp(seconds: number): LogEntry | undefined;
   load(s: GameState): void;
   reset(logKey?: string): void;
   on(fn: (e: GameEvent) => void): () => void;
@@ -101,17 +101,21 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
       return false;
     },
     catchUp(seconds) {
-      if (s.end || seconds <= 60) return;
-      const t0 = s.total, z0 = s.zl;
+      if (s.end || !Number.isFinite(seconds) || seconds <= 0) return;
+      const before = { total: s.total, sold: s.sold };
+      const elapsed = Math.min(seconds, BAL.offlineMaxSeconds);
       ctx.offline = true;
-      let rem = Math.min(seconds, BAL.offlineMaxSeconds);
+      let rem = elapsed;
       while (rem > 0) { const d = Math.min(1, rem); game.tick(d); rem -= d; }
       ctx.offline = false;
-      const made = Math.floor(s.total - t0);
-      if (made >= 1) {
-        if (s.zl - z0 >= 1) log(s, ctx, 'off', '~' + Math.round(seconds), made, '$' + (s.zl - z0));
-        else log(s, ctx, 'off2', '~' + Math.round(seconds), made);
-      }
+      const made = Math.floor(s.total - before.total);
+      const sold = s.goal >= 1 ? s.sold - before.sold : 0;
+      if (elapsed < 120 || (!made && !sold)) return;
+      const duration = '~' + Math.round(elapsed);
+      if (made && sold) log(s, ctx, 'offProductionSales', duration, made, sold);
+      else if (sold) log(s, ctx, 'offSales', duration, sold);
+      else log(s, ctx, 'off2', duration, made);
+      return s.log[0];
     },
     load(next) { s = next; },
     reset(logKey = 'fresh') { s = createState(); log(s, ctx, logKey); },

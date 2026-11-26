@@ -92,6 +92,31 @@ describe('save', () => {
 });
 
 describe('offline', () => {
+  it('simulates short absences without a report', () => {
+    const g = newGame();
+    g.s.auto = 1;
+    expect(g.catchUp(30)).toBeUndefined();
+    expect(g.s.total).toBeGreaterThan(0);
+  });
+
+  it('reports sales from existing stock even when production is idle', () => {
+    const g = newGame();
+    g.s.inv = 3;
+    g.s.goal = 2;
+    expect(g.catchUp(120)).toEqual({ k: 'offSales', a: ['~120', 3] });
+    expect(g.s.total).toBe(0);
+  });
+
+  it('caps simulation and reported time at eight hours', () => {
+    const capped = newGame();
+    const longer = newGame();
+    for (const g of [capped, longer]) { g.s.auto = 1; g.s.fil = 1000; }
+    const report = longer.catchUp(9 * 3600);
+    expect(report?.a[0]).toBe('~28800');
+    capped.catchUp(8 * 3600);
+    expect(longer.s).toEqual(capped.s);
+  });
+
   it('catches up auto production without random events', () => {
     const g = newGame();
     g.s.auto = 5; g.s.fil = 1e6; g.s.goal = 5;
