@@ -10,7 +10,11 @@
 --sh:0 1px 2px rgb(0 0 0/.06),0 4px 14px rgb(0 0 0/.04)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
-html{-webkit-text-size-adjust:100%}
+/* Touch: no double-tap zoom anywhere (iOS Safari ignores width=device-width for that), pinch zoom still works.
+   No pull-to-refresh or scroll chaining, no grey tap flash, and no accidental text selection when tapping fast. */
+html{-webkit-text-size-adjust:100%;touch-action:manipulation;overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
+#app{-webkit-user-select:none;user-select:none}
+#app :is(input,textarea,.log,.modal-box p){-webkit-user-select:text;user-select:text}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 Barlow,system-ui,sans-serif;overflow-x:clip}
 h1,h2,h3,.num{font-family:"Barlow Condensed",Barlow,sans-serif}
 button{font:600 15px Barlow,sans-serif;min-height:40px;padding:6px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;touch-action:manipulation;transition:background .15s,border-color .15s,transform .08s}
@@ -284,3 +288,5 @@ body.space .title-screen{background:#14122b}
 @media(min-width:1520px){
   .hud{max-width:1180px}
 }
+/* iOS zooms into any focused field under 16px. */
+@media (pointer:coarse){.modal-box textarea,.modal-box input{font-size:16px}}
