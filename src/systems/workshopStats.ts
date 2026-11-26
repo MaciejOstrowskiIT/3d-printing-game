@@ -26,6 +26,14 @@ export const newPeriod = (index: number): CashPeriod => ({
 export const income = ({ cash }: CashPeriod) => cash.sales + cash.orders + cash.bonus;
 export const expenses = ({ cash }: CashPeriod) => cash.filament + cash.equipment + cash.other;
 
+/** Average income per second over the current and the previous 30 s period (sales, orders, bonuses). */
+export function incomePerSecond(s: GameState) {
+  const index = periodIndex(s);
+  const recent = s.finance.filter(p => p.index >= index - 1);
+  const seconds = s.financeTime - Math.max(0, index - 1) * PERIOD_SECONDS;
+  return seconds > 1 ? recent.reduce((sum, p) => sum + income(p), 0) / seconds : 0;
+}
+
 function currentPeriod(s: GameState) {
   const index = periodIndex(s);
   let period = s.finance.at(-1);

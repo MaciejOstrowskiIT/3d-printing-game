@@ -1,5 +1,5 @@
 import { bookCash } from '../systems/workshopStats';
-import { setFleetModel, setFleetPrinters } from '../systems/fleet';
+import { setFleet } from '../systems/fleet';
 import { BAL } from '../content/balance';
 import { achievementsSystem } from '../systems/achievements';
 import { automationSystem } from '../systems/automation';
@@ -55,7 +55,7 @@ export type Action =
   | 'print' | 'spool' | 'auto' | 'farm' | 'panel' | 'mkt' | 'drone' | 'fab'
   | 'pminus' | 'pplus' | 'oacc' | 'odec' | 'fix' | 'mevyes' | 'mevno' | 'tool'
   | 'proc1' | 'procmax' | 'mem1' | 'memmax' | 'boost' | 'adfail' | 'prestige' | 'prestigeR' | 'offx2' | 'daily' | 'msgok'
-  | `t:${string}` | `col:${number}` | `material:${string}` | `price-up:${string}` | `price-down:${string}` | `fleet-model:${string}` | `fleet-count:${number}` | `mdl:${string}` | `stl:${string}` | `day:${number}` | `am:${string}:${0 | 1}` | `pat:${string}`;
+  | `t:${string}` | `col:${number}` | `material:${string}` | `price-up:${string}` | `price-down:${string}` | `fleet:${string}:${number}` | `mdl:${string}` | `stl:${string}` | `day:${number}` | `am:${string}:${0 | 1}` | `pat:${string}`;
 
 export interface Game {
   readonly s: GameState;
@@ -110,8 +110,7 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
       if (a === 'tool') { const ok = buyClickTool(s); if (ok) sfx(ctx, 'buy'); return ok; }
       if (a.startsWith('material:')) return selectMaterial(s, a.slice('material:'.length));
       if (a.startsWith('stl:')) { const ok = buyDesign(s, ctx, a.slice(4)); if (ok) sfx(ctx, 'buy'); return ok; }
-      if (a.startsWith('fleet-model:')) return setFleetModel(s, a.slice('fleet-model:'.length));
-      if (a.startsWith('fleet-count:')) return setFleetPrinters(s, Number(a.slice('fleet-count:'.length)));
+      if (a.startsWith('fleet:')) { const [, id, n] = a.split(':'); return setFleet(s, id, Number(n)); }
       if (a.startsWith('mdl:')) { const ok = selectModel(s, ctx, a.slice(4)); if (ok) sfx(ctx, 'buy'); return ok; }
       if (a === 'mevyes') { const ok = acceptMarketEvent(s, ctx); if (ok) sfx(ctx, 'buy'); return ok; }
       if (a === 'mevno') { declineMarketEvent(s, ctx); return true; }

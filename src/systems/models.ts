@@ -1,3 +1,4 @@
+import { swapMain } from './fleet';
 import { bookCash } from './workshopStats';
 import { BAL } from '../content/balance';
 import { MODEL, MODELS, type PrintModel } from '../content/models';
@@ -37,10 +38,7 @@ export function selectModel(s: GameState, ctx: Ctx, id: string): boolean {
   modelStock(s, cur.id).price = s.price;
   const stock = modelStock(s, next.id);
   s.price = stock.price || Math.max(0.1, Math.round(s.price * (next.value / cur.value) * 100) / 100);
-  if (id === s.fleetModel) {
-    s.fleetModel = cur.id;
-    s.fleetPrinters = s.auto - s.fleetPrinters;
-  }
+  swapMain(s, cur.id, id);
   s.mdl = id;
   s.mp = 0;
   log(s, ctx, 'mdlSel', '*' + id);

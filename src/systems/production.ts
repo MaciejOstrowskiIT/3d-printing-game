@@ -1,6 +1,6 @@
 import { bookCash, recordStockOutput } from './workshopStats';
 import { MODEL } from '../content/models';
-import { fleetFilamentPerSecond, secondaryRate } from './fleet';
+import { fleetFilamentPerSecond, printing } from './fleet';
 import { BAL } from '../content/balance';
 import { modelStock, putPieces } from './inventory';
 import { log, sfx, type Ctx } from '../core/ctx';
@@ -82,17 +82,15 @@ export function printWork(s: GameState, ctx: Ctx, requested: number, m = model(s
 export function productionSystem(s: GameState, dt: number, ctx: Ctx) {
   if (s.ph !== 1) return;
   const g = gpu(s);
-  const rate = rate1(s);
-  const secondary = secondaryRate(s, rate);
+  const groups = printing(s, rate1(s));
   const grams = fleetFilamentPerSecond(s) * dt;
   if (s.amOn.autobuy && has(s, 'autobuy')) {
     const need = Math.max(g, grams * 3);
     while (s.fil < need && buySpool(s)) { /* keep buying */ }
   }
-  // If stock is low, keep both groups running in the configured proportion.
+  // If filament is short, every model keeps running in the configured proportion.
   const fraction = grams > 0 ? Math.min(1, s.fil / grams) : 0;
-  printWork(s, ctx, (rate - secondary) * dt * fraction);
-  if (secondary > 0) printWork(s, ctx, secondary * dt * fraction, MODEL[s.fleetModel]);
+  for (const { m, rate } of groups) if (rate > 0) printWork(s, ctx, rate * dt * fraction, m);
 
   if (s.fil < g && !s.warn && s.total > 0) { s.warn = true; log(s, ctx, 'noFil'); sfx(ctx, 'alert'); }
 
