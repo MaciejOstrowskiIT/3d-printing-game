@@ -62,6 +62,19 @@ tests/         system tests and the balance bot
 4. Put numbers in `content/balance.ts` and texts in `content/i18n/pl.ts` and `en.ts`.
 5. Run `npm test`: the balance bot shows whether pacing still holds.
 
+### Adding content (data-driven)
+Content lives in `src/content/` as plain lists. Each list has one place that reads it and a test that checks every entry, so new content needs no code changes:
+
+| Content | File | Checked by |
+|---|---|---|
+| Print models (figurine, bust, dragon…) | `content/models.ts` | `tests/models.test.ts` (numbers, shape fits the printer, PL/EN texts, unlock order) |
+| Market events | `content/events.ts` | `tests/marketEvents.test.ts` |
+| Achievements | `content/achievements.ts` | — |
+| Patents | `content/patents.ts` | `tests/prestige.test.ts` |
+| Research tree | `content/tree.ts` | `tests/systems.test.ts` |
+
+To add a print model, append an entry to `MODELS`: print time (`seconds`), `value` (pay per printer-second), `market` (how many buyers), `material` (filament per printer-second), `design` price, `unlockAt` and a `shape` (layer widths for the printer animation and the card silhouette). Ids go into saves, so never rename or remove one. The economy stays in figurines (one printer-second of work), so goals, stock and the space phase are unaffected by the selected model; see the comment at the top of `content/models.ts`.
+
 ### Rules
 
 - **The UI never mutates game state directly.** It dispatches actions via `act('...')`. The only exception is view-only state (active tab, research branch) via `ui(fn)`.

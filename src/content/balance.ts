@@ -84,4 +84,11 @@ export const BAL = {
   marketMulRange: [0.5, 4],   // stacked effects are clamped to this demand/price multiplier range
   marketMinMoney: 50,         // smallest price of a money offer
   clearanceDiscount: 0.5,
+
+  // manual printing (systems/models.ts): a click adds clickWork figurines of work; each tool level adds clickStep
+  clickWork: 1,
+  clickStep: 0.25,
+  clickCost: 30,
+  clickGrowth: 2.2,
+  clickMaxLevel: 40,
 } as const;

@@ -11,24 +11,23 @@ More than one agent works on this repo in parallel (Claude, Codex). Read this be
 - **GameState**: add new fields at the end of the interface and give them a default in `createState()`.
   `migrate()` fills missing fields from the defaults, so most additions need no migration. If a field changes meaning,
   bump `SAVE_VERSION` and append a migration; never edit old ones.
-- Do not reorder `SYSTEMS`, rename existing state fields or change log-arg prefixes (`@ $ # % ~ & ! ^`):
+- Do not reorder `SYSTEMS`, rename existing state fields or change log-arg prefixes (`@ $ # % ~ & ! ^ *`):
   old saves depend on them.
 - One feature per branch, branched from the latest `main`; rebase before opening the PR.
 
 ## In flight
 | PR / branch | Agent | Touches |
 |---|---|---|
-| #12 `feat/market-events` | Claude | `content/events.ts`, `systems/marketEvents.ts` (new); `GameState.mev/mevT/mfx`; `formulas.ts` (`marketMul` in `demand` and `spoolPrice`); `GameEvent` `market`; actions `mevyes/mevno`; i18n `L.mev*`, `mevExp`, `fx*`; `Workshop.tsx` Events; `ui/store.ts` (one `track` line); `tests/bot.ts` |
-| #11 `feat/offline-mobile` (on top of #10 `feat/workshop-discovery`) | Codex | `core/saveValidation.ts` (new), `save.ts` (`migrate` validates, rebuilds research multipliers), `catchUp` return value, `GameState.serverThrough`, `ui/store.ts`, `ui/workshopClock.ts`, `Research.tsx`, `Side.tsx`, `App.tsx`, `styles.css` |
+| #13 `chore/land-save-validation` | Claude | brings #11 (Codex: save validation, verified offline clock) to `main`; hooks `validMarketState()` and `play >= 0` into `validSave()` |
+| `feat/print-models` | Claude | `content/models.ts`, `systems/models.ts`, `tests/models.test.ts` (new); `GameState.mdl/mdls/clk/mp`; `formulas.ts` (`model`, `gpu`, `modelDemand` in `demand`, `clickPower`); manual printing moved from `systems/production.ts` to `systems/models.ts`; `printed` event `share`; actions `tool`, `mdl:*`, `stl:*`; log prefix `*`; `Workshop.tsx` (Models card, tools row, prices per piece); `Side.tsx` print label; `scene/printer.ts` shapes; `tests/bot.ts` |
 
-Merged: #8 analytics, #9 portal assets.
+Merged: #8 analytics, #9 portal assets, #10 workshop discovery, #12 market events. #11 was merged into
+`feat/workshop-discovery` only; #13 lands it.
 
 Cross-branch notes:
-- `feat/offline-mobile` + `feat/market-events` merge cleanly (checked locally: typecheck OK, 46 tests pass).
-- **For `saveValidation.ts`:** call `validMarketState(s)` from `systems/marketEvents.ts` in `validSave()`. The generic
-  number/boolean check does not cover `mev` (object or null) or `mfx` (array); a tampered `mev.cost < 0` would pay out
-  on accept (acceptance now refuses non-positive prices too, but the save should be rejected).
-- `GameState.play` (from #8) is a plain number: active seconds on the current line.
+- After #13 is in `main`, `validSave()` should also call `validModelState()` from `systems/models.ts` (done in
+  `feat/print-models` once it is rebased on that `main`).
+- Content is data-driven: new models, events, achievements go into `src/content/` lists; see README "Adding content".
 
 Waiting for the cheat-proofing work: rewarded "double offline earnings" and CrazyGames account saves (both touch
 `save.ts`, offline catch-up and the platform save API).

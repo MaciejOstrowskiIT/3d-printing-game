@@ -79,16 +79,18 @@ export async function watchAdForBoost() {
 }
 
 /** Core event listeners: sound, printer animation and analytics. */
-export const printedListeners = new Set<() => void>();
+/** Called with the share of a piece each manual click printed (1 = a whole piece). */
+export const printedListeners = new Set<(share: number) => void>();
 game.on(e => {
   if (e.type === 'sfx') play(e.name);
-  if (e.type === 'printed') printedListeners.forEach(fn => fn());
+  if (e.type === 'printed') printedListeners.forEach(fn => fn(e.share ?? 1));
   if (e.type === 'goal') track('goal', { index: e.index });
   if (e.type === 'phase') track('liftoff');
   if (e.type === 'order') track('order', { result: e.result });
   if (e.type === 'end') track('end', { total: Math.floor(game.s.total) });
   if (e.type === 'prestige') track('prestige', { gain: e.gain });
   if (e.type === 'market') track('market', { id: e.id, result: e.result });
+  if (e.type === 'model') track('model', { id: e.id, action: e.action });
   if (e.type === 'achievement') { pushToast(e.id); track('achievement', { id: e.id }); }
 });
 

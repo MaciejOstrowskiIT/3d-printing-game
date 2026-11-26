@@ -6,13 +6,14 @@ export type Sfx = 'click' | 'buy' | 'goal' | 'alert' | 'fail';
 export type GameEvent =
   | { type: 'log'; entry: LogEntry }
   | { type: 'sfx'; name: Sfx }
-  | { type: 'printed'; manual: boolean }
+  | { type: 'printed'; manual: boolean; share?: number }
   | { type: 'goal'; index: number }
   | { type: 'node'; id: string }
   | { type: 'phase'; phase: 1 | 2 }
   | { type: 'order'; result: 'offered' | 'delivered' | 'failed' | 'expired' }
   | { type: 'achievement'; id: string }
   | { type: 'prestige'; gain: number }
+  | { type: 'model'; id: string; action: 'bought' | 'selected' }
   | { type: 'market'; id: string; result: 'started' | 'offered' | 'accepted' | 'declined' | 'expired' }
   | { type: 'end' };
 

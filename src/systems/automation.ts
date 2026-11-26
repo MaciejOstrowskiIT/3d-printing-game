@@ -1,6 +1,6 @@
 import { TREE } from '../content/tree';
 import type { Ctx } from '../core/ctx';
-import { autoCost, drawP, fabCap, farmCost, freePts, mining, mktCost, panelCost, rate1, spoolPrice, supply, unitCost, droneCost, fabCost } from '../core/formulas';
+import { autoCost, drawP, fabCap, farmCost, freePts, mining, mktCost, panelCost, rate1, spoolPrice, supply, unitCost, droneCost, fabCost, gpu } from '../core/formulas';
 import { has, type GameState } from '../core/state';
 import { acceptOrder } from './orders';
 import { buyNode, nodeStatus, reserveWyd } from './research';
@@ -17,7 +17,7 @@ export function automationSystem(s: GameState, dt: number, ctx: Ctx) {
 
       if (on(s, 'autocena')) {
         const target = Math.max(5, rate1(s) * 3);
-        const making = rate1(s) > 0 && s.fil >= s.g;
+        const making = rate1(s) > 0 && s.fil >= gpu(s);
         if (s.inv > target * 2) s.price = Math.max(0.1, s.price * 0.97);
         else if (s.inv < target && making) s.price = Math.min(500, s.price * 1.03);
         s.price = Math.max(Math.round(s.price * 100) / 100, Math.ceil(unitCost(s) * 1.3 * 100) / 100);

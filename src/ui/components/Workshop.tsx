@@ -2,12 +2,14 @@ import { BAL } from '../../content/balance';
 import { COLORS } from '../../content/colors';
 import { AUTOMATIONS, NODE } from '../../content/tree';
 import {
-  autoCost, demand, drawP, droneCost, eff, fabCost, farmCost, inTrend, mktCost, panelCost, rate1, spaceRate, spoolPrice, supply, trendOn, unitCost,
+  autoCost, clickCost, clickPower, demand, drawP, gpu, model, droneCost, eff, fabCost, farmCost, inTrend, mktCost, panelCost, rate1, spaceRate, spoolPrice, supply, trendOn, unitCost,
 } from '../../core/formulas';
 import { has } from '../../core/state';
 import { boostUnlocked } from '../../systems/boost';
 import { canAfford } from '../../systems/marketEvents';
 import { MARKET_EVENT } from '../../content/events';
+import { MODELS, type PrintModel } from '../../content/models';
+import { designVisible } from '../../systems/models';
 import { platform } from '../platform';
 import { act, adPending, useS, watchAdForBoost } from '../store';
 import { clock, colorName, dict, dur, fmt, li, money, nf, t } from '../i18n';
@@ -113,7 +115,7 @@ function BoostRow() {
 
 function Production() {
   const v = useS(s => ({
-    rate: rate1(s), fil: s.fil, g: s.g, printers: s.auto + s.farm * 60, zl: s.zl, bulk: s.spoolG > 1000, spool: spoolPrice(s), spoolD: s.spoolD,
+    rate: rate1(s), fil: s.fil, g: gpu(s), clk: s.clk, clickPow: clickPower(s), clickCost: clickCost(s), printers: s.auto + s.farm * 60, zl: s.zl, bulk: s.spoolG > 1000, spool: spoolPrice(s), spoolD: s.spoolD,
     goal: s.goal, auto: s.auto, spd: s.spd, autoCost: autoCost(s), farmOn: s.farmOn, farm: s.farm, farmCost: farmCost(s),
   }));
   const spoolSub = !v.spoolD ? t('spoolSub') : t(v.spoolD > 0 ? 'spoolUp' : 'spoolDn', Math.abs(Math.round(v.spoolD * 100)));
@@ -129,6 +131,11 @@ function Production() {
       <Item name={t(v.bulk ? 'spool5Item' : 'spoolItem')} sub={spoolSub}>
         <BuyButton action="spool" cost={v.spool} have={v.zl} label={money(v.spool)} />
       </Item>
+      {v.goal >= 1 && (
+        <Item name={t('toolItem')} sub={t('toolSub', v.clk, nf(v.clickPow, 2))}>
+          <BuyButton action="tool" cost={v.clickCost} have={v.zl} label={money(v.clickCost)} />
+        </Item>
+      )}
       {v.goal >= 2 && (
         <Item name={t('autoItem')} sub={t('autoSub', fmt(v.auto), nf(v.spd, 2))}>
           <BuyButton action="auto" cost={v.autoCost} have={v.zl} label={money(v.autoCost)} />
@@ -160,7 +167,7 @@ function ColorPicker() {
 }
 
 function PriceStepper() {
-  const price = useS(s => s.price);
+  const price = useS(s => s.price * model(s).seconds);
   const minus = useHold('pminus'), plus = useHold('pplus');
   return (
     <div class="stepper">
@@ -173,7 +180,7 @@ function PriceStepper() {
 
 function Sales() {
   const v = useS(s => ({
-    sold: s.sold, inv: s.inv, dem: demand(s), uc: unitCost(s), price: s.price, auto: has(s, 'autocena') && !!s.amOn.autocena,
+    sold: s.sold, inv: s.inv, dem: demand(s), uc: unitCost(s) * model(s).seconds, price: s.price * model(s).seconds, auto: has(s, 'autocena') && !!s.amOn.autocena,
     slow: rate1(s) > demand(s) * 1.1, fast: s.inv < 1 && s.sold > 0, goal: s.goal, mkt: s.mkt, mktCost: mktCost(s), zl: s.zl,
   }));
   const loss = v.price < v.uc;
@@ -194,6 +201,48 @@ function Sales() {
           <BuyButton action="mkt" cost={v.mktCost} have={v.zl} label={money(v.mktCost)} />
         </Item>
       )}
+    </section>
+  );
+}
+
+/** Silhouette of a model, drawn from the same layer widths the printer animation uses. */
+function Shape({ m, size = 36 }: { m: PrintModel; size?: number }) {
+  const h = m.shape.length * 8;
+  return (
+    <svg class="mshape" viewBox={`0 0 120 ${Math.max(h, 40)}`} width={size} height={size} aria-hidden="true">
+      {m.shape.map((w, i) => <rect key={i} x={60 - w / 2} y={Math.max(h, 40) - (i + 1) * 8} width={w} height={8.4} rx={2.5} />)}
+    </svg>
+  );
+}
+
+/** Print models: owned ones can be selected for all printers, visible ones bought as designs. Data: content/models.ts. */
+function Models() {
+  const v = useS(s => ({
+    cur: s.mdl, owned: s.mdls.join(','), zl: s.zl, total: s.total,
+    visible: MODELS.filter(m => designVisible(s, m)).map(m => m.id).join(','),
+  }));
+  const visible = MODELS.filter(m => v.visible.split(',').includes(m.id));
+  if (visible.length < 2) return null;
+  const next = MODELS.find(m => !v.visible.split(',').includes(m.id));
+  const cur = MODELS.find(m => m.id === v.cur) ?? MODELS[0];
+  return (
+    <section class="card models">
+      <CardHead title={t('mdlTitle')} aside={t('mdlAside', cur.name[li()])} />
+      <p class="hint">{t('mdlHint')}</p>
+      {visible.map(m => {
+        const have = v.owned.split(',').includes(m.id), on = m.id === v.cur;
+        const stats = [t('mdlTime', nf(m.seconds, m.seconds < 1 ? 1 : 0)), t('mdlPay', nf(m.value, 2)), t('mdlMkt', nf(m.market, 2)), t('mdlMat', nf(m.material, 2))].join(' · ');
+        return (
+          <div key={m.id} class={'item model' + (on ? ' active' : '')}>
+            <Shape m={m} />
+            <div class="it"><b>{m.name[li()]}</b><small>{m.desc[li()]}</small><small class="stats">{stats}</small></div>
+            {have
+              ? <button class={on ? 'on' : ''} disabled={on} onClick={() => act(`mdl:${m.id}`)}>{on ? t('mdlOn') : t('mdlUse')}</button>
+              : <BuyButton action={`stl:${m.id}`} cost={m.design} have={v.zl} label={money(m.design)} />}
+          </div>
+        );
+      })}
+      {next && <p class="hint">{t('mdlNext', fmt(next.unlockAt))}</p>}
     </section>
   );
 }
@@ -275,6 +324,7 @@ export function Workshop() {
       <div class="grid">
         {!v.sp && <Production />}
         {!v.sp && v.g >= 1 && <Sales />}
+        {!v.sp && <Models />}
         {!v.sp && v.farmOn && <Energy />}
         {v.sp && <Space />}
         {v.sp && <PrestigeCard />}

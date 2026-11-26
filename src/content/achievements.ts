@@ -1,5 +1,6 @@
 import { AUTOMATIONS } from './tree';
 import { COLORS } from './colors';
+import { MODELS } from './models';
 import { has, type GameState } from '../core/state';
 
 type L = [string, string];
@@ -28,6 +29,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'order10', n: ['Solidny dostawca', 'Reliable supplier'], d: ['Zrealizuj 10 zamówień bez żadnej wpadki.', 'Deliver 10 orders without a single failure.'], check: s => s.ordDone >= 10 && s.ordFail === 0 },
   { id: 'rich', n: ['Milioner z garażu', 'Garage millionaire'], d: ['Miej milion na koncie.', 'Have a million in the bank.'], check: s => s.zl >= 1e6 },
   { id: 'rainbow', n: ['Tęcza', 'Rainbow'], d: ['Drukuj w każdym kolorze filamentu.', 'Print in every filament colour.'], check: s => (s.colorsUsed & allColors) === allColors },
+  { id: 'designs', n: ['Pełny katalog', 'Full catalogue'], d: ['Kup projekty wszystkich modeli.', 'Buy the designs of every model.'], check: s => MODELS.every(m => s.mdls?.includes(m.id)) },
   { id: 'trendy', n: ['Na czasie', 'On trend'], d: ['Drukuj w modnym kolorze.', 'Print in the trending colour.'], check: s => s.goal >= 2 && s.col === s.trend && s.total > 0 },
   { id: 'fixer', n: ['Złota rączka', 'Handyman'], d: ['Przetrwaj 10 awarii.', 'Survive 10 breakdowns.'], check: s => s.fails >= 10 },
   { id: 'robots', n: ['Firma bez ludzi', 'Nobody at the wheel'], d: ['Odblokuj wszystkie automatyzacje na Ziemi.', 'Unlock every automation on Earth.'], check: s => AUTOMATIONS.filter(id => id !== 'autobud').every(id => has(s, id)) },
