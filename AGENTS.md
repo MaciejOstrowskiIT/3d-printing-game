@@ -11,19 +11,23 @@ More than one agent works on this repo in parallel (Claude, Codex). Read this be
 - **GameState**: add new fields at the end of the interface and give them a default in `createState()`.
   `migrate()` fills missing fields from the defaults, so most additions need no migration. If a field changes meaning,
   bump `SAVE_VERSION` and append a migration; never edit old ones.
-- Do not reorder `SYSTEMS`, rename existing state fields or change log-arg prefixes (`@ $ # % ~ & ! ^`):
+- Do not reorder `SYSTEMS`, rename existing state fields or change log-arg prefixes (`@ $ # % ~ & ! ^ *`):
   old saves depend on them.
 - One feature per branch, branched from the latest `main`; rebase before opening the PR.
-- **PRs target `main`.** A PR based on another feature branch lands in that branch, not in `main`, once the base is
-  merged first (this happened with #4 and #11). If you stack PRs, retarget the top one to `main` after the bottom one merges.
 
 ## In flight
 | PR / branch | Agent | Touches |
 |---|---|---|
-| `chore/land-save-validation` | Claude | brings #11 (Codex: save validation, verified offline clock) to `main`; hooks `validMarketState()` and `play >= 0` into `validSave()` |
+| #14 `feat/print-models` | Claude | `content/models.ts`, `systems/models.ts`, `tests/models.test.ts` (new); `GameState.mdl/mdls/clk/mp`; `formulas.ts` (`model`, `gpu`, `modelDemand` in `demand`, `clickPower`); manual printing moved from `systems/production.ts` to `systems/models.ts`; `printed` event `share`; actions `tool`, `mdl:*`, `stl:*`; log prefix `*`; `Workshop.tsx` (Models card, tools row, prices per piece); `Side.tsx` print label; `scene/printer.ts` shapes; `tests/bot.ts` |
+| `fix/early-balance` (on top of #14) | Claude | `systems/automation.ts` (`autoPrice` controller), `formulas.ts` (`clearingPrice`), `balance.ts` (printer cost, `autoPrice*`), `tree.ts` (`autocena` gating/text), `goals.ts` (goal 2 = sell 30), `tests/bot.ts`, `tests/autoPrice.test.ts` |
+| #15 `fix/mobile-touch` | Claude | `styles.css` (touch rules at the top, one media query at the end) |
 
-Merged: #8 analytics, #9 portal assets, #10 workshop discovery, #12 market events. #11 was merged into
-`feat/workshop-discovery` only; the branch above lands it.
+Merged: #8 analytics, #9 portal assets, #10 workshop discovery, #11 save validation (via #13), #12 market events.
+
+Cross-branch notes:
+- `validSave()` calls `validMarketState()` and `validModelState()`; new state with objects or arrays needs its own
+  validator there (the generic check only covers numbers and booleans).
+- Content is data-driven: new models, events, achievements go into `src/content/` lists; see README "Adding content".
 
 Waiting for the cheat-proofing work: rewarded "double offline earnings" and CrazyGames account saves (both touch
 `save.ts`, offline catch-up and the platform save API).

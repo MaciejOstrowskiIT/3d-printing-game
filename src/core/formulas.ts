@@ -1,5 +1,6 @@
 import { BAL } from '../content/balance';
 import { MARKET_EVENT } from '../content/events';
+import { DEFAULT_MODEL, MODEL, type PrintModel } from '../content/models';
 import { patLvl, type GameState } from './state';
 
 /** Pure formulas derived from state. No side effects: used by core, UI and tests. */
@@ -16,7 +17,20 @@ export function marketMul(s: GameState, key: 'demand' | 'spool') {
 }
 
 export const spoolPrice = (s: GameState) => (s.spoolG > 1000 ? s.spool * 5 * BAL.bulkPackDiscount : s.spool) * marketMul(s, 'spool');
-export const unitCost = (s: GameState) => (spoolPrice(s) / s.spoolG) * s.g;
+/** Selected print model (falls back to the figurine for unknown ids). */
+export const model = (s: GameState): PrintModel => MODEL[s.mdl] ?? DEFAULT_MODEL;
+/** Filament per figurine of work: base nozzle consumption × the model's material factor. */
+export const gpu = (s: GameState) => s.g * model(s).material;
+/** Market size of a model in figurines/s at the same price per figurine (see content/models.ts). */
+export const modelDemand = (m: PrintModel) => m.value ** BAL.demandElasticity * m.market * m.seconds;
+/** Figurines of work added by one click. */
+export const clickPower = (s: GameState) => BAL.clickWork * (1 + BAL.clickStep * s.clk);
+export const clickCost = (s: GameState) => BAL.clickCost * BAL.clickGrowth ** s.clk;
+/** Price per figurine at which demand would be `sales` figurines/s (demand ∝ price^-elasticity). */
+export const clearingPrice = (s: GameState, sales: number) =>
+  s.price * (demand(s) / Math.max(sales, 1e-6)) ** (1 / BAL.demandElasticity);
+
+export const unitCost = (s: GameState) => (spoolPrice(s) / s.spoolG) * gpu(s);
 export const droneCost = (s: GameState) => BAL.droneCost * BAL.droneCostGrowth ** s.drones;
 export const fabCost = (s: GameState) => BAL.fabCost * BAL.fabCostGrowth ** s.fabs;
 
@@ -35,7 +49,8 @@ export const demand = (s: GameState) =>
   (s.pen > 0 ? BAL.penaltyDemand : 1) *
   (inTrend(s) ? BAL.trendBonus : 1) *
   (1 + 0.15 * patLvl(s, 'brand')) *
-  marketMul(s, 'demand');
+  marketMul(s, 'demand') *
+  modelDemand(model(s));
 
 export const boostMul = (s: GameState) => (s.boostT > 0 ? BAL.boostMultiplier : 1);
 export const rateBase = (s: GameState) => (s.auto + s.farm * BAL.farmPrinters * eff(s)) * s.spd * boostMul(s) * (1 + 0.15 * patLvl(s, 'speed'));

@@ -1,7 +1,7 @@
 import { BAL } from '../content/balance';
 
 /** Log entry argument. String prefixes are kept for compatibility with old saves:
- *  '@id' tree node, '$123' money, '#2' client, '%1' breakdown cause, '~90' duration in s, '&3' colour, '!id' achievement, '^id' market event, 'pl|en' goal text. */
+ *  '@id' tree node, '$123' money, '#2' client, '%1' breakdown cause, '~90' duration in s, '&3' colour, '!id' achievement, '^id' market event, '*id' print model, 'pl|en' goal text. */
 export type LogArg = string | number;
 export interface LogEntry { k: string; a: LogArg[] }
 
@@ -52,6 +52,8 @@ export interface GameState {
   play: number;
   /** Market events: pending offer, seconds until the next one, running effects. */
   mev: PendingMarketEvent | null; mevT: number; mfx: MarketEffect[];
+  /** Print models (content/models.ts): selected model, owned designs, click tool level, manual progress on the current piece. */
+  mdl: string; mdls: string[]; clk: number; mp: number;
   meta: Meta;
 }
 
@@ -78,6 +80,7 @@ export const createState = (): GameState => ({
   ach: [], achT: 0, colorsUsed: 1,
   play: 0,
   mev: null, mevT: BAL.marketEventFirst, mfx: [],
+  mdl: 'fig', mdls: ['fig'], clk: 0, mp: 0,
   meta: { patents: 0, earned: 0, runs: 0, pat: {} },
 });
 

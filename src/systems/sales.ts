@@ -12,5 +12,5 @@ export function salesSystem(s: GameState, dt: number) {
 }
 
 export function changePrice(s: GameState, delta: number) {
-  s.price = Math.max(0.1, Math.round((s.price + delta) * 100) / 100);
+  s.price = Math.max(0.01, Math.round((s.price + delta) * 1000) / 1000);
 }

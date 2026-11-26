@@ -7,12 +7,13 @@ import { energySystem } from '../systems/energy';
 import { marketSystem, setColor } from '../systems/market';
 import { acceptMarketEvent, declineMarketEvent, marketEventsSystem } from '../systems/marketEvents';
 import { acceptOrder, declineOrder, ordersSystem } from '../systems/orders';
-import { buySpool, printManual, productionSystem } from '../systems/production';
+import { buySpool, productionSystem } from '../systems/production';
+import { buyClickTool, buyDesign, printManual, selectModel } from '../systems/models';
 import { assignPoint, buyNode, computeSystem, goalsSystem, reputationSystem } from '../systems/research';
 import { changePrice, salesSystem } from '../systems/sales';
 import { buyDrone, buyFab, spaceSystem } from '../systems/space';
 import { log, sfx, type Ctx, type GameEvent } from './ctx';
-import { autoCost, farmCost, mktCost, panelCost } from './formulas';
+import { autoCost, farmCost, mktCost, model, panelCost } from './formulas';
 import { buyPatent, prestige } from './prestige';
 import { createState, type GameState, type LogEntry } from './state';
 
@@ -39,9 +40,9 @@ export const SYSTEMS: System[] = [
 /** Player actions. The UI only sends these strings and never mutates game state itself. */
 export type Action =
   | 'print' | 'spool' | 'auto' | 'farm' | 'panel' | 'mkt' | 'drone' | 'fab'
-  | 'pminus' | 'pplus' | 'oacc' | 'odec' | 'fix' | 'mevyes' | 'mevno'
+  | 'pminus' | 'pplus' | 'oacc' | 'odec' | 'fix' | 'mevyes' | 'mevno' | 'tool'
   | 'proc1' | 'procmax' | 'mem1' | 'memmax' | 'boost' | 'adfail' | 'prestige'
-  | `t:${string}` | `col:${number}` | `am:${string}:${0 | 1}` | `pat:${string}`;
+  | `t:${string}` | `col:${number}` | `mdl:${string}` | `stl:${string}` | `am:${string}:${0 | 1}` | `pat:${string}`;
 
 export interface Game {
   readonly s: GameState;
@@ -84,10 +85,13 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
       if (a === 'mkt') return spend(mktCost(s), () => { s.mkt++; log(s, ctx, 'mkt', s.mkt); });
       if (a === 'drone') { const ok = buyDrone(s); if (ok) sfx(ctx, 'buy'); return ok; }
       if (a === 'fab') { const ok = buyFab(s); if (ok) sfx(ctx, 'buy'); return ok; }
-      if (a === 'pminus') { changePrice(s, -0.1); return true; }
-      if (a === 'pplus') { changePrice(s, 0.1); return true; }
+      if (a === 'pminus') { changePrice(s, -0.1 / model(s).seconds); return true; }
+      if (a === 'pplus') { changePrice(s, 0.1 / model(s).seconds); return true; }
       if (a === 'oacc') { acceptOrder(s); sfx(ctx, 'buy'); return true; }
       if (a === 'odec') { declineOrder(s, ctx); return true; }
+      if (a === 'tool') { const ok = buyClickTool(s); if (ok) sfx(ctx, 'buy'); return ok; }
+      if (a.startsWith('stl:')) { const ok = buyDesign(s, ctx, a.slice(4)); if (ok) sfx(ctx, 'buy'); return ok; }
+      if (a.startsWith('mdl:')) { const ok = selectModel(s, ctx, a.slice(4)); if (ok) sfx(ctx, 'buy'); return ok; }
       if (a === 'mevyes') { const ok = acceptMarketEvent(s, ctx); if (ok) sfx(ctx, 'buy'); return ok; }
       if (a === 'mevno') { declineMarketEvent(s, ctx); return true; }
       if (a === 'fix') { repair(s, ctx); sfx(ctx, 'buy'); return true; }

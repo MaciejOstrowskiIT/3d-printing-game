@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { GOALS } from '../../content/goals';
-import { rate1 } from '../../core/formulas';
+import { DEFAULT_MODEL, MODEL } from '../../content/models';
+import { gpu, rate1 } from '../../core/formulas';
 import { fmt, li, logText, prefs, setPrefs, t } from '../i18n';
 import { buildRoom, roomSignature, type Stage } from '../scene/room';
 import { mountPrinter } from '../scene/printer';
@@ -16,14 +17,14 @@ function Picture({ onToggleExpand }: { onToggleExpand: () => void }) {
   const [info, setInfo] = useState<{ stage: Stage; hidden: number }>({ stage: 'garage', hidden: 0 });
   const canRoom = useS(s => s.ph === 2 || s.auto > 0 || s.farm > 0);
   const sig = useS(roomSignature);
-  const busy = useS(s => s.ph === 2 || (rate1(s) > 0 && s.fil >= s.g));
+  const busy = useS(s => s.ph === 2 || (rate1(s) > 0 && s.fil >= gpu(s)));
   const counts = useS(s => (s.ph === 2 ? `${s.drones}/${s.fabs}` : String(s.auto + s.farm * 60)));
   const lang = prefs.value.lang;
   const view = !canRoom ? 'close' : prefs.value.view ?? 'room';
 
   useEffect(() => {
     const p = mountPrinter(closeRef.current!, () => game.s);
-    const feed = () => p.feed();
+    const feed = (share: number) => p.feed(share);
     printedListeners.add(feed);
     return () => { printedListeners.delete(feed); p.destroy(); };
   }, []);
@@ -54,11 +55,13 @@ function Picture({ onToggleExpand }: { onToggleExpand: () => void }) {
 }
 
 function PrintButton({ short }: { short?: boolean }) {
-  const disabled = useS(s => s.fil < s.g);
+  const disabled = useS(s => s.fil < gpu(s));
+  const mdl = useS(s => s.mdl);
   const hold = useHold('print');
+  const label = mdl === DEFAULT_MODEL.id ? t('printBtn') : t('printBtnM', MODEL[mdl]?.name[li()] ?? '');
   return (
     <button class="pbtn" disabled={disabled} {...hold}>
-      {short ? t('printBtnS') : <><span>{t('printBtn')}</span><kbd>{t('kbd')}</kbd></>}
+      {short ? t('printBtnS') : <><span>{label}</span><kbd>{t('kbd')}</kbd></>}
     </button>
   );
 }

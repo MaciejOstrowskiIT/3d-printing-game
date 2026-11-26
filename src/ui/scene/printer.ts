@@ -1,5 +1,5 @@
 import { COLORS } from '../../content/colors';
-import { rate1 } from '../../core/formulas';
+import { gpu, model, rate1 } from '../../core/formulas';
 import type { GameState } from '../../core/state';
 
 /** Printer close-up SVG. Elements tagged with data-p are driven by the animation. */
@@ -29,8 +29,6 @@ export const PRINTER_SVG = `<rect x="18" y="224" width="284" height="10" rx="4" 
 <circle cx="292" cy="40" r="20" fill="#f4efe9" stroke="var(--frame)" stroke-width="5"/>
 <g data-p="spool"><circle cx="292" cy="40" r="6" fill="var(--frame)"/><rect x="290.5" y="22" width="3" height="10" rx="1.5" fill="var(--frame)" opacity=".55"/><rect x="290.5" y="48" width="3" height="10" rx="1.5" fill="var(--frame)" opacity=".55"/></g>`;
 
-const VW = [34, 44, 52, 56, 56, 52, 46, 40, 36, 36, 40, 46];
-const NL = VW.length;
 
 /** Layer-by-layer print animation. Independent of game ticks: rAF reads the state and draws smoothly. */
 export function mountPrinter(svg: SVGSVGElement, getState: () => GameState) {
@@ -38,9 +36,15 @@ export function mountPrinter(svg: SVGSVGElement, getState: () => GameState) {
   const q = (k: string) => svg.querySelector(`[data-p="${k}"]`) as SVGElement;
   const vase = q('vase'), gantry = q('gantry'), head = q('head'), filpath = q('filpath'), glow = q('glow'), spool = q('spool'), led = q('led');
   const spoolBody = spool.previousElementSibling as SVGElement;
-  vase.innerHTML = VW.map((_, i) => `<rect x="160" y="${188 - i * 8}" width="0" height="8.4" rx="2.5" stroke-width=".6"/>`).join('');
-  const layers = [...vase.children] as SVGElement[];
+  // The piece being printed takes its layer widths from the selected model (content/models.ts).
+  let VW: number[] = [], NL = 0, layers: SVGElement[] = [], mdl = '';
   const A = { layer: 0, x: 0, work: 0, eject: 0, hx: 200, hy: 40, rot: 0, last: performance.now(), col: -1 };
+  const applyShape = (id: string, shape: number[]) => {
+    mdl = id; VW = shape; NL = shape.length;
+    vase.innerHTML = VW.map((_, i) => `<rect x="160" y="${188 - i * 8}" width="0" height="8.4" rx="2.5" stroke-width=".6"/>`).join('');
+    layers = [...vase.children] as SVGElement[];
+    A.layer = 0; A.x = 0; A.work = Math.min(A.work, NL); A.col = -1;
+  };
   const RM = matchMedia('(prefers-reduced-motion: reduce)');
   let raf = 0;
 
@@ -55,10 +59,12 @@ export function mountPrinter(svg: SVGSVGElement, getState: () => GameState) {
     const s = getState();
     const dt = Math.min(0.05, (now - A.last) / 1000);
     A.last = now;
+    const m = model(s);
+    if (m.id !== mdl) applyShape(m.id, m.shape);
     if (A.col !== s.col) { A.col = s.col; applyColor(s.col); }
     led.setAttribute('fill', s.brk > 0 ? '#ff4d3d' : '#3cc8e4');
 
-    const sp = s.ph === 2, auto = sp || (s.ph === 1 && rate1(s) > 0 && s.fil >= s.g);
+    const sp = s.ph === 2, auto = sp || (s.ph === 1 && rate1(s) > 0 && s.fil >= gpu(s));
     if (auto && A.work < NL) A.work = NL;
     const r = sp ? 1e6 : rate1(s);
     const v = Math.min(45, 4 + (r > 0 ? Math.log10(r + 1) * 9 : 0) + A.work * 0.35);
@@ -106,8 +112,8 @@ export function mountPrinter(svg: SVGSVGElement, getState: () => GameState) {
   raf = requestAnimationFrame(frame);
 
   return {
-    /** A manual print queues one more figurine in the animation. */
-    feed() { A.work = Math.min(A.work + NL, NL * 3); },
+    /** A click queues its share of a piece (1 = a whole piece) in the animation. */
+    feed(share = 1) { A.work = Math.min(A.work + NL * share, NL * 3); },
     isBusy() { return A.work > 0; },
     destroy() { cancelAnimationFrame(raf); },
   };

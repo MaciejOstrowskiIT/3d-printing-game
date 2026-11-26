@@ -1,11 +1,28 @@
+import { BAL } from '../src/content/balance';
 import { TREE } from '../src/content/tree';
 import { seededRng } from '../src/core/ctx';
-import { autoCost, drawP, droneCost, fabCap, fabCost, farmCost, freePts, mining, mktCost, panelCost, rate1, spoolPrice, supply } from '../src/core/formulas';
+import { autoCost, clickCost, demand, drawP, droneCost, fabCap, fabCost, farmCost, freePts, gpu, mining, mktCost, panelCost, rate1, spoolPrice, supply, unitCost } from '../src/core/formulas';
 import { createGame } from '../src/core/game';
 import { applyStartBonuses } from '../src/core/prestige';
 import type { GameState, Meta } from '../src/core/state';
 import { has } from '../src/core/state';
 import { nodeStatus, reserveWyd } from '../src/systems/research';
+import { MODEL, MODELS } from '../src/content/models';
+import { designVisible } from '../src/systems/models';
+import { autoPrice } from '../src/systems/automation';
+
+/** Owned model with the best profit per second if the price clears the market at the current production rate. */
+export function bestModel(s: GameState): string {
+  const R = Math.max(rate1(s), 1e-6);
+  let best = s.mdl, bestProfit = -Infinity;
+  for (const id of s.mdls) {
+    const t = { ...s, mdl: id, price: s.price * (MODEL[id].value / MODEL[s.mdl].value) };
+    const clearing = t.price * (demand(t) / R) ** (1 / BAL.demandElasticity);
+    const profit = R * (Math.min(clearing, 500 / MODEL[id].seconds) - unitCost(t));
+    if (profit > bestProfit) { bestProfit = profit; best = id; }
+  }
+  return best;
+}
 
 export interface BotResult { ended: boolean; minutes: number; goalMinutes: number[]; ordersDone: number; ordersFailed: number }
 
@@ -20,13 +37,9 @@ export function playthrough(seed = 1, maxHours = 6, dt = 0.25, meta?: Partial<Me
     if (Math.abs(t - Math.round(t)) < 1e-6) {
       if (s.ph === 1) {
         if (s.auto < 15) for (let i = 0; i < 4; i++) game.act('print');
-        if (s.fil < s.g * Math.max(10, rate1(s) * 15) && s.zl >= spoolPrice(s)) game.act('spool');
-        if (!has(s, 'autocena')) {
-          const target = Math.max(5, rate1(s) * 3);
-          if (s.inv > target * 2) s.price = Math.max(0.1, Math.round(s.price * 0.97 * 100) / 100);
-          else if (s.inv < target) s.price = Math.round(s.price * 1.03 * 100) / 100;
-          s.price = Math.max(s.price, (spoolPrice(s) / s.spoolG) * s.g * 1.3);
-        }
+        if (s.fil < gpu(s) * Math.max(10, rate1(s) * 15) && s.zl >= spoolPrice(s)) game.act('spool');
+        // A player sets prices by hand less often than the automation does: same idea, every 3 s.
+        if (!has(s, 'autocena') && Math.round(t) % 3 === 0) autoPrice(s);
         const reserve = spoolPrice(s) * 2;
         if (s.farmOn && supply(s) < drawP(s) + 20 && panelCost(s) < s.zl - reserve) game.act('panel');
         else if (!(has(s, 'slicer') && s.farm >= 5) && s.farmOn && farmCost(s) < (s.zl - reserve) * 0.7 && supply(s) >= drawP(s) + 20) game.act('farm');
@@ -35,6 +48,10 @@ export function playthrough(seed = 1, maxHours = 6, dt = 0.25, meta?: Partial<Me
         if (s.ord && !s.ord.acc) game.act('oacc');
         // Market offers: take them when they cost under a third of what the bot has.
         if (s.mev && s.mev.cost < s.zl / 3) game.act('mevyes');
+        // Click tools while clicking still matters; designs when cheap; every 10 s print the most profitable model.
+        if (s.auto < 15 && clickCost(s) < (s.zl - reserve) * 0.25) game.act('tool');
+        for (const m of MODELS) if (!s.mdls.includes(m.id) && designVisible(s, m) && m.design < (s.zl - reserve) * 0.3) game.act(`stl:${m.id}`);
+        if (Math.round(t) % 10 === 0) { const best = bestModel(s); if (best !== s.mdl) game.act(`mdl:${best}`); }
         if (s.brk > 0) game.act('fix');
         if (s.col !== s.trend && s.goal >= 2) game.act(`col:${s.trend}`);
       } else {

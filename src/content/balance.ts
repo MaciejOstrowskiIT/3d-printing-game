@@ -25,8 +25,8 @@ export const BAL = {
   trendEvery: [150, 240],
 
   // production
-  printerCost: 50,
-  printerCostGrowth: 1.12,
+  printerCost: 200,          // first printer ~1 min of clicking for a person, ~30 s for the bot
+  printerCostGrowth: 1.15,
   farmCost: 20000,
   farmCostGrowth: 1.1,
   farmPrinters: 60,
@@ -84,4 +84,16 @@ export const BAL = {
   marketMulRange: [0.5, 4],   // stacked effects are clamped to this demand/price multiplier range
   marketMinMoney: 50,         // smallest price of a money offer
   clearanceDiscount: 0.5,
+
+  // manual printing (systems/models.ts): a click adds clickWork figurines of work; each tool level adds clickStep
+  clickWork: 1,
+  clickStep: 0.25,
+  clickCost: 30,
+  clickGrowth: 2.2,
+  clickMaxLevel: 40,
+
+  // dynamic pricing (automation 'autocena'): steers toward the price that sells production plus a slow stock drain
+  autoPriceStockSeconds: 20,  // stock it aims to keep, in seconds of production
+  autoPriceMaxDrain: 1.5,     // sells at most this × production while the stock is above target
+  autoPriceStep: 0.02,        // max price change per second
 } as const;
