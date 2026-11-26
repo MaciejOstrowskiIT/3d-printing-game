@@ -3,14 +3,14 @@ import { seededRng } from '../src/core/ctx';
 import { autoCost, drawP, droneCost, fabCap, fabCost, farmCost, freePts, mining, mktCost, panelCost, rate1, spoolPrice, supply } from '../src/core/formulas';
 import { createGame } from '../src/core/game';
 import { applyStartBonuses } from '../src/core/prestige';
-import type { Meta } from '../src/core/state';
+import type { GameState, Meta } from '../src/core/state';
 import { has } from '../src/core/state';
 import { nodeStatus, reserveWyd } from '../src/systems/research';
 
 export interface BotResult { ended: boolean; minutes: number; goalMinutes: number[]; ordersDone: number; ordersFailed: number }
 
 /** Bot that plays like a skilled player: clicks early, watches filament and price, buys sensibly, takes orders. */
-export function playthrough(seed = 1, maxHours = 6, dt = 0.25, meta?: Partial<Meta>): BotResult {
+export function playthrough(seed = 1, maxHours = 6, dt = 0.25, meta?: Partial<Meta>, observe?: (s: GameState, t: number) => void): BotResult {
   const game = createGame({ rng: seededRng(seed) });
   if (meta) { Object.assign(game.s.meta, meta); applyStartBonuses(game.s); }
   const goalMinutes: number[] = [];
@@ -54,6 +54,7 @@ export function playthrough(seed = 1, maxHours = 6, dt = 0.25, meta?: Partial<Me
     game.tick(dt);
     t = Math.round((t + dt) * 100) / 100;
     for (let k = before; k < game.s.goal; k++) goalMinutes[k] = t / 60;
+    observe?.(game.s, t);
   }
   return { ended: game.s.end, minutes: t / 60, goalMinutes, ordersDone: game.s.ordDone, ordersFailed: game.s.ordFail };
 }
