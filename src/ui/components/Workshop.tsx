@@ -1,8 +1,9 @@
 import { BAL } from '../../content/balance';
+import { MATERIALS, materialDemand } from '../../content/materials';
 import { COLORS } from '../../content/colors';
 import { AUTOMATIONS, NODE } from '../../content/tree';
 import {
-  autoCost, clickCost, clickPower, demand, drawP, gpu, model, droneCost, eff, fabCost, farmCost, inTrend, mktCost, panelCost, rate1, spaceRate, spoolPrice, supply, trendOn, unitCost,
+  autoCost, clickCost, clickPower, demand, drawP, gpu, material, model, droneCost, eff, fabCost, farmCost, inTrend, mktCost, panelCost, rate1, spaceRate, spoolPrice, supply, trendOn, unitCost,
 } from '../../core/formulas';
 import { has } from '../../core/state';
 import { boostUnlocked } from '../../systems/boost';
@@ -11,6 +12,7 @@ import { MARKET_EVENT } from '../../content/events';
 import { STORY_MSG } from '../../content/story';
 import { CALENDAR_EVENT, calendarOn } from '../../content/calendar';
 import { MODELS, type PrintModel } from '../../content/models';
+import { materialStock } from '../../systems/materials';
 import { designVisible } from '../../systems/models';
 import { platform } from '../platform';
 import { act, adPending, useS, watchAdForBoost } from '../store';
@@ -158,7 +160,7 @@ function BoostRow() {
 
 function Production() {
   const v = useS(s => ({
-    rate: rate1(s), fil: s.fil, g: gpu(s), clk: s.clk, clickPow: clickPower(s), clickCost: clickCost(s), printers: s.auto + s.farm * 60, zl: s.zl, bulk: s.spoolG > 1000, spool: spoolPrice(s), spoolD: s.spoolD,
+    rate: rate1(s), fil: s.fil, g: gpu(s), feedstock: material(s).name[li()], showFeedstock: s.total >= MATERIALS[1].unlockAt, clk: s.clk, clickPow: clickPower(s), clickCost: clickCost(s), printers: s.auto + s.farm * 60, zl: s.zl, bulk: s.spoolG > 1000, spool: spoolPrice(s), spoolD: s.spoolD,
     goal: s.goal, auto: s.auto, spd: s.spd, autoCost: autoCost(s), farmOn: s.farmOn, farm: s.farm, farmCost: farmCost(s),
   }));
   const spoolSub = !v.spoolD ? t('spoolSub') : t(v.spoolD > 0 ? 'spoolUp' : 'spoolDn', Math.abs(Math.round(v.spoolD * 100)));
@@ -171,7 +173,7 @@ function Production() {
         <Tile label={t('printersS')} value={fmt(v.printers)} />
       </div>
       <BoostRow />
-      <Item name={t(v.bulk ? 'spool5Item' : 'spoolItem')} sub={spoolSub}>
+      <Item name={t(v.bulk ? 'spool5Item' : 'spoolItem')} sub={v.showFeedstock ? v.feedstock + ' · ' + spoolSub : spoolSub}>
         <BuyButton action="spool" cost={v.spool} have={v.zl} label={money(v.spool)} />
       </Item>
       {v.goal >= 1 && (
@@ -291,6 +293,32 @@ function Models() {
   );
 }
 
+function Materials() {
+  const rows = useS(s => MATERIALS.filter(m => s.total >= m.unlockAt).map(m => ({
+    material: m, selected: s.materialId === m.id, stock: materialStock(s, m.id),
+    price: spoolPrice(s, m) * 1000 / s.spoolG, bonus: materialDemand(m, s.mdl),
+  })));
+  if (rows.length < 2) return null;
+
+  return (
+    <section class="card wide">
+      <CardHead title={t('materialsTitle')} />
+      {rows.map(({ material: m, selected, stock, price, bonus }) => (
+        <Item key={m.id} name={m.name[li()]} sub={[
+          t('materialStock', fmt(stock)),
+          t('materialPrice', money(price)),
+          t('materialDurability', m.durability),
+          bonus > 1 ? t('materialMatch', Math.round((bonus - 1) * 100)) : '',
+        ].filter(Boolean).join(' · ')}>
+          <button aria-pressed={selected} disabled={selected} onClick={() => act(`material:${m.id}`)}>
+            {t(selected ? 'mdlOn' : 'materialUse')}
+          </button>
+        </Item>
+      ))}
+    </section>
+  );
+}
+
 function Energy() {
   const v = useS(s => ({ sup: supply(s), drw: drawP(s), pan: s.panels, e: eff(s), cost: panelCost(s), zl: s.zl }));
   const low = v.e < 1;
@@ -369,6 +397,7 @@ export function Workshop() {
         {!v.sp && <Production />}
         {!v.sp && v.g >= 1 && <Sales />}
         {!v.sp && <Models />}
+        {!v.sp && <Materials />}
         {!v.sp && v.farmOn && <Energy />}
         {v.sp && <Space />}
         {v.sp && <PrestigeCard />}

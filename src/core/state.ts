@@ -1,3 +1,4 @@
+import { DEFAULT_MATERIAL } from '../content/materials';
 import type { DailyOrder } from '../systems/dailyOrder';
 import { BAL } from '../content/balance';
 
@@ -66,6 +67,9 @@ export interface GameState {
   /** Story messages already shown, the one open on screen, and a 1 s check timer. */
   story: string[]; msg: string | null; msgT: number;
   meta: Meta;
+  /** Active feedstock and reserves. fil holds the active feedstock, including PLA in old saves. */
+  materialId: string;
+  materialStock: Record<string, number>;
 }
 
 export const SAVE_VERSION = 5;
@@ -98,6 +102,7 @@ export const createState = (): GameState => ({
   today: 0,
   story: [], msg: null, msgT: 0,
   meta: { patents: 0, earned: 0, runs: 0, pat: {} },
+  materialId: DEFAULT_MATERIAL.id, materialStock: {},
 });
 
 export const has = (s: GameState, id: string) => s.done.includes(id);

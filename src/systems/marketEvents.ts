@@ -1,3 +1,5 @@
+import { DEFAULT_MATERIAL } from '../content/materials';
+import { addMaterial } from './materials';
 import { BAL } from '../content/balance';
 import { MARKET_EVENT, MARKET_EVENTS, type MarketEvent } from '../content/events';
 import { log, pick, sfx, type Ctx } from '../core/ctx';
@@ -13,7 +15,7 @@ const baseIncome = (s: GameState) => Math.min(demand(s) / marketMul(s, 'demand')
 /** Price of an offer, fixed when it appears. */
 export function offerCost(s: GameState, e: MarketEvent): number {
   if (!e.offer) return 0;
-  if (e.spools) return Math.ceil(spoolPrice(s) * e.spools * BAL.clearanceDiscount * 100) / 100;
+  if (e.spools) return Math.ceil(spoolPrice(s, DEFAULT_MATERIAL) * e.spools * BAL.clearanceDiscount * 100) / 100;
   return Math.max(BAL.marketMinMoney, Math.round(baseIncome(s) * e.offer.seconds));
 }
 
@@ -68,7 +70,7 @@ export function acceptMarketEvent(s: GameState, ctx: Ctx): boolean {
   if (!s.mev || !e?.offer || !canAfford(s)) return false;
   s.zl -= s.mev.cost;
   if (e.counter) s.mfx = s.mfx.filter(f => f.id !== e.id);
-  else if (e.spools) s.fil += e.spools * s.spoolG;
+  else if (e.spools) addMaterial(s, DEFAULT_MATERIAL.id, e.spools * s.spoolG);
   else startEffect(s, e);
   log(s, ctx, 'mevOk', '^' + e.id);
   ctx.emit({ type: 'market', id: e.id, result: 'accepted' });
