@@ -127,4 +127,11 @@ describe('market events', () => {
     expect(validMarketState({ ...s, mfx: [{ id: 'nope', t: 1 }] })).toBe(false);
     expect(validMarketState({ ...s, mfx: [{ id: 'holiday', t: 5 }, { id: 'holiday', t: 5 }] })).toBe(false);
   });
+
+  it('the save loader rejects tampered market state', () => {
+    const s = { ...createState(), mev: { id: 'expo', offer: 10, cost: -1e9 } };
+    expect(() => migrate(JSON.parse(JSON.stringify(s)))).toThrow();
+    const ok = { ...createState(), mev: { id: 'expo', offer: 10, cost: 500 }, mfx: [{ id: 'holiday', t: 30 }] };
+    expect(migrate(JSON.parse(JSON.stringify(ok))).mev?.cost).toBe(500);
+  });
 });
