@@ -55,7 +55,7 @@ function Picture({ onToggleExpand }: { onToggleExpand: () => void }) {
 }
 
 function PrintButton({ short }: { short?: boolean }) {
-  const disabled = useS(s => s.fil < gpu(s));
+  const disabled = useS(s => s.fil <= 0);
   const mdl = useS(s => s.mdl);
   const hold = useHold('print');
   const label = mdl === DEFAULT_MODEL.id ? t('printBtn') : t('printBtnM', MODEL[mdl]?.name[li()] ?? '');

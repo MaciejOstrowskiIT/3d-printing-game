@@ -10,7 +10,9 @@ type Migration = (raw: Record<string, unknown>) => void;
 const MIGRATIONS: Record<number, Migration> = {
   // v3 (single-file version) had no v field and not every save stored the failed-order counter.
   3: raw => { raw.ordFail ??= 0; },
-  // v5 added achievements; existing progress unlocks them silently in migrate() below.
+  // v5 stock was pooled in figurine equivalents, with no model provenance.
+  // Keep it as figurines. Old partially printed work was not paid for yet.
+  5: raw => { raw.acc = 0; raw.mp = 0; },
 };
 
 /** Loads a raw save (including old versions) and returns a complete, current state. */

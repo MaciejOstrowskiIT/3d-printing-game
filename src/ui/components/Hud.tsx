@@ -1,5 +1,7 @@
 import { BAL } from '../../content/balance';
 import { autobuyOn, filamentRunway } from '../../systems/filament';
+import { MODELS } from '../../content/models';
+import { piecesInStock } from '../../systems/inventory';
 import { TREE } from '../../content/tree';
 import { eff, freePts, gpu, opsCap } from '../../core/formulas';
 import { has } from '../../core/state';
@@ -40,7 +42,7 @@ export function Tabs({ class: cls }: { class?: string }) {
 
 export function Hud() {
   const v = useS(s => ({
-    sp: s.ph === 2, g: s.goal, zl: money(s.zl), inv: fmt(Math.floor(s.inv)), fil: fmt(s.fil) + ' g', filWarn: s.ph === 1 && (s.fil < gpu(s) || (filamentRunway(s) < BAL.filamentWarnSeconds && !autobuyOn(s) && s.total > 0)),
+    sp: s.ph === 2, g: s.goal, zl: money(s.zl), inv: fmt(s.ph === 2 ? Math.floor(s.inv) : MODELS.reduce((sum, m) => sum + piecesInStock(s, m.id), 0)), fil: fmt(s.fil) + ' g', filWarn: s.ph === 1 && (s.fil < gpu(s) || (filamentRunway(s) < BAL.filamentWarnSeconds && !autobuyOn(s) && s.total > 0)),
     real: (s.slow || 1) > 1, farmOn: s.farmOn, en: Math.round(eff(s) * 100), ops: fmt(Math.floor(s.ops)) + ' / ' + fmt(opsCap(s)), mat: fmt(s.mat) + ' t',
   }), );
   const unlocked = useResearchUnlocked();
