@@ -1,6 +1,6 @@
 import { signal, useComputed } from '@preact/signals';
-import { adState } from '../platform/Platform';
 import { useRef } from 'preact/hooks';
+import { adState } from '../platform/Platform';
 import { createGame, type Action } from '../core/game';
 import { migrate, serialize } from '../core/save';
 import type { GameState } from '../core/state';
@@ -71,12 +71,30 @@ game.on(e => {
   if (e.type === 'achievement') { pushToast(e.id); platform.track('achievement', { id: e.id }); }
 });
 
+/** Title screen first; the simulation only runs on the game screen. */
+export const screen = signal<'title' | 'game'>('title');
+/** Open modal dialog, if any. */
+export const dialog = signal<null | 'save'>(null);
+
+export function startGame(fresh = false) {
+  if (fresh) resetGame('fresh');
+  screen.value = 'game';
+  platform.gameplayStart();
+}
+
+/** Replaces the running game with an imported save. */
+export function loadImported(s: GameState) {
+  game.load(s);
+  save();
+  bump();
+}
+
 let lastT = performance.now(), sinceSave = 0;
 export function startLoop() {
   setInterval(() => {
     const now = performance.now(), dt = Math.min(1, (now - lastT) / 1000);
     lastT = now;
-    if (adState.playing) return; // the game is paused while an ad plays
+    if (adState.playing || screen.value !== 'game') return; // paused during ads and on the title screen
     game.tick(dt);
     bump();
     sinceSave += dt;
@@ -84,5 +102,4 @@ export function startLoop() {
   }, 100);
   document.addEventListener('visibilitychange', save);
   window.addEventListener('pagehide', save);
-  platform.gameplayStart();
 }

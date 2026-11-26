@@ -24,3 +24,30 @@ export function migrate(raw: unknown): GameState {
 }
 
 export const serialize = (s: GameState) => JSON.stringify({ ...s, ts: Date.now() });
+
+/** Prefix of exported save codes; bump the number if the code format (not the state) ever changes. */
+export const EXPORT_PREFIX = 'DRK1:';
+
+const toBase64 = (text: string) => {
+  let bin = '';
+  for (const b of new TextEncoder().encode(text)) bin += String.fromCharCode(b);
+  return btoa(bin);
+};
+const fromBase64 = (b64: string) => new TextDecoder().decode(Uint8Array.from(atob(b64), c => c.charCodeAt(0)));
+
+/** A portable text code for moving a save between browsers or devices. */
+export const exportSave = (s: GameState) => EXPORT_PREFIX + toBase64(serialize(s));
+
+/** Parses a save code (or raw save JSON). Returns null for anything that does not look like a save. */
+export function importSave(text: string): GameState | null {
+  const code = text.trim().replace(/\s+/g, '');
+  if (!code) return null;
+  try {
+    const json = code.startsWith(EXPORT_PREFIX) ? fromBase64(code.slice(EXPORT_PREFIX.length)) : code;
+    const raw = JSON.parse(json) as Record<string, unknown>;
+    if (!raw || typeof raw !== 'object' || typeof raw.total !== 'number' || !Array.isArray(raw.done)) return null;
+    return migrate(raw);
+  } catch {
+    return null;
+  }
+}

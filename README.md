@@ -76,6 +76,7 @@ tests/         system tests and the balance bot
 - Isometric scene (garage → workshop → factory floor → orbit) with a printer close-up inset and layer-by-layer animation.
 - 20 achievements (one hidden) with toasts; older saves unlock earned ones silently.
 - Prestige: after liftoff, start a new production line for patents (`floor(2 · log10(total / 1e5)^1.5)`), spent on 9 permanent upgrades in `content/patents.ts`.
+- Title screen (continue, new game, load a save) and a Save dialog: export as a `DRK1:` text code (copy or download) and import from text or a file.
 - PL / EN, sound (WebAudio), offline progress up to 8 h.
 
 ## Balance
