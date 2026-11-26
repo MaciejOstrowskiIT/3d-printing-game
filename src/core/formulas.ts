@@ -27,7 +27,8 @@ export const demand = (s: GameState) =>
   (s.pen > 0 ? BAL.penaltyDemand : 1) *
   (inTrend(s) ? BAL.trendBonus : 1);
 
-export const rateBase = (s: GameState) => (s.auto + s.farm * BAL.farmPrinters * eff(s)) * s.spd;
+export const boostMul = (s: GameState) => (s.boostT > 0 ? BAL.boostMultiplier : 1);
+export const rateBase = (s: GameState) => (s.auto + s.farm * BAL.farmPrinters * eff(s)) * s.spd * boostMul(s);
 export const rate1 = (s: GameState) => rateBase(s) * (1 - s.brk);
 
 export const repNext = (s: GameState) => BAL.repThreshold * (s.rep + 1) ** 2;
@@ -36,6 +37,6 @@ export const freePts = (s: GameState) => s.rep - (s.proc + s.mem - 2);
 export const opsCap = (s: GameState) => s.mem * BAL.opsPerMemory;
 export const opsRate = (s: GameState) => s.proc * BAL.opsPerProcessor;
 
-export const mining = (s: GameState) => s.drones * BAL.droneMining * s.dMul;
-export const fabCap = (s: GameState) => s.fabs * BAL.fabThroughput * s.fMul;
+export const mining = (s: GameState) => s.drones * BAL.droneMining * s.dMul * boostMul(s);
+export const fabCap = (s: GameState) => s.fabs * BAL.fabThroughput * s.fMul * boostMul(s);
 export const spaceRate = (s: GameState) => Math.min(mining(s), fabCap(s)) * BAL.figurinesPerTon;

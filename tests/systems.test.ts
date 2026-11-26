@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { seededRng } from '../src/core/ctx';
-import { demand, eff, unitCost } from '../src/core/formulas';
+import { demand, eff, rate1, unitCost } from '../src/core/formulas';
 import { createGame } from '../src/core/game';
 import { migrate } from '../src/core/save';
 import { createState } from '../src/core/state';
@@ -100,5 +100,27 @@ describe('offline', () => {
     expect(g.s.ord).toBeNull();
     expect(g.s.brk).toBe(0);
     expect(g.s.log[0].k).toMatch(/^off/);
+  });
+});
+
+describe('rewarded boost', () => {
+  it('doubles production for its duration, then has a cooldown', () => {
+    const g = newGame();
+    g.s.auto = 10; g.s.goal = 3; g.s.brkT = 1e9; // keep breakdowns out of the comparison
+    const base = rate1(g.s);
+    expect(g.act('boost')).toBe(true);
+    expect(rate1(g.s)).toBeCloseTo(base * 2);
+    expect(g.act('boost')).toBe(false);
+    for (let i = 0; i < 301; i++) g.tick(1);
+    expect(g.s.boostT).toBe(0);
+    expect(rate1(g.s)).toBeCloseTo(base);
+    expect(g.act('boost')).toBe(false);
+    for (let i = 0; i < 300; i++) g.tick(1);
+    expect(g.act('boost')).toBe(true);
+  });
+
+  it('is not available before the player automates production', () => {
+    const g = newGame();
+    expect(g.act('boost')).toBe(false);
   });
 });

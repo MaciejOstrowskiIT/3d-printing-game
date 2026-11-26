@@ -5,8 +5,10 @@ import {
   autoCost, demand, drawP, droneCost, eff, fabCost, farmCost, inTrend, mktCost, panelCost, rate1, spaceRate, spoolPrice, supply, trendOn, unitCost,
 } from '../../core/formulas';
 import { has } from '../../core/state';
-import { act, useS } from '../store';
-import { colorName, dict, dur, fmt, li, money, nf, t } from '../i18n';
+import { boostUnlocked } from '../../systems/boost';
+import { platform } from '../platform';
+import { act, adPending, useS, watchAdForBoost } from '../store';
+import { clock, colorName, dict, dur, fmt, li, money, nf, t } from '../i18n';
 import { BuyButton, CardHead, Item, Meter, Tile, useHold } from './common';
 
 function Events() {
@@ -44,6 +46,22 @@ function Events() {
   );
 }
 
+/** Rewarded "overtime" boost. Shown only where the platform can serve rewarded ads. */
+function BoostRow() {
+  const v = useS(s => ({ show: boostUnlocked(s), on: s.boostT > 0, left: s.boostT, cd: s.boostCd }));
+  if (!platform.rewardedAvailable || !v.show) return null;
+  const pending = adPending.value;
+  const sub = v.on ? t('boostOn', clock(v.left)) : v.cd > 0 ? t('boostCd', clock(v.cd)) : t('boostSub');
+  return (
+    <div class={'item boost' + (v.on ? ' active' : '')}>
+      <div class="it"><b>{t('boostItem')}</b><small>{sub}</small></div>
+      <button class="buy ok" disabled={v.on || v.cd > 0 || pending} onClick={() => void watchAdForBoost()}>
+        {pending ? t('boostWait') : t('boostBtn')}
+      </button>
+    </div>
+  );
+}
+
 function Production() {
   const v = useS(s => ({
     rate: rate1(s), fil: s.fil, g: s.g, printers: s.auto + s.farm * 60, zl: s.zl, bulk: s.spoolG > 1000, spool: spoolPrice(s), spoolD: s.spoolD,
@@ -58,6 +76,7 @@ function Production() {
         <Tile label={t('perFigS')} value={nf(v.g, 1) + ' g'} />
         <Tile label={t('printersS')} value={fmt(v.printers)} />
       </div>
+      <BoostRow />
       <Item name={t(v.bulk ? 'spool5Item' : 'spoolItem')} sub={spoolSub}>
         <BuyButton action="spool" cost={v.spool} have={v.zl} label={money(v.spool)} />
       </Item>
@@ -166,6 +185,7 @@ function Space() {
         <Tile label={t('storage')} value={fmt(v.ft, 2) + ' t'} />
         <Tile label={t('mining')} value={t('perS', fmt(v.rate))} />
       </div>
+      <BoostRow />
       <Item name={t('droneItem')} sub={t('droneSub', fmt(v.drones), fmt(v.dRate, 1))}>
         <BuyButton action="drone" cost={v.dCost} have={v.inv} label={t('figs', fmt(v.dCost))} />
       </Item>
