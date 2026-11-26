@@ -307,6 +307,11 @@ body.space .title-screen{background:#14122b}
 }
 /* iOS zooms into any focused field under 16px. */
 @media (pointer:coarse){.modal-box textarea,.modal-box input{font-size:16px}}
+/* Research tree pages (4 branches each). */
+.tpages{display:flex;gap:6px;margin:4px 0 10px}
+.tpages button{display:flex;align-items:center;gap:6px}
+.tpages button[aria-selected="true"]{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.tpages .dot-in{background:var(--or);color:#fff;border-radius:999px;font-size:12px;min-width:20px;padding:1px 6px;line-height:18px;text-align:center}
 /* Research preview in the Workshop: the next few nodes side by side, with progress and a direct unlock button. */
 .rprev{margin-bottom:14px}
 .rprev .rp-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}

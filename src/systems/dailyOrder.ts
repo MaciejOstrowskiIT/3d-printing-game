@@ -5,6 +5,7 @@ import { log, sfx, type Ctx } from '../core/ctx';
 import { boostMul, rateBase } from '../core/formulas';
 import { calendarOn } from '../content/calendar';
 import type { GameState } from '../core/state';
+import { mod } from '../core/mods';
 
 /** Order of the day: one special order per calendar day, delivered from stock any time that day.
  *  Days in a row build a streak that raises the pay. The core never reads the clock: the UI reports the local
@@ -34,7 +35,7 @@ export function newDay(s: GameState, ctx: Ctx, day: number): boolean {
   const n = Math.max(BAL.dailyMinSize, Math.round((rate * BAL.dailySeconds) / 10) * 10);
   const c = Math.floor(ctx.rng() * CLIENTS);
   const streak = s.dstreak + 1;
-  s.dord = { day, n, c, done: false, pay: Math.round(n * s.price * BAL.dailyPayMultiplier * streakMul(streak) * 100) / 100 };
+  s.dord = { day, n, c, done: false, pay: Math.round(n * s.price * BAL.dailyPayMultiplier * streakMul(streak) * mod(s, 'dailyPay') * 100) / 100 };
   log(s, ctx, 'dNew', '#' + c);
   ctx.emit({ type: 'daily', result: 'offered', streak });
   sfx(ctx, 'alert');

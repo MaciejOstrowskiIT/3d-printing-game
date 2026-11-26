@@ -1,28 +1,16 @@
-import { BAL } from '../src/content/balance';
 import { TREE } from '../src/content/tree';
 import { seededRng } from '../src/core/ctx';
-import { autoCost, clickCost, demand, drawP, droneCost, fabCap, fabCost, farmCost, freePts, gpu, mining, mktCost, panelCost, rate1, spoolPrice, supply, unitCost } from '../src/core/formulas';
+import { autoCost, clickCost, drawP, droneCost, fabCap, fabCost, farmCost, freePts, gpu, mining, mktCost, panelCost, rate1, spoolPrice, supply } from '../src/core/formulas';
 import { createGame } from '../src/core/game';
 import { applyStartBonuses } from '../src/core/prestige';
 import type { GameState, Meta } from '../src/core/state';
 import { has } from '../src/core/state';
 import { nodeStatus, reserveWyd } from '../src/systems/research';
-import { MODEL, MODELS } from '../src/content/models';
-import { designVisible } from '../src/systems/models';
-import { autoPrice } from '../src/systems/automation';
+import { MODELS } from '../src/content/models';
+import { bestModel, designCost, designVisible } from '../src/systems/models';
+import { autoPrice, savingForLiftoff } from '../src/systems/automation';
 
-/** Owned model with the best profit per second if the price clears the market at the current production rate. */
-export function bestModel(s: GameState): string {
-  const R = Math.max(rate1(s), 1e-6);
-  let best = s.mdl, bestProfit = -Infinity;
-  for (const id of s.mdls) {
-    const t = { ...s, mdl: id, price: s.price * (MODEL[id].value / MODEL[s.mdl].value) };
-    const clearing = t.price * (demand(t) / R) ** (1 / BAL.demandElasticity);
-    const profit = R * (Math.min(clearing, 500 / MODEL[id].seconds) - unitCost(t));
-    if (profit > bestProfit) { bestProfit = profit; best = id; }
-  }
-  return best;
-}
+export { bestModel } from '../src/systems/models';
 
 export interface BotResult { ended: boolean; minutes: number; goalMinutes: number[]; ordersDone: number; ordersFailed: number }
 
@@ -52,7 +40,7 @@ export function playthrough(seed = 1, maxHours = 6, dt = 0.25, meta?: Partial<Me
         if (s.mev && s.mev.cost < s.zl / 3) game.act('mevyes');
         // Click tools while clicking still matters; designs when cheap; every 10 s print the most profitable model.
         if (s.auto < 15 && clickCost(s) < (s.zl - reserve) * 0.25) game.act('tool');
-        for (const m of MODELS) if (!s.mdls.includes(m.id) && designVisible(s, m) && m.design < (s.zl - reserve) * 0.3) game.act(`stl:${m.id}`);
+        for (const m of MODELS) if (!s.mdls.includes(m.id) && designVisible(s, m) && designCost(s, m) < (s.zl - reserve) * 0.3) game.act(`stl:${m.id}`);
         if (Math.round(t) % 10 === 0) { const best = bestModel(s); if (best !== s.mdl) game.act(`mdl:${best}`); }
         if (s.brk > 0) game.act('fix');
         if (s.col !== s.trend && s.goal >= 2) game.act(`col:${s.trend}`);
@@ -68,7 +56,8 @@ export function playthrough(seed = 1, maxHours = 6, dt = 0.25, meta?: Partial<Me
         if (need > s.mem * 1000) { const m = Math.min(f, Math.ceil((need - s.mem * 1000) / 1000)); s.mem += m; s.proc += f - m; }
         else s.proc += f;
       }
-      const r = TREE.filter(n => nodeStatus(s, n) === 'ready').sort((a, b) => a.ops - b.ops)[0];
+      // Like a sensible player: once liftoff is within reach, research only the liftoff node.
+      const r = TREE.filter(n => nodeStatus(s, n) === 'ready' && (!savingForLiftoff(s) || n.liftoff)).sort((a, b) => a.ops - b.ops)[0];
       if (r) game.act(`t:${r.id}`);
     }
     const before = game.s.goal;

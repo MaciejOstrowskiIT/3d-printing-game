@@ -18,9 +18,9 @@ import { MODELS, type PrintModel } from '../../content/models';
 import { qualityUnlocked } from '../../systems/printQuality';
 import { materialStock } from '../../systems/materials';
 import { autobuyOn, filamentRunway, stockedAlternative } from '../../systems/filament';
-import { designVisible } from '../../systems/models';
+import { designCost, designVisible } from '../../systems/models';
 import { platform } from '../platform';
-import { act, adPending, useS, watchAdForBoost } from '../store';
+import { act, game, adPending, useS, watchAdForBoost } from '../store';
 import { clock, colorName, dict, dur, fmt, li, money, nf, t } from '../i18n';
 import { BuyButton, CardHead, Item, Meter, Tile, useHold } from './common';
 import { WorkshopStats } from './WorkshopStats';
@@ -338,7 +338,7 @@ function Models() {
             </div>
             {have
               ? <button class={on ? 'on' : ''} disabled={on} onClick={e => { if (act(`mdl:${m.id}`) && e.detail > 0) e.currentTarget.blur(); }}>{on ? t('mdlOn') : t('mdlUse')}</button>
-              : <BuyButton action={`stl:${m.id}`} cost={m.design} have={v.zl} label={money(m.design)} />}
+              : <BuyButton action={`stl:${m.id}`} cost={designCost(game.s, m)} have={v.zl} label={money(designCost(game.s, m))} />}
           </div>
         );
       })}

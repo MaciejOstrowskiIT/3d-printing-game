@@ -12,8 +12,7 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 
 | Card | PR | Notes |
 |---|---|---|
-| Research visibility: next research in the Workshop, collapsed finished nodes, pulsing tab count | #30 | |
-| Filament run-out: early warning, switch to a material in stock, idle time in the away report | #28 | |
+| Big research tree: 69 nodes in 8 branches on two pages, data-driven research modifiers, 3 new automations | (this PR) | Pacing: liftoff ~60 min, end ~90 min (bot) |
 
 ## 🚦 Next up
 
@@ -81,3 +80,5 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 | Materials (Codex) | #25 |
 | Print quality (Codex) | #26 |
 | Story messages | #27 |
+| Filament run-out handling | #28 |
+| Research visibility | #30 |

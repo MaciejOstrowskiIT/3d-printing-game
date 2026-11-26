@@ -31,7 +31,7 @@ export function migrate(raw: unknown): GameState {
   // These multipliers come exclusively from research. Rebuild them from the
   // purchased projects, on a scratch state so one-time rewards never replay.
   const researched = createState();
-  for (const id of s.done) NODE[id].fx(researched);
+  for (const id of s.done) NODE[id].fx?.(researched);
   s.spd = researched.spd;
   s.dem = researched.dem;
   s.dMul = researched.dMul;
