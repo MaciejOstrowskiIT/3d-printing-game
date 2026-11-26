@@ -27,8 +27,8 @@ export const BAL = {
   // production
   printerCost: 200,          // first printer ~1 min of clicking for a person, ~30 s for the bot
   printerCostGrowth: 1.15,
-  farmCost: 20000,
-  farmCostGrowth: 1.1,
+  farmCost: 50000,           // a farm is 60 printers: cheap per printer, so the price climbs fast to avoid a
+  farmCostGrowth: 1.3,       // runaway (was 20,000 x 1.1: 77 -> 4,700 figurines/s within 7 minutes)
   farmPrinters: 60,
 
   // power
@@ -96,4 +96,14 @@ export const BAL = {
   autoPriceStockSeconds: 20,  // stock it aims to keep, in seconds of production
   autoPriceMaxDrain: 1.5,     // sells at most this × production while the stock is above target
   autoPriceStep: 0.02,        // max price change per second
+
+  // rewarded "double offline earnings" (systems/offlineBonus.ts)
+  offlineBonusMinSeconds: 120,     // shorter absences get no offer
+  offlineBonusMult: 1,             // the ad adds this × what was earned while away
+  offlineBonusClaimSeconds: 600,   // the offer stays for 10 minutes of play
+
+  // realistic mode: a challenge chosen when starting a new production line (core/prestige.ts)
+  realisticSlow: 10,               // printing takes 10× longer (printers and clicks; the space phase is unchanged)
+  realisticPatentMult: 2,          // patents for finishing such a line
+  realisticOfflineMax: 24 * 3600,  // longer offline progress, made for playing in the background
 } as const;

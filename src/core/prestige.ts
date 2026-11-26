@@ -4,14 +4,17 @@ import { log, sfx, type Ctx } from './ctx';
 import { createState, patLvl, type GameState } from './state';
 
 /** Patents earned by resetting now: grows with the log of total figurines, so a finished game gives far more than an early reset. */
-export function patentsFor(s: GameState): number {
+function basePatents(s: GameState): number {
   const x = Math.log10(Math.max(1, s.total) / BAL.prestigeBase);
   return x <= 0 ? 0 : Math.floor(BAL.prestigeScale * x ** 1.5);
 }
 
+/** Patents for resetting now; a realistic line pays realisticPatentMult times more. */
+export const patentsFor = (s: GameState) => basePatents(s) * ((s.slow || 1) > 1 ? BAL.realisticPatentMult : 1);
+
 /** Total figurines needed for the next patent at reset. */
 export function nextPatentAt(s: GameState): number {
-  const want = patentsFor(s) + 1;
+  const want = basePatents(s) + 1;
   return BAL.prestigeBase * 10 ** ((want / BAL.prestigeScale) ** (2 / 3));
 }
 
@@ -34,8 +37,9 @@ export function applyStartBonuses(s: GameState) {
   keepAutomation(s);
 }
 
-/** Starts a new production line. Keeps meta progress, achievements and colours; returns the fresh state. */
-export function prestige(s: GameState, ctx: Ctx): GameState | null {
+/** Starts a new production line, optionally a realistic one (challenge: slower printing, more patents).
+ *  Keeps meta progress, achievements and colours; returns the fresh state. */
+export function prestige(s: GameState, ctx: Ctx, realistic = false): GameState | null {
   if (!canPrestige(s)) return null;
   const gain = patentsFor(s);
   const next = createState();
@@ -43,9 +47,10 @@ export function prestige(s: GameState, ctx: Ctx): GameState | null {
   next.ach = [...s.ach];
   next.colorsUsed = s.colorsUsed;
   next.col = s.col;
+  next.slow = realistic ? BAL.realisticSlow : 1;
   applyStartBonuses(next);
-  log(next, ctx, 'prestige', gain);
-  ctx.emit({ type: 'prestige', gain });
+  log(next, ctx, realistic ? 'prestigeR' : 'prestige', gain);
+  ctx.emit({ type: 'prestige', gain, realistic });
   sfx(ctx, 'goal');
   return next;
 }

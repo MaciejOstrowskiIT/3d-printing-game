@@ -39,7 +39,7 @@ export function Tabs({ class: cls }: { class?: string }) {
 export function Hud() {
   const v = useS(s => ({
     sp: s.ph === 2, g: s.goal, zl: money(s.zl), inv: fmt(Math.floor(s.inv)), fil: fmt(s.fil) + ' g', filWarn: s.ph === 1 && s.fil < gpu(s),
-    farmOn: s.farmOn, en: Math.round(eff(s) * 100), ops: fmt(Math.floor(s.ops)) + ' / ' + fmt(opsCap(s)), mat: fmt(s.mat) + ' t',
+    real: (s.slow || 1) > 1, farmOn: s.farmOn, en: Math.round(eff(s) * 100), ops: fmt(Math.floor(s.ops)) + ' / ' + fmt(opsCap(s)), mat: fmt(s.mat) + ' t',
   }), );
   const unlocked = useResearchUnlocked();
   return (
@@ -51,6 +51,7 @@ export function Hud() {
         <Chip show={!v.sp && v.farmOn} label={t('power')} value={v.en + '%'} warn={v.en < 100} />
         <Chip show={unlocked} label={t('compute')} value={v.ops} />
         <Chip show={v.sp} label={t('matter')} value={v.mat} />
+        <Chip show={v.real} label={t('realBadge')} value={t('realBadgeV')} />
       </div>
       <div class="tabs" role="tablist"><Tabs /></div>
     </nav>

@@ -20,11 +20,10 @@ Planned work and its order: `ROADMAP.md` (task board). Pick cards from "Next up"
 ## In flight
 | PR / branch | Agent | Touches |
 |---|---|---|
-| #14 `feat/print-models` | Claude | `content/models.ts`, `systems/models.ts`, `tests/models.test.ts` (new); `GameState.mdl/mdls/clk/mp`; `formulas.ts` (`model`, `gpu`, `modelDemand` in `demand`, `clickPower`); manual printing moved from `systems/production.ts` to `systems/models.ts`; `printed` event `share`; actions `tool`, `mdl:*`, `stl:*`; log prefix `*`; `Workshop.tsx` (Models card, tools row, prices per piece); `Side.tsx` print label; `scene/printer.ts` shapes; `tests/bot.ts` |
-| `fix/early-balance` (on top of #14) | Claude | `systems/automation.ts` (`autoPrice` controller), `formulas.ts` (`clearingPrice`), `balance.ts` (printer cost, `autoPrice*`), `tree.ts` (`autocena` gating/text), `goals.ts` (goal 2 = sell 30), `tests/bot.ts`, `tests/autoPrice.test.ts` |
-| #15 `fix/mobile-touch` | Claude | `styles.css` (touch rules at the top, one media query at the end) |
+| `feat/offline-double` | Claude | `systems/offlineBonus.ts` (new, appended to `SYSTEMS`); `GameState.offB/offBi/offBT`; `catchUp` sums sales revenue; action `offx2`; `validSave()` hook; `ui/store.ts` (`watchAd()` generalised); `App.tsx` away report; `market.ts` trend pick without retry loop |
+| `feat/realistic-mode` (on top of #17) | Claude | `GameState.slow`; `formulas.ts` (`rateBase`/`clickPower` ÷ slow, `printSeconds`, `isRealistic`); `prestige.ts` (`prestige(s, ctx, realistic)`, `patentsFor` ×2); action `prestigeR`; `catchUp` 24 h cap; `validSave()` hook; `Prestige.tsx`, `App.tsx` End, `Hud.tsx` badge; achievement `realist`; `tests/bot.ts` (`init` arg) |
 
-Merged: #8 analytics, #9 portal assets, #10 workshop discovery, #11 save validation (via #13), #12 market events.
+Merged: #8–#16 (analytics, portal assets, workshop discovery, save validation, market events, print models, mobile touch, early balance).
 
 Cross-branch notes:
 - `validSave()` calls `validMarketState()` and `validModelState()`; new state with objects or arrays needs its own

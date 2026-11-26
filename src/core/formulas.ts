@@ -27,7 +27,10 @@ export const gpu = (s: GameState) => s.g * model(s).material;
 /** Market size of a model in figurines/s at the same price per figurine (see content/models.ts). */
 export const modelDemand = (m: PrintModel) => m.value ** BAL.demandElasticity * m.market * m.seconds;
 /** Figurines of work added by one click. */
-export const clickPower = (s: GameState) => BAL.clickWork * (1 + BAL.clickStep * s.clk);
+export const clickPower = (s: GameState) => BAL.clickWork * (1 + BAL.clickStep * s.clk) / (s.slow || 1);
+/** Print time of one piece of a model in seconds, as the player sees it (longer on a realistic line). */
+export const printSeconds = (s: GameState, m: PrintModel) => m.seconds * (s.slow || 1);
+export const isRealistic = (s: GameState) => (s.slow || 1) > 1;
 export const clickCost = (s: GameState) => BAL.clickCost * BAL.clickGrowth ** s.clk;
 /** Price per figurine at which demand would be `sales` figurines/s (demand ∝ price^-elasticity). */
 export const clearingPrice = (s: GameState, sales: number) =>
@@ -56,7 +59,7 @@ export const demand = (s: GameState) =>
   modelDemand(model(s)) * materialDemand(material(s), s.mdl);
 
 export const boostMul = (s: GameState) => (s.boostT > 0 ? BAL.boostMultiplier : 1);
-export const rateBase = (s: GameState) => (s.auto + s.farm * BAL.farmPrinters * eff(s)) * s.spd * boostMul(s) * (1 + 0.15 * patLvl(s, 'speed'));
+export const rateBase = (s: GameState) => (s.auto + s.farm * BAL.farmPrinters * eff(s)) * s.spd * boostMul(s) * (1 + 0.15 * patLvl(s, 'speed')) / (s.slow || 1);
 export const rate1 = (s: GameState) => rateBase(s) * (1 - s.brk);
 
 const repBase = (s: GameState) => BAL.repThreshold * 0.9 ** patLvl(s, 'fame');

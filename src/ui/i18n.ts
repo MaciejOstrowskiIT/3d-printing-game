@@ -18,6 +18,8 @@ function loadPrefs(): Prefs {
 }
 
 export const prefs = signal<Prefs>(loadPrefs());
+/** Re-reads preferences once the platform is ready (a portal SDK may hold them). */
+export const reloadPrefs = () => { prefs.value = loadPrefs(); };
 export const setPrefs = (p: Partial<Prefs>) => { prefs.value = { ...prefs.value, ...p }; platform.savePrefs(JSON.stringify(prefs.value)); };
 
 const DICTS: Record<Lang, Dict> = { pl, en };
@@ -78,5 +80,6 @@ export function logText(e: LogEntry): string {
       default: return x;
     }
   });
-  return fill((D.L as Record<string, string>)[e.k] ?? e.k, args);
+  // Abbreviated numbers end with a dot ("12 tys."); do not double it at the end of a sentence.
+  return fill((D.L as Record<string, string>)[e.k] ?? e.k, args).replace(/\.\.(?=\s|$)/g, '.');
 }

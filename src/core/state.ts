@@ -55,6 +55,10 @@ export interface GameState {
   mev: PendingMarketEvent | null; mevT: number; mfx: MarketEffect[];
   /** Print models (content/models.ts): selected model, owned designs, click tool level, manual progress on the current piece. */
   mdl: string; mdls: string[]; clk: number; mp: number;
+  /** Rewarded offline bonus waiting to be claimed: money, figurines, seconds left. */
+  offB: number; offBi: number; offBT: number;
+  /** Print-time multiplier: 1 normally, BAL.realisticSlow on a realistic line. */
+  slow: number;
   meta: Meta;
   /** Active feedstock and reserves. fil holds the active feedstock, including PLA in old saves. */
   materialId: string;
@@ -85,6 +89,8 @@ export const createState = (): GameState => ({
   play: 0,
   mev: null, mevT: BAL.marketEventFirst, mfx: [],
   mdl: 'fig', mdls: ['fig'], clk: 0, mp: 0,
+  offB: 0, offBi: 0, offBT: 0,
+  slow: 1,
   meta: { patents: 0, earned: 0, runs: 0, pat: {} },
   materialId: DEFAULT_MATERIAL.id, materialStock: {},
 });
