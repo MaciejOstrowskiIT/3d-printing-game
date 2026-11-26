@@ -9,7 +9,7 @@ import { useHold } from './common';
 
 const STAGE_KEY = { garage: 'stGarage', shop: 'stShop', hall: 'stHall', space: 'stSpace' } as const;
 
-/** Obrazek w panelu bocznym: hala (izometria) i zbliżenie na drukarkę. Mniejszy widok to okienko w rogu; kliknięcie zamienia. */
+/** Sidebar picture: isometric floor and printer close-up. The smaller view is a corner inset; clicking it swaps them. */
 function Picture({ onToggleExpand }: { onToggleExpand: () => void }) {
   const closeRef = useRef<SVGSVGElement>(null);
   const roomRef = useRef<SVGSVGElement>(null);

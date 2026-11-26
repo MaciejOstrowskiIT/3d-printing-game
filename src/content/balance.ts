@@ -1,5 +1,5 @@
-/** Wszystkie liczby od balansu w jednym miejscu. Zmieniasz tutaj, a test bota w tests/balance.sim.test.ts
- *  od razu pokaże, jak to wpływa na tempo gry. */
+/** All balance numbers in one place. Change them here and the bot test in tests/balance.sim.test.ts
+ *  shows right away how pacing is affected. */
 export const BAL = {
   startPrice: 5,
   startFilament: 1000,
@@ -9,11 +9,11 @@ export const BAL = {
   spoolBasePrice: 60,
   spoolMin: 40,
   spoolMax: 85,
-  spoolStep: 0.07,          // maks. zmiana ceny przy jednym skoku
-  spoolEvery: [10, 13],     // co ile sekund zmienia się cena
-  bulkPackDiscount: 0.85,   // paczka 5 kg
+  spoolStep: 0.07,          // max price change per step
+  spoolEvery: [10, 13],     // seconds between price changes
+  bulkPackDiscount: 0.85,   // 5 kg pack
 
-  // sprzedaż
+  // sales
   demandBase: 4,
   demandElasticity: 1.6,
   marketingGrowth: 1.15,
@@ -24,38 +24,38 @@ export const BAL = {
   trendBonus: 1.3,
   trendEvery: [150, 240],
 
-  // produkcja
+  // production
   printerCost: 50,
   printerCostGrowth: 1.12,
   farmCost: 20000,
   farmCostGrowth: 1.1,
   farmPrinters: 60,
 
-  // energia
+  // power
   garagePower: 40,
   panelPower: 25,
   farmDraw: 20,
   panelCost: 5000,
   panelCostGrowth: 1.1,
 
-  // komputer
+  // computer
   opsPerProcessor: 10,
   opsPerMemory: 1000,
-  repThreshold: 500,        // następny punkt przy repThreshold * (rep+1)^2 figurek
+  repThreshold: 500,        // next point at repThreshold * (rep+1)^2 figurines
 
-  // zamówienia
+  // orders
   orderFirstAt: 45,
   orderEvery: [60, 120],
   orderOffer: 30,
   orderPayMultiplier: 3,
   b2bBonus: 1.5,
 
-  // awarie
+  // breakdowns
   breakdownEvery: [90, 170],
   breakdownShare: [0.2, 0.35],
   cameraFix: 5,
 
-  // kosmos
+  // space
   beltMatter: 4e7,
   droneCost: 2e5,
   droneCostGrowth: 1.055,

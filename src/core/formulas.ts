@@ -1,7 +1,7 @@
 import { BAL } from '../content/balance';
 import type { GameState } from './state';
 
-/** Czyste wzory liczone ze stanu. Bez efektów ubocznych: używa ich rdzeń, UI i testy. */
+/** Pure formulas derived from state. No side effects: used by core, UI and tests. */
 
 export const autoCost = (s: GameState) => BAL.printerCost * BAL.printerCostGrowth ** s.auto;
 export const farmCost = (s: GameState) => BAL.farmCost * BAL.farmCostGrowth ** s.farm;

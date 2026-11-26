@@ -1,7 +1,7 @@
 import { BAL } from '../content/balance';
 
-/** Argument wpisu w dzienniku. Prefiksy w stringach są zachowane dla zgodności ze starymi zapisami:
- *  '@id' węzeł drzewka, '$123' kwota, '#2' klient, '%1' przyczyna awarii, '~90' czas w s, '&3' kolor, 'pl|en' tekst celu. */
+/** Log entry argument. String prefixes are kept for compatibility with old saves:
+ *  '@id' tree node, '$123' money, '#2' client, '%1' breakdown cause, '~90' duration in s, '&3' colour, 'pl|en' goal text. */
 export type LogArg = string | number;
 export interface LogEntry { k: string; a: LogArg[] }
 
@@ -9,7 +9,7 @@ export interface Order {
   n: number; got: number; time: number; left: number; offer: number; acc: boolean; c: number; pay: number;
 }
 
-/** Cały stan gry. Zwykły obiekt, który da się zapisać jako JSON. Nazwy pól są zgodne z wersją v3 jednoplikową. */
+/** The whole game state. A plain JSON-serialisable object. Field names match the single-file v3 version. */
 export interface GameState {
   v: number;
   ph: 1 | 2;

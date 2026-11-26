@@ -3,7 +3,7 @@ import { has, type GameState } from '../core/state';
 type L = [string, string];
 export interface Goal { t: L; h: L; p: (s: GameState) => [number, number] }
 
-/** Ścieżka celów prowadząca gracza przez całą grę. Kolejność ma znaczenie: s.goal to indeks w tej tablicy. */
+/** Goal path guiding the player through the whole game. Order matters: s.goal is an index into this array. */
 export const GOALS: Goal[] = [
   { t: ['Wydrukuj 10 figurek', 'Print 10 figurines'], h: ['Klikaj „Drukuj figurkę”. Każda zużywa 20 g filamentu.', 'Click “Print a figurine”. Each uses 20 g of filament.'], p: s => [s.total, 10] },
   { t: ['Sprzedaj 10 figurek', 'Sell 10 figurines'], h: ['Pojawił się panel Sprzedaż. Klienci kupują sami. Im niższa cena, tym więcej ich przychodzi.', 'The Sales panel is open. Customers buy on their own; a lower price brings more of them.'], p: s => [s.sold, 10] },

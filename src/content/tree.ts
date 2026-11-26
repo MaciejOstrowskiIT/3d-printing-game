@@ -4,20 +4,20 @@ type L = [string, string];
 
 export interface TreeNode {
   id: string;
-  /** Gałąź: 0 Produkcja, 1 Sprzedaż, 2 Automatyka, 3 Kosmos. */
+  /** Branch: 0 Production, 1 Sales, 2 Automation, 3 Space. */
   col: 0 | 1 | 2 | 3;
   row: number;
   n: L;
   d: L;
   ops: number;
   zl?: number;
-  /** Koszt w figurkach (faza kosmiczna). */
+  /** Cost in figurines (space phase). */
   wyd?: number;
   req?: string[];
   need?: { label: L; value: (s: GameState) => number; target: number };
-  /** Węzeł automatyki: po odblokowaniu włącza przełącznik o tym id. */
+  /** Automation node: unlocking it enables the toggle with this id. */
   automation?: boolean;
-  /** Węzeł zmieniający fazę gry (lot w kosmos). Zarząd go nie kupuje. */
+  /** Node that switches the game phase (liftoff). The board never buys it. */
   liftoff?: boolean;
   fx: (s: GameState) => void;
 }
@@ -66,5 +66,5 @@ export const TREE: TreeNode[] = [
 
 export const NODE: Record<string, TreeNode> = Object.fromEntries(TREE.map(n => [n.id, n]));
 
-/** Automatyzacje w kolejności wyświetlania w panelu Automatyka. */
+/** Automations in the order shown in the Automation panel. */
 export const AUTOMATIONS = ['kamera', 'autobuy', 'autocena', 'automkt', 'autodruk', 'autopkt', 'zarzad', 'b2b', 'autobud'];

@@ -14,7 +14,7 @@ import { createState, type GameState } from './state';
 
 export type System = (s: GameState, dt: number, ctx: Ctx) => void;
 
-/** Kolejność systemów w jednym ticku. Nowa mechanika = nowy plik w systems/ i wpis tutaj. */
+/** System order within one tick. A new mechanic = a new file in systems/ plus an entry here. */
 export const SYSTEMS: System[] = [
   computeSystem,
   productionSystem,
@@ -29,7 +29,7 @@ export const SYSTEMS: System[] = [
   goalsSystem,
 ];
 
-/** Akcje gracza. UI wysyła tylko te stringi, nigdy nie zmienia stanu gry samo. */
+/** Player actions. The UI only sends these strings and never mutates game state itself. */
 export type Action =
   | 'print' | 'spool' | 'auto' | 'farm' | 'panel' | 'mkt' | 'drone' | 'fab'
   | 'pminus' | 'pplus' | 'oacc' | 'odec' | 'fix'
@@ -40,7 +40,7 @@ export interface Game {
   readonly s: GameState;
   tick(dt: number): void;
   act(a: Action): boolean;
-  /** Symuluje czas nieobecności i zwraca przyrost figurek. */
+  /** Simulates time spent away and logs what was produced. */
   catchUp(seconds: number): void;
   load(s: GameState): void;
   reset(logKey?: string): void;

@@ -1,11 +1,11 @@
 import type { Platform } from './Platform';
 
-// Klucze zgodne z wersją jednoplikową, żeby gracze nie stracili postępu.
+// Keys match the single-file version so players keep their progress.
 const GAME_KEY = 'drukarnia-v3';
 const PREF_KEY = 'drukarnia-pref';
 
 const get = (k: string) => { try { return localStorage.getItem(k); } catch { return null; } };
-const set = (k: string, v: string) => { try { localStorage.setItem(k, v); } catch { /* tryb prywatny albo brak miejsca */ } };
+const set = (k: string, v: string) => { try { localStorage.setItem(k, v); } catch { /* private mode or storage full */ } };
 
 export const localPlatform: Platform = {
   name: 'local',

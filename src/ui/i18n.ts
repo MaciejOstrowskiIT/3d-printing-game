@@ -33,7 +33,7 @@ const UNITS = {
   en: [[1e18, 'Qi'], [1e15, 'Qa'], [1e12, 'T'], [1e9, 'B'], [1e6, 'M'], [1e3, 'K']],
 } as const;
 
-/** Liczby: do 10 tys. pełne, wyżej z przyrostkiem (tys., mln / K, M). */
+/** Numbers: full below 10k, abbreviated above (tys., mln / K, M). */
 export function fmt(n: number, d = 0): string {
   n = Math.max(0, n);
   if (n >= 1e21) return n.toExponential(2);
@@ -53,7 +53,7 @@ export const dur = (s: number) =>
 export const nodeName = (id: string) => NODE[id]?.n[li()] ?? id;
 export const colorName = (i: number) => COLORS[i]?.n[li()] ?? '';
 
-/** Zamienia wpis dziennika na tekst w bieżącym języku (prefiksy argumentów opisane w core/state.ts). */
+/** Renders a log entry in the current language (argument prefixes are documented in core/state.ts). */
 export function logText(e: LogEntry): string {
   const D = dict();
   if (e.k === 'goal') return fill(D.L.goal, [String(e.a[0]).split('|')[li()]]);

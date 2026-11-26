@@ -15,11 +15,11 @@ const saved = loadSaved();
 export const game = createGame({ state: saved });
 if (saved?.ts) game.catchUp((Date.now() - saved.ts) / 1000);
 
-/** Licznik wersji stanu: rośnie po każdym ticku i akcji. Komponenty czytają stan przez useS, które od niego zależy. */
+/** State version counter, bumped after every tick and action. Components read state through useS, which depends on it. */
 export const ver = signal(0);
 const bump = () => { ver.value++; };
 
-/** Selektor stanu: komponent przerysuje się tylko wtedy, gdy zwrócona wartość się zmieni. */
+/** State selector: the component re-renders only when the returned value changes. */
 export function useS<T>(fn: (s: GameState) => T): T {
   const ref = useRef(fn);
   ref.current = fn;
@@ -30,11 +30,11 @@ export function useS<T>(fn: (s: GameState) => T): T {
 export const save = () => platform.saveGame(serialize(game.s));
 
 export function act(a: Action) { const ok = game.act(a); bump(); return ok; }
-/** Zmiany stanu, które są wyłącznie sprawą widoku (zakładka, gałąź drzewka). */
+/** View-only state changes (active tab, research branch). */
 export function ui(fn: (s: GameState) => void) { fn(game.s); bump(); }
 export function resetGame(logKey?: string) { game.reset(logKey); save(); bump(); }
 
-/** Słuchacze zdarzeń z rdzenia: dźwięk i animacja drukarki. */
+/** Core event listeners: sound, printer animation and analytics. */
 export const printedListeners = new Set<() => void>();
 game.on(e => {
   if (e.type === 'sfx') play(e.name);

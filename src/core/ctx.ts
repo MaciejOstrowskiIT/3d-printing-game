@@ -2,7 +2,7 @@ import type { GameState, LogArg, LogEntry } from './state';
 
 export type Sfx = 'click' | 'buy' | 'goal' | 'alert' | 'fail';
 
-/** Zdarzenia, które rdzeń wysyła na zewnątrz. Słuchają ich dziennik, dźwięk, animacja i (później) analityka oraz SDK portalu. */
+/** Events emitted by the core. Consumed by the log, sound, animation and (later) analytics and the portal SDK. */
 export type GameEvent =
   | { type: 'log'; entry: LogEntry }
   | { type: 'sfx'; name: Sfx }
@@ -14,9 +14,9 @@ export type GameEvent =
   | { type: 'end' };
 
 export interface Ctx {
-  /** Losowość przez kontekst, żeby testy były powtarzalne. */
+  /** Randomness goes through the context so tests are deterministic. */
   rng(): number;
-  /** Symulacja czasu nieobecności: bez zdarzeń losowych, dźwięków i większości wpisów w dzienniku. */
+  /** Offline catch-up: no random events, no sounds and almost no log entries. */
   offline: boolean;
   emit(e: GameEvent): void;
 }
@@ -38,7 +38,7 @@ export function sfx(ctx: Ctx, name: Sfx) {
   if (!ctx.offline) ctx.emit({ type: 'sfx', name });
 }
 
-/** Prosty generator do testów (Park–Miller). */
+/** Simple seeded generator for tests (Park–Miller). */
 export function seededRng(seed = 1) {
   let x = seed % 2147483647 || 1;
   return () => (x = (x * 16807) % 2147483647) / 2147483647;

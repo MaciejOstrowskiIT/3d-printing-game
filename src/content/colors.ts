@@ -1,6 +1,6 @@
 export interface FilamentColor { n: [string, string]; c: string; c2: string; st: string }
 
-/** Kolory filamentu. Kolejność = indeks zapisany w stanie (s.col, s.trend), więc nowe dopisuj na końcu. */
+/** Filament colours. Order = index stored in state (s.col, s.trend), so append new ones at the end. */
 export const COLORS: FilamentColor[] = [
   { n: ['biały', 'white'], c: '#ffffff', c2: '#f1ece6', st: '#d9d2ca' },
   { n: ['czarny', 'black'], c: '#2e2e35', c2: '#3b3b44', st: '#55555f' },

@@ -4,7 +4,7 @@ import { log, pick, rnd, sfx, type Ctx } from '../core/ctx';
 import { trendOn } from '../core/formulas';
 import type { GameState } from '../core/state';
 
-/** Cena filamentu skacze co ~10 s i ciąży do ceny bazowej. Modny kolor zmienia się co kilka minut. */
+/** Filament price jumps every ~10 s and drifts back to base. The trending colour changes every few minutes. */
 export function marketSystem(s: GameState, dt: number, ctx: Ctx) {
   if (s.ph !== 1) return;
 

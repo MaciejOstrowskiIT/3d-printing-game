@@ -12,7 +12,7 @@ const SEQ: Record<Sfx, [number, number, number][]> = {
   fail: [[300, 0.12, 0.12], [180, 0.25, 0.12]],
 };
 
-/** Krótkie dźwięki z WebAudio, bez plików. */
+/** Short WebAudio blips, no audio files. */
 export function play(k: Sfx) {
   if (prefs.value.mute) return;
   try {
@@ -35,5 +35,5 @@ export function play(k: Sfx) {
       o.stop(t0 + d + 0.03);
       t0 += d;
     }
-  } catch { /* brak dźwięku nie psuje gry */ }
+  } catch { /* missing audio must not break the game */ }
 }

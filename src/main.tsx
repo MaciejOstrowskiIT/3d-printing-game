@@ -6,5 +6,5 @@ import { game, startLoop } from './ui/store';
 render(<App />, document.getElementById('app')!);
 startLoop();
 
-// Podgląd stanu do testów w konsoli, tylko w trybie deweloperskim (nie trafia do builda produkcyjnego).
+// Console handle for debugging, dev mode only (stripped from production builds).
 if (import.meta.env.DEV) (window as unknown as { __drk: unknown }).__drk = game;

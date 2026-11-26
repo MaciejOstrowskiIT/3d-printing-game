@@ -1,66 +1,67 @@
 # Drukarnia / Printworks
 
-Przeglądarkowa gra incremental w stylu Universal Paperclips, osadzona w świecie druku 3D. Zaczynasz od jednej drukarki w garażu, a kończysz na przerabianiu pasa asteroid na figurki.
+A browser incremental game in the spirit of Universal Paperclips, set in the world of 3D printing. You start with a single printer in a garage and end up turning an asteroid belt into figurines.
 
-## Uruchomienie
+## Getting started
 
 ```bash
 npm install
-npm run dev        # serwer deweloperski z hot reload
-npm test           # testy jednostkowe + bot przechodzący całą grę
-npm run build      # dist/index.html: jeden samodzielny plik (portale, GitHub Pages)
+npm run dev        # dev server with hot reload
+npm test           # unit tests + a bot that plays the whole game
+npm run build      # dist/index.html: one self-contained file (portals, GitHub Pages)
 ```
 
-## Architektura
+## Architecture
 
-Trzy warstwy. Rdzeń nie wie nic o przeglądarce, widok tylko czyta stan i wysyła akcje, a wszystko zależne od miejsca uruchomienia siedzi za interfejsem platformy.
+Three layers. The core knows nothing about the browser, the UI only reads state and dispatches actions, and everything that depends on where the game runs sits behind the platform interface.
 
 ```
 src/
-  core/        rdzeń gry, czysty TypeScript bez DOM
-    state.ts     GameState: zwykły obiekt zapisywany jako JSON
-    formulas.ts  czyste wzory: koszty, popyt, tempo, energia
-    game.ts      pętla (lista SYSTEMS), akcje gracza, nadrabianie offline
-    ctx.ts       kontekst ticku: losowość, zdarzenia, dziennik, dźwięki
-    save.ts      wersje zapisu i migracje
-  systems/     jedna mechanika = jeden plik, sygnatura (state, dt, ctx) => void
-  content/     dane gry: balance.ts (wszystkie liczby), tree.ts, goals.ts, colors.ts, i18n/
+  core/        game core, plain TypeScript, no DOM
+    state.ts     GameState: a plain object saved as JSON
+    formulas.ts  pure formulas: costs, demand, rates, power
+    game.ts      tick loop (SYSTEMS list), player actions, offline catch-up
+    ctx.ts       tick context: randomness, events, log, sound effects
+    save.ts      save versions and migrations
+  systems/     one mechanic per file, signature (state, dt, ctx) => void
+  content/     game data: balance.ts (all numbers), tree.ts, goals.ts, colors.ts, i18n/
   ui/          Preact + @preact/signals
-    store.ts     instancja gry, pętla 10 Hz, useS() (selektor stanu), zapis
+    store.ts     game instance, 10 Hz loop, useS() state selector, saving
     components/  App, Side, Hud, Workshop, Research, common
-    scene/       hala izometryczna i animacja drukarki (imperatywne SVG)
-  platform/    interfejs Platform + adapter local (localStorage); tu dojdą Poki i CrazyGames
-legacy/        poprzednia wersja jednoplikowa, do porównania
-tests/         testy systemów i bot balansu
+    scene/       isometric floor and printer animation (imperative SVG)
+  platform/    Platform interface + local adapter (localStorage); Poki and CrazyGames adapters go here
+legacy/        previous single-file version, kept for comparison
+tests/         system tests and the balance bot
 ```
 
-### Jak dodać nową mechanikę
+### Adding a mechanic
 
-1. Nowy plik w `src/systems/` z funkcją `(s, dt, ctx) => void`.
-2. Wpis na liście `SYSTEMS` w `src/core/game.ts`.
-3. Nowe pola stanu w `GameState` i `createState()`. Jeśli zmieniasz znaczenie istniejących pól, podbij `SAVE_VERSION` i dopisz migrację w `save.ts`.
-4. Liczby do `content/balance.ts`, teksty do `content/i18n/pl.ts` i `en.ts`.
-5. Odpal `npm test`: bot balansu pokaże, czy tempo gry się nie rozjechało.
+1. Add a file in `src/systems/` exporting `(s, dt, ctx) => void`.
+2. Register it in the `SYSTEMS` list in `src/core/game.ts`.
+3. Add new state fields to `GameState` and `createState()`. If you change the meaning of existing fields, bump `SAVE_VERSION` and add a migration in `save.ts`.
+4. Put numbers in `content/balance.ts` and texts in `content/i18n/pl.ts` and `en.ts`.
+5. Run `npm test`: the balance bot shows whether pacing still holds.
 
-### Zasady
+### Rules
 
-- **UI nie zmienia stanu gry samo.** Wysyła akcje przez `act('...')`. Wyjątek: stan czysto widokowy (zakładka, gałąź drzewka) przez `ui(fn)`.
-- **Losowość tylko przez `ctx.rng()`**, dzięki temu testy są powtarzalne.
-- **Zdarzenia zamiast wywołań na krzyż.** Rdzeń emituje `log`, `sfx`, `printed`, `goal`, `order`, `phase`, `end`. Słuchają ich dziennik, dźwięk, animacja i analityka (`platform.track`).
-- **Zapis zgodny wstecz.** Klucz `drukarnia-v3` w localStorage, stare zapisy wczytują się przez migracje.
+- **The UI never mutates game state directly.** It dispatches actions via `act('...')`. The only exception is view-only state (active tab, research branch) via `ui(fn)`.
+- **Randomness only through `ctx.rng()`**, so tests are deterministic.
+- **Events instead of cross-calls.** The core emits `log`, `sfx`, `printed`, `goal`, `order`, `phase` and `end`. The log, audio, animation and analytics (`platform.track`) listen to them.
+- **Backward-compatible saves.** The `drukarnia-v3` localStorage key is kept and old saves load through migrations.
+- **English in code**: identifiers, comments, commits and PRs. Player-facing texts live in the PL/EN dictionaries.
 
-## Co jest w grze
+## Features
 
-- Ręczny druk (klik, przytrzymanie albo spacja), sprzedaż z ceną i popytem, filament z ceną zmieniającą się co ok. 10 s.
-- Kolory filamentu i modny kolor (+30% klientów).
-- Zamówienia specjalne, awarie drukarek, energia dla farm.
-- Komputer: punkty reputacji, procesory, pamięć, moc obliczeniowa.
-- Drzewko rozwoju: Produkcja, Sprzedaż, Automatyka, Kosmos.
-- 17 celów prowadzących przez całą grę.
-- Faza kosmiczna: drony, orbitalne fabryki, pas asteroid.
-- Scena izometryczna (garaż → pracownia → hala → orbita) z okienkiem zbliżenia na drukarkę i animacją warstw.
-- PL / EN, dźwięk (WebAudio), postęp offline do 8 h.
+- Manual printing (click, hold or Space), sales with price and demand, filament price changing about every 10 s.
+- Filament colours and a trending colour (+30% customers).
+- Special orders, printer breakdowns, power for farms.
+- Computer: reputation points, processors, memory, compute.
+- Research tree: Production, Sales, Automation, Space.
+- 17 goals guiding the player through the whole game.
+- Space phase: drones, orbital factories, asteroid belt.
+- Isometric scene (garage → workshop → factory floor → orbit) with a printer close-up inset and layer-by-layer animation.
+- PL / EN, sound (WebAudio), offline progress up to 8 h.
 
-## Balans
+## Balance
 
-Bot z `tests/bot.ts` przechodzi grę w ok. 78–89 minut (lot w kosmos po 42–52 min). Człowiek gra wolniej, szacunkowo 2–3 godziny. Test `balance.sim.test.ts` pilnuje, żeby te czasy nie wyszły poza ustalone widełki.
+The bot in `tests/bot.ts` finishes the game in about 78–89 minutes (liftoff after 42–52 min). A human plays slower, roughly 2–3 hours. `balance.sim.test.ts` keeps these times within the agreed range.

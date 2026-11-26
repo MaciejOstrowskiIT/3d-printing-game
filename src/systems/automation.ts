@@ -7,7 +7,7 @@ import { buyNode, nodeStatus, reserveWyd } from './research';
 
 const on = (s: GameState, id: string) => has(s, id) && !!s.amOn[id];
 
-/** Wszystkie automaty odblokowane w drzewku. Każdy działa tylko, gdy gracz go nie wyłączył. */
+/** All automations unlocked in the research tree. Each runs only while the player keeps it enabled. */
 export function automationSystem(s: GameState, dt: number, ctx: Ctx) {
   if (s.ph === 1) {
     s.amT += dt;
@@ -25,7 +25,7 @@ export function automationSystem(s: GameState, dt: number, ctx: Ctx) {
 
       if (on(s, 'automkt') && mktCost(s) < free * 0.2) { s.zl -= mktCost(s); s.mkt++; }
 
-      // Gdy da się już lecieć w kosmos, menedżer wstrzymuje zakupy, żeby gracz uzbierał na lot.
+      // Once liftoff is within reach, the manager stops buying so the player can save up for it.
       const saving = has(s, 'slicer') && !has(s, 'replik') && s.farm >= 5;
       if (on(s, 'autodruk') && free > 0 && !saving) {
         if (s.farmOn && supply(s) < drawP(s) + 20 && panelCost(s) < free * 0.25) { s.zl -= panelCost(s); s.panels++; }

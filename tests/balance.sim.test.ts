@@ -2,13 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { GOALS } from '../src/content/goals';
 import { playthrough } from './bot';
 
-const LIFTOFF = GOALS.findIndex(g => g.t[0] === 'Wyjdź poza Ziemię');
+const LIFTOFF = GOALS.findIndex(g => g.t[1] === 'Leave Earth');
 
-/** Strażnik tempa gry. Jeśli zmiana w balance.ts albo w systemach rozjedzie tempo, ten test to pokaże.
- *  Progi są dla bota, który gra sprawniej niż człowiek (człowiek: ok. 2× dłużej). */
-describe('balans: bot przechodzi grę', () => {
+/** Pacing guard. If a change in balance.ts or in a system breaks pacing, this test catches it.
+ *  Thresholds are for the bot, which plays faster than a human (a human takes roughly 2× longer). */
+describe('balance: bot finishes the game', () => {
   for (const seed of [1, 7, 42]) {
-    it(`seed ${seed}: koniec w 50–150 min, lot w kosmos w 25–75 min`, () => {
+    it(`seed ${seed}: ends in 50–150 min, liftoff in 25–75 min`, () => {
       const r = playthrough(seed);
       expect(r.ended).toBe(true);
       expect(r.minutes).toBeGreaterThan(50);

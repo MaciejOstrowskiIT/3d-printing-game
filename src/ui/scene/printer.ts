@@ -2,7 +2,7 @@ import { COLORS } from '../../content/colors';
 import { rate1 } from '../../core/formulas';
 import type { GameState } from '../../core/state';
 
-/** Zbliżenie na drukarkę: rysunek SVG. Elementy z data-p są sterowane przez animację. */
+/** Printer close-up SVG. Elements tagged with data-p are driven by the animation. */
 export const PRINTER_SVG = `<rect x="18" y="224" width="284" height="10" rx="4" fill="#0003"/>
 <rect x="40" y="20" width="16" height="204" rx="3" fill="var(--frame)"/>
 <rect x="264" y="20" width="16" height="204" rx="3" fill="var(--frame)"/>
@@ -32,7 +32,7 @@ export const PRINTER_SVG = `<rect x="18" y="224" width="284" height="10" rx="4" 
 const VW = [34, 44, 52, 56, 56, 52, 46, 40, 36, 36, 40, 46];
 const NL = VW.length;
 
-/** Animacja druku warstwa po warstwie. Niezależna od ticków gry: rAF czyta stan i rysuje płynnie. */
+/** Layer-by-layer print animation. Independent of game ticks: rAF reads the state and draws smoothly. */
 export function mountPrinter(svg: SVGSVGElement, getState: () => GameState) {
   svg.innerHTML = PRINTER_SVG;
   const q = (k: string) => svg.querySelector(`[data-p="${k}"]`) as SVGElement;
@@ -106,7 +106,7 @@ export function mountPrinter(svg: SVGSVGElement, getState: () => GameState) {
   raf = requestAnimationFrame(frame);
 
   return {
-    /** Ręczny druk dokłada jedną figurkę do kolejki animacji. */
+    /** A manual print queues one more figurine in the animation. */
     feed() { A.work = Math.min(A.work + NL, NL * 3); },
     isBusy() { return A.work > 0; },
     destroy() { cancelAnimationFrame(raf); },

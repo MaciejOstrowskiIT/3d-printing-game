@@ -31,18 +31,18 @@ export function buyNode(s: GameState, ctx: Ctx, id: string, logKey = 'node'): bo
   return true;
 }
 
-/** Ile figurek trzymać w rezerwie na najbliższy węzeł płatny figurkami, gdy moc już wystarcza. */
+/** Figurines to keep in reserve for the next figurine-priced node once compute is sufficient. */
 export function reserveWyd(s: GameState) {
   const w = TREE.filter(n => n.wyd && !has(s, n.id) && nodeStatus(s, n) !== 'locked' && s.ops >= n.ops).map(n => n.wyd!);
   return w.length ? Math.min(...w) : 0;
 }
 
-/** Moc obliczeniowa rośnie co tick, ograniczona pamięcią. */
+/** Compute grows every tick, capped by memory. */
 export function computeSystem(s: GameState, dt: number) {
   s.ops = Math.min(opsCap(s), s.ops + opsRate(s) * dt);
 }
 
-/** Punkty reputacji za kolejne figurki. */
+/** Reputation points for printed figurines. */
 export function reputationSystem(s: GameState, _dt: number, ctx: Ctx) {
   let gained = 0;
   while (s.total >= repNext(s)) { s.rep++; gained++; }

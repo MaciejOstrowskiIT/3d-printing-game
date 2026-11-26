@@ -8,10 +8,10 @@ import { ui, useS } from '../store';
 const Chip = ({ label, value, warn, show = true }: { label: string; value: string; warn?: boolean; show?: boolean }) =>
   show ? <div class={'chip' + (warn ? ' warn' : '')}><small>{label}</small><b>{value}</b></div> : null;
 
-/** Czy zakładka Rozwój jest już odblokowana. */
+/** Whether the Research tab is unlocked yet. */
 export const useResearchUnlocked = () => useS(s => s.goal >= 5 || s.rep > 0 || s.done.length > 0);
 
-/** Liczba rzeczy czekających w Rozwoju (węzły do kupienia + wolne punkty) i alarm w Warsztacie. */
+/** Pending items in Research (buyable nodes + free points) and the Workshop alert flag. */
 export function useBadges() {
   const research = useS(s => TREE.filter(n => nodeStatus(s, n) === 'ready').length + Math.max(0, freePts(s)));
   const workshop = useS(s => s.tab === 'r' && s.ph === 1 && ((!!s.ord && !s.ord.acc) || (s.brk > 0 && !(has(s, 'kamera') && s.amOn.kamera))));

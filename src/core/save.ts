@@ -2,13 +2,13 @@ import { createState, SAVE_VERSION, type GameState } from './state';
 
 type Migration = (raw: Record<string, unknown>) => void;
 
-/** Migracje zapisu. Klucz = wersja, z której migrujemy. Dopisuj nowe, nigdy nie zmieniaj starych. */
+/** Save migrations. Key = version being migrated from. Append new ones, never edit old ones. */
 const MIGRATIONS: Record<number, Migration> = {
-  // v3 (wersja jednoplikowa) nie miała pola v ani licznika nieudanych zamówień wprost w każdym zapisie.
+  // v3 (single-file version) had no v field and not every save stored the failed-order counter.
   3: raw => { raw.ordFail ??= 0; },
 };
 
-/** Wczytuje surowy zapis (także ze starych wersji) i zwraca pełny, aktualny stan. */
+/** Loads a raw save (including old versions) and returns a complete, current state. */
 export function migrate(raw: unknown): GameState {
   if (!raw || typeof raw !== 'object') return createState();
   const r = { ...(raw as Record<string, unknown>) };

@@ -7,28 +7,28 @@ import { createState } from '../src/core/state';
 
 const newGame = () => createGame({ rng: seededRng(3) });
 
-describe('produkcja i sprzedaż', () => {
-  it('ręczny druk zużywa filament i dodaje figurkę', () => {
+describe('production and sales', () => {
+  it('manual print uses filament and adds a figurine', () => {
     const g = newGame();
     expect(g.act('print')).toBe(true);
     expect(g.s.total).toBe(1);
     expect(g.s.fil).toBe(980);
   });
 
-  it('bez filamentu nie da się drukować', () => {
+  it('cannot print without filament', () => {
     const g = newGame();
     g.s.fil = 5;
     expect(g.act('print')).toBe(false);
   });
 
-  it('niższa cena daje większy popyt', () => {
+  it('lower price raises demand', () => {
     const s = createState();
     const high = demand(s);
     s.price = 2;
     expect(demand(s)).toBeGreaterThan(high);
   });
 
-  it('modny kolor daje +30% popytu', () => {
+  it('trending colour gives +30% demand', () => {
     const s = createState();
     s.goal = 3; s.trend = 2; s.col = 0;
     const base = demand(s);
@@ -37,8 +37,8 @@ describe('produkcja i sprzedaż', () => {
   });
 });
 
-describe('zamówienia', () => {
-  it('przyjęte zamówienie dostaje figurki przed sprzedażą i płaci po zrealizowaniu', () => {
+describe('orders', () => {
+  it('accepted order gets figurines before sales and pays on delivery', () => {
     const g = newGame();
     g.s.goal = 3; g.s.ordT = 0.01;
     g.tick(0.1);
@@ -54,18 +54,18 @@ describe('zamówienia', () => {
   });
 });
 
-describe('energia', () => {
-  it('farmy bez paneli pracują wolniej', () => {
+describe('power', () => {
+  it('farms without panels run slower', () => {
     const s = createState();
-    s.farm = 4; // pobór 80 kW, garaż daje 40
+    s.farm = 4; // draws 80 kW, the garage supplies 40
     expect(eff(s)).toBe(0.5);
     s.panels = 2;
     expect(eff(s)).toBe(1);
   });
 });
 
-describe('automatyka', () => {
-  it('dynamiczne ceny nie schodzą poniżej kosztu filamentu', () => {
+describe('automation', () => {
+  it('dynamic pricing never goes below filament cost', () => {
     const g = newGame();
     g.s.done.push('autobuy', 'tiktok', 'autocena');
     g.s.amOn.autocena = true;
@@ -75,8 +75,8 @@ describe('automatyka', () => {
   });
 });
 
-describe('zapis', () => {
-  it('wczytuje zapis z wersji jednoplikowej (v3)', () => {
+describe('save', () => {
+  it('loads a save from the single-file version (v3)', () => {
     const s = migrate({ total: 1234, zl: 50, auto: 3, done: ['dysza'] });
     expect(s.total).toBe(1234);
     expect(s.auto).toBe(3);
@@ -85,14 +85,14 @@ describe('zapis', () => {
     expect(s.col).toBe(0);
   });
 
-  it('pusty albo zepsuty zapis daje nową grę', () => {
+  it('empty or broken save starts a new game', () => {
     expect(migrate(null).total).toBe(0);
     expect(migrate('x').total).toBe(0);
   });
 });
 
 describe('offline', () => {
-  it('nadrabia produkcję automatów bez losowych zdarzeń', () => {
+  it('catches up auto production without random events', () => {
     const g = newGame();
     g.s.auto = 5; g.s.fil = 1e6; g.s.goal = 5;
     g.catchUp(600);

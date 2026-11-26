@@ -54,7 +54,7 @@ function Node({ n, hidden }: { n: TreeNode; hidden: boolean }) {
   );
 }
 
-/** Linie między węzłami liczone z pozycji w DOM po każdym przerysowaniu układu. */
+/** Connector lines between nodes, computed from DOM positions after every layout change. */
 function useTreeLines(treeRef: { current: HTMLDivElement | null }, svgRef: { current: SVGSVGElement | null }, key: string) {
   const draw = () => {
     const tree = treeRef.current, svg = svgRef.current;

@@ -2,8 +2,8 @@ import { BAL } from '../../content/balance';
 import { COLORS } from '../../content/colors';
 import type { GameState } from '../../core/state';
 
-/** Scena izometryczna. Zamiast rysować każdą drukarkę, zmienia skalę: garaż, pracownia, hala, orbita.
- *  Rysuje najwyżej kilkadziesiąt obiektów, a resztę zwraca jako liczbę „ukrytych”. */
+/** Isometric scene. Instead of drawing every printer it changes scale: garage, workshop, factory floor, orbit.
+ *  It draws at most a few dozen objects and reports the rest as a "hidden" count. */
 
 const TW = 32, TH = 16, OX = 160, OY = 70;
 type P = [number, number];

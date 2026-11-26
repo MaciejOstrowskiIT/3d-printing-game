@@ -7,7 +7,7 @@ import { nodeStatus, reserveWyd } from '../src/systems/research';
 
 export interface BotResult { ended: boolean; minutes: number; goalMinutes: number[]; ordersDone: number; ordersFailed: number }
 
-/** Bot grający jak sprawny gracz: klika na początku, pilnuje filamentu i ceny, kupuje rozsądnie, bierze zamówienia. */
+/** Bot that plays like a skilled player: clicks early, watches filament and price, buys sensibly, takes orders. */
 export function playthrough(seed = 1, maxHours = 6, dt = 0.25): BotResult {
   const game = createGame({ rng: seededRng(seed) });
   const goalMinutes: number[] = [];

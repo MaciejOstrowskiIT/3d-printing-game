@@ -3,7 +3,7 @@ import { rate1, spoolPrice } from '../core/formulas';
 import { has, type GameState } from '../core/state';
 import { pickOrderCooldown } from './orders';
 
-/** Nowe figurki trafiają najpierw do przyjętego zamówienia, reszta na stan. */
+/** New figurines fill an accepted order first; the rest goes to stock. */
 export function make(s: GameState, ctx: Ctx, n: number) {
   s.total += n;
   const o = s.ord;
@@ -53,7 +53,7 @@ export function productionSystem(s: GameState, dt: number, ctx: Ctx) {
 
   if (s.fil < s.g && !s.warn && s.total > 0) { s.warn = true; log(s, ctx, 'noFil'); sfx(ctx, 'alert'); }
 
-  // Ratunek przed zablokowaniem gry: bez filamentu, bez towaru i bez pieniędzy hurtownia daje szpulę na kredyt.
+  // Soft-lock guard: with no filament, no stock and no money, the supplier gives a spool on credit.
   if (s.fil < s.g && s.inv < 1 && s.zl < spoolPrice(s) && s.zl > -spoolPrice(s) * 4 && s.total > 0 && !(s.ord && s.ord.acc)) {
     s.zl -= spoolPrice(s);
     s.fil += s.spoolG;

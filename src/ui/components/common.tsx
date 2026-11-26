@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'preact/hooks';
 import type { Action } from '../../core/game';
 import { act } from '../store';
 
-/** Przytrzymanie przycisku powtarza akcję (druk, zmiana ceny). Klawiatura działa zwykłym kliknięciem. */
+/** Holding the button repeats the action (printing, price changes). Keyboard activation works as a plain click. */
 export function useHold(action: Action) {
   const timers = useRef<{ t?: number; i?: number }>({});
   const stop = () => { clearTimeout(timers.current.t); clearInterval(timers.current.i); timers.current = {}; };
@@ -26,7 +26,7 @@ export function useHold(action: Action) {
   };
 }
 
-/** Przycisk zakupu: wypełnia się kolorem w miarę zbierania pieniędzy, pomarańczowy, gdy stać cię na zakup. */
+/** Purchase button: fills up as you save money and turns orange once you can afford it. */
 export function BuyButton({ cost, have, label, action }: { cost: number; have: number; label: string; action: Action }) {
   const ok = have >= cost;
   const pct = Math.min(100, (100 * have) / cost).toFixed(1) + '%';
