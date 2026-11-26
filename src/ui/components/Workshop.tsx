@@ -8,6 +8,7 @@ import { has } from '../../core/state';
 import { boostUnlocked } from '../../systems/boost';
 import { canAfford } from '../../systems/marketEvents';
 import { MARKET_EVENT } from '../../content/events';
+import { CALENDAR_EVENT, calendarOn } from '../../content/calendar';
 import { MODELS, type PrintModel } from '../../content/models';
 import { designVisible } from '../../systems/models';
 import { platform } from '../platform';
@@ -41,10 +42,15 @@ function MarketOffer() {
 /** Running market effects as small chips with a countdown; red when the effect hurts. */
 function MarketEffects() {
   const fx = useS(s => (s.ph === 1 ? s.mfx.map(f => `${f.id}:${Math.ceil(f.t)}`).join(',') : ''));
-  if (!fx) return null;
+  const cal = useS(s => (s.ph === 1 ? calendarOn(s.today).map(e => e.id).join(',') : ''));
+  if (!fx && !cal) return null;
   return (
     <div class="mfx" aria-label={t('fxTitle')}>
-      {fx.split(',').map(item => {
+      {cal && cal.split(',').map(id => {
+        const e = CALENDAR_EVENT[id];
+        return <span key={id} class="mchip cal" title={e.desc[li()]}>📅 {e.name[li()]}</span>;
+      })}
+      {fx && fx.split(',').map(item => {
         const [id, left] = item.split(':');
         const e = MARKET_EVENT[id];
         if (!e) return null;
@@ -81,7 +87,7 @@ function DailyOrderCard() {
 function Events() {
   const o = useS(s => (s.ph === 1 && s.ord ? { ...s.ord } : null));
   const brk = useS(s => (s.ph === 1 && s.brk > 0 ? { brk: s.brk, c: s.brkC, fixT: s.fixT, cam: has(s, 'kamera') && !!s.amOn.kamera } : null));
-  const market = useS(s => s.ph === 1 && (!!s.mev || s.mfx.length > 0));
+  const market = useS(s => s.ph === 1 && (!!s.mev || s.mfx.length > 0 || calendarOn(s.today).length > 0));
   const daily = useS(s => s.ph === 1 && !!s.dord && s.dord.day === s.dday);
   if (!o && !brk && !market && !daily) return null;
   return (

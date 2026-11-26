@@ -92,6 +92,7 @@ body.space .side .pbtn,body.space .dock .pbtn{display:none}
 .mfx{display:flex;flex-wrap:wrap;gap:6px}
 .mfx .mchip{font-size:13px;font-weight:600;border-radius:999px;padding:3px 10px;background:var(--accS);color:var(--acc);border:1px solid color-mix(in srgb,var(--acc) 40%,transparent)}
 .mfx .mchip.bad{background:var(--badS);color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,transparent)}
+.mfx .mchip.cal{background:var(--card);color:var(--ink);border-color:var(--line)}
 .evb{display:flex;gap:6px}
 .btn-main{background:#1c1b22;color:#fff;border-color:#1c1b22}
 .btn-main:hover:not(:disabled){background:#2c2b34;border-color:#1c1b22}

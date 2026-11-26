@@ -1,6 +1,7 @@
 import { BAL } from '../content/balance';
 import { log, sfx, type Ctx } from '../core/ctx';
 import { boostMul, rateBase } from '../core/formulas';
+import { calendarOn } from '../content/calendar';
 import type { GameState } from '../core/state';
 
 /** Order of the day: one special order per calendar day, delivered from stock any time that day.
@@ -16,7 +17,14 @@ export const streakMul = (streak: number) => 1 + BAL.dailyStreakStep * Math.min(
 
 /** Called when the UI reports today's day number (on start and every minute). Creates today's order once. */
 export function newDay(s: GameState, ctx: Ctx, day: number): boolean {
-  if (!Number.isInteger(day) || day <= s.dday || !dailyUnlocked(s)) return false;
+  if (!Number.isInteger(day) || day < 1) return false;
+  if (day > s.today) {
+    // Calendar events (content/calendar.ts) follow s.today; announce the ones that were not running on the last day seen.
+    const before = new Set(calendarOn(s.today).map(e => e.id));
+    for (const e of calendarOn(day)) if (!before.has(e.id) && s.ph === 1) log(s, ctx, 'calOn', '+' + e.id);
+    s.today = day;
+  }
+  if (day <= s.dday || !dailyUnlocked(s)) return false;
   // The streak continues only if yesterday's order was delivered.
   if (!(s.dord?.done && s.dord.day === day - 1)) s.dstreak = 0;
   s.dday = day;
@@ -47,7 +55,7 @@ export function deliverDaily(s: GameState, ctx: Ctx): boolean {
 
 export function validDailyState(s: GameState): boolean {
   const int = (v: unknown, min: number) => Number.isInteger(v) && (v as number) >= min;
-  if (!int(s.dday, 0) || !int(s.dstreak, 0) || !int(s.dbest, 0) || s.dstreak > s.dbest + 1) return false;
+  if (!int(s.today, 0) || s.dday > s.today || !int(s.dday, 0) || !int(s.dstreak, 0) || !int(s.dbest, 0) || s.dstreak > s.dbest + 1) return false;
   if (s.dord === null) return true;
   const o = s.dord;
   return !!o && int(o.day, 0) && o.day <= s.dday && int(o.n, 1) && int(o.c, 0) && o.c < CLIENTS &&
