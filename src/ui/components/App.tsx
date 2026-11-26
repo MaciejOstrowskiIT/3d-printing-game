@@ -1,6 +1,7 @@
 import { useEffect } from 'preact/hooks';
 import { fmt, prefs, t } from '../i18n';
 import { act, resetGame, useS } from '../store';
+import { Toasts } from './Achievements';
 import { Hud, Tabs } from './Hud';
 import { Research } from './Research';
 import { PrintButton, Settings, Side } from './Side';
@@ -59,6 +60,7 @@ export function App() {
         </div>
       </div>
       <Dock />
+      <Toasts />
       <End />
     </>
   );

@@ -1,7 +1,7 @@
 import { BAL } from '../content/balance';
 
 /** Log entry argument. String prefixes are kept for compatibility with old saves:
- *  '@id' tree node, '$123' money, '#2' client, '%1' breakdown cause, '~90' duration in s, '&3' colour, 'pl|en' goal text. */
+ *  '@id' tree node, '$123' money, '#2' client, '%1' breakdown cause, '~90' duration in s, '&3' colour, '!id' achievement, 'pl|en' goal text. */
 export type LogArg = string | number;
 export interface LogEntry { k: string; a: LogArg[] }
 
@@ -29,9 +29,11 @@ export interface GameState {
   col: number; trend: number; trendT: number;
   /** Rewarded boost: seconds left, and seconds until it can be activated again. */
   boostT: number; boostCd: number;
+  /** Unlocked achievement ids, check timer, and a bitmask of filament colours ever used. */
+  ach: string[]; achT: number; colorsUsed: number;
 }
 
-export const SAVE_VERSION = 4;
+export const SAVE_VERSION = 5;
 
 export const createState = (): GameState => ({
   v: SAVE_VERSION,
@@ -51,6 +53,7 @@ export const createState = (): GameState => ({
   panels: 0, pwWarn: false, ts: 0,
   col: 0, trend: 2, trendT: 150,
   boostT: 0, boostCd: 0,
+  ach: [], achT: 0, colorsUsed: 1,
 });
 
 export const has = (s: GameState, id: string) => s.done.includes(id);
