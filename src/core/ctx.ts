@@ -13,6 +13,7 @@ export type GameEvent =
   | { type: 'order'; result: 'offered' | 'delivered' | 'failed' | 'expired' }
   | { type: 'achievement'; id: string }
   | { type: 'prestige'; gain: number }
+  | { type: 'market'; id: string; result: 'started' | 'offered' | 'accepted' | 'declined' | 'expired' }
   | { type: 'end' };
 
 export interface Ctx {

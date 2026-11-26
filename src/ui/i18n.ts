@@ -1,5 +1,6 @@
 import { signal } from '@preact/signals';
 import { ACH } from '../content/achievements';
+import { MARKET_EVENT } from '../content/events';
 import { COLORS } from '../content/colors';
 import { en } from '../content/i18n/en';
 import { pl, type Dict } from '../content/i18n/pl';
@@ -71,6 +72,7 @@ export function logText(e: LogEntry): string {
       case '~': return dur(+x.slice(1));
       case '&': return colorName(+x.slice(1));
       case '!': return ACH[x.slice(1)]?.n[li()] ?? x;
+      case '^': return MARKET_EVENT[x.slice(1)]?.name[li()] ?? x;
       default: return x;
     }
   });

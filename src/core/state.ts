@@ -1,7 +1,7 @@
 import { BAL } from '../content/balance';
 
 /** Log entry argument. String prefixes are kept for compatibility with old saves:
- *  '@id' tree node, '$123' money, '#2' client, '%1' breakdown cause, '~90' duration in s, '&3' colour, '!id' achievement, 'pl|en' goal text. */
+ *  '@id' tree node, '$123' money, '#2' client, '%1' breakdown cause, '~90' duration in s, '&3' colour, '!id' achievement, '^id' market event, 'pl|en' goal text. */
 export type LogArg = string | number;
 export interface LogEntry { k: string; a: LogArg[] }
 
@@ -20,6 +20,11 @@ export interface Meta {
 export interface Order {
   n: number; got: number; time: number; left: number; offer: number; acc: boolean; c: number; pay: number;
 }
+
+/** A market event waiting for the player's decision. cost is fixed when it appears (money or figurines). */
+export interface PendingMarketEvent { id: string; offer: number; cost: number }
+/** A running market effect and its seconds left. */
+export interface MarketEffect { id: string; t: number }
 
 /** The whole game state. A plain JSON-serialisable object. Field names match the single-file v3 version. */
 export interface GameState {
@@ -43,6 +48,8 @@ export interface GameState {
   boostT: number; boostCd: number;
   /** Unlocked achievement ids, check timer, and a bitmask of filament colours ever used. */
   ach: string[]; achT: number; colorsUsed: number;
+  /** Market events: pending offer, seconds until the next one, running effects. */
+  mev: PendingMarketEvent | null; mevT: number; mfx: MarketEffect[];
   meta: Meta;
 }
 
@@ -67,6 +74,7 @@ export const createState = (): GameState => ({
   col: 0, trend: 2, trendT: 150,
   boostT: 0, boostCd: 0,
   ach: [], achT: 0, colorsUsed: 1,
+  mev: null, mevT: BAL.marketEventFirst, mfx: [],
   meta: { patents: 0, earned: 0, runs: 0, pat: {} },
 });
 

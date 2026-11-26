@@ -1,4 +1,5 @@
 import { BAL } from '../content/balance';
+import { MARKET_EVENT } from '../content/events';
 import { patLvl, type GameState } from './state';
 
 /** Pure formulas derived from state. No side effects: used by core, UI and tests. */
@@ -7,7 +8,14 @@ export const autoCost = (s: GameState) => BAL.printerCost * BAL.printerCostGrowt
 export const farmCost = (s: GameState) => BAL.farmCost * BAL.farmCostGrowth ** s.farm;
 export const panelCost = (s: GameState) => BAL.panelCost * BAL.panelCostGrowth ** s.panels;
 export const mktCost = (s: GameState) => BAL.marketingCost * BAL.marketingCostGrowth ** (s.mkt - 1);
-export const spoolPrice = (s: GameState) => (s.spoolG > 1000 ? s.spool * 5 * BAL.bulkPackDiscount : s.spool);
+/** Product of a multiplier over running market effects, clamped so stacked events cannot break the economy. */
+export function marketMul(s: GameState, key: 'demand' | 'spool') {
+  let m = 1;
+  for (const fx of s.mfx ?? []) m *= MARKET_EVENT[fx.id]?.[key] ?? 1;
+  return Math.min(BAL.marketMulRange[1], Math.max(BAL.marketMulRange[0], m));
+}
+
+export const spoolPrice = (s: GameState) => (s.spoolG > 1000 ? s.spool * 5 * BAL.bulkPackDiscount : s.spool) * marketMul(s, 'spool');
 export const unitCost = (s: GameState) => (spoolPrice(s) / s.spoolG) * s.g;
 export const droneCost = (s: GameState) => BAL.droneCost * BAL.droneCostGrowth ** s.drones;
 export const fabCost = (s: GameState) => BAL.fabCost * BAL.fabCostGrowth ** s.fabs;
@@ -26,7 +34,8 @@ export const demand = (s: GameState) =>
   s.dem *
   (s.pen > 0 ? BAL.penaltyDemand : 1) *
   (inTrend(s) ? BAL.trendBonus : 1) *
-  (1 + 0.15 * patLvl(s, 'brand'));
+  (1 + 0.15 * patLvl(s, 'brand')) *
+  marketMul(s, 'demand');
 
 export const boostMul = (s: GameState) => (s.boostT > 0 ? BAL.boostMultiplier : 1);
 export const rateBase = (s: GameState) => (s.auto + s.farm * BAL.farmPrinters * eff(s)) * s.spd * boostMul(s) * (1 + 0.15 * patLvl(s, 'speed'));

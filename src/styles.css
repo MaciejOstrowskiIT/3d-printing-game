@@ -78,13 +78,16 @@ body.space .pbtn{display:none}
 .main{min-width:0}
 .content{padding:18px 20px 30px;max-width:1180px}
 .events{display:grid;gap:10px;margin-bottom:14px}
-.events:not(:has(.ev:not([hidden]))){display:none}
+.events:not(:has(.ev:not([hidden]),.mfx)){display:none}
 .ev{border:1.5px solid var(--or);background:var(--orS);border-radius:12px;padding:10px 12px 10px 14px;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
 .ev.bad{border-color:var(--bad);background:var(--badS)}
 .ev .evt{flex:1 1 240px}
 .ev b{font:700 18px "Barlow Condensed",sans-serif}
 .ev p{margin:0;font-size:14px}
 .ev .meter{margin:6px 0 0}
+.mfx{display:flex;flex-wrap:wrap;gap:6px}
+.mfx .mchip{font-size:13px;font-weight:600;border-radius:999px;padding:3px 10px;background:var(--accS);color:var(--acc);border:1px solid color-mix(in srgb,var(--acc) 40%,transparent)}
+.mfx .mchip.bad{background:var(--badS);color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,transparent)}
 .evb{display:flex;gap:6px}
 .btn-main{background:#1c1b22;color:#fff;border-color:#1c1b22}
 .btn-main:hover:not(:disabled){background:#2c2b34;border-color:#1c1b22}
