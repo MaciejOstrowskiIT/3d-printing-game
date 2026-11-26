@@ -15,20 +15,22 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 | Rewarded "double offline earnings" | #17 | Merge first |
 | Realistic mode (new-line challenge) | #18 | Built on #17 |
 | CrazyGames account saves (data module) | #19 | Merge after #18; needs the submission setting below |
+| Order of the day (daily order + streak) | #21 | Built on #18 |
+| Smooth the farm phase | #22 | Independent |
+| Calendar events (Black Week, Christmas, Halloween…) | #23 | Built on #21 |
 
-## In progress
+## 🛠️ In progress
 
-| Card | Branch | Owner |
-|---|---|---|
-| **Materials**: PLA, PETG, TPU, resin; each with its own price, durability and matching models | `feat/materials` | Codex |
+| Card | Who |
+|---|---|
+| Materials (`feat/materials`) | Codex |
+| Story messages | Claude |
 
 ## 🚦 Next up
 
 | Card | Effort | Owner | Why |
 |---|---|---|---|
-| **Print problems & quality**: bed adhesion, spaghetti, clogged nozzle, wet filament; bed calibration, filament dryer, slow-and-fine mode; quality raises the price | M | Dev | Grows out of today's breakdowns; makes the mid-game active instead of waiting |
-| **Order of the day**: one special order per day, bonus for a streak | S | Dev | Day-1/day-7 return, measured in Umami (`open.day`) |
-| Smooth the farm phase (~20 min): production jumps by 60 printers per farm | S | Dev | Next balance candidate after #16 |
+| **Print problems & quality** (after Materials: wet filament depends on the material): bed adhesion, spaghetti, clogged nozzle, wet filament; bed calibration, filament dryer, slow-and-fine mode; quality raises the price | M | Dev | Grows out of today's breakdowns; makes the mid-game active instead of waiting |
 
 ## 🧑‍🔧 Your side (Maciej)
 
@@ -38,7 +40,7 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 | Set repo variables `UMAMI_HOST` and `UMAMI_WEBSITE_ID`, re-run the deploy | Analytics stays off until then |
 | Playtest with 5–10 people, read Umami after a week | Where players drop off decides the backlog order |
 | CrazyGames submission: progress saving = "Yes, using the Data Module from the CrazyGames SDK" | Without it the data module is disabled (the game falls back to localStorage) |
-| Merge order: #17 → #18 → #19 | |
+| Merge order: #17 → #18 → #19 → #21 → #23; #22 any time | |
 
 ## 📋 Backlog
 
@@ -46,7 +48,6 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 | Card | Effort | Notes |
 |---|---|---|
 | **Printer types**: resin (small, very detailed figurines), industrial; trade-offs instead of "more of the same" | M | Pairs with materials |
-| **Calendar events** tied to the real date (Christmas rush, Halloween masks…) | S | Reuses the market-event system |
 | **Story messages** from clients, competitors and the "AI board" (Paperclips-style narrative) | S | Cheap; gives the game character |
 | **Second prestige layer**: IPO after a few production lines, shares give permanent bonuses | M | After players reach several lines |
 | **Third phase**: e.g. printing Mars bases from regolith after the asteroid belt | L | Decide after the playtest: only if enough players reach space |
