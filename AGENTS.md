@@ -3,6 +3,8 @@
 More than one agent works on this repo in parallel (Claude, Codex). Read this before you start, and update the
 "In flight" table when you open or merge a PR.
 
+Planned work and its order: `ROADMAP.md` (task board). Pick cards from "Next up" and move them as you go.
+
 ## Rules
 - Code, comments, commits, PR titles and descriptions: **English**. Player-facing text: PL + EN.
 - `npm test` and `npm run typecheck` must pass. Balance changes: check `tests/balance.sim.test.ts` (bot pacing).

@@ -4,6 +4,8 @@ A browser incremental game in the spirit of Universal Paperclips, set in the wor
 
 **Play:** https://maciejostrowskiit.github.io/3d-printing-game/
 
+Roadmap and task board: [`ROADMAP.md`](ROADMAP.md).
+
 ## Getting started
 
 ```bash
