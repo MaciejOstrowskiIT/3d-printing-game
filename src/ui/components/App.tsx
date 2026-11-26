@@ -1,7 +1,9 @@
 import { useEffect } from 'preact/hooks';
 import { fmt, prefs, t } from '../i18n';
-import { act, resetGame, useS } from '../store';
+import { act, dialog, resetGame, screen, useS } from '../store';
 import { Toasts } from './Achievements';
+import { SaveDialog } from './SaveDialog';
+import { Title } from './Title';
 import { PrestigeButton } from './Prestige';
 import { Hud, Tabs } from './Hud';
 import { Research } from './Research';
@@ -45,11 +47,14 @@ export function App() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const el = document.activeElement?.tagName;
+      if (screen.value !== 'game' || dialog.value) return;
       if (e.code === 'Space' && !e.repeat && el !== 'BUTTON' && el !== 'INPUT' && el !== 'TEXTAREA') { e.preventDefault(); act('print'); }
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, []);
+
+  if (screen.value === 'title') return (<><Title /><SaveDialog /></>);
 
   return (
     <>
@@ -66,6 +71,7 @@ export function App() {
       <Dock />
       <Toasts />
       <End />
+      <SaveDialog />
     </>
   );
 }

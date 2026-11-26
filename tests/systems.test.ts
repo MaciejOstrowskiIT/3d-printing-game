@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { seededRng } from '../src/core/ctx';
 import { demand, eff, rate1, unitCost } from '../src/core/formulas';
 import { createGame } from '../src/core/game';
-import { migrate } from '../src/core/save';
+import { EXPORT_PREFIX, exportSave, importSave, migrate } from '../src/core/save';
 import { createState } from '../src/core/state';
 
 const newGame = () => createGame({ rng: seededRng(3) });
@@ -156,5 +156,38 @@ describe('filament auto-buy', () => {
     const before = g.s.total;
     g.tick(1);
     expect(g.s.total - before).toBeGreaterThan(9000);
+  });
+});
+
+describe('save export and import', () => {
+  it('round-trips a save through the text code', () => {
+    const g = newGame();
+    Object.assign(g.s, { total: 12345, auto: 7, zl: 99.5, col: 4 });
+    g.s.done.push('dysza');
+    g.s.meta.patents = 3;
+    const code = exportSave(g.s);
+    expect(code.startsWith(EXPORT_PREFIX)).toBe(true);
+    const s = importSave(code)!;
+    expect(s.total).toBe(12345);
+    expect(s.auto).toBe(7);
+    expect(s.col).toBe(4);
+    expect(s.done).toContain('dysza');
+    expect(s.meta.patents).toBe(3);
+  });
+
+  it('accepts codes with whitespace and raw JSON saves', () => {
+    const code = exportSave(createState());
+    expect(importSave(`  ${code.slice(0, 20)}\n${code.slice(20)}  `)).not.toBeNull();
+    expect(importSave(JSON.stringify({ total: 5, done: [] }))!.total).toBe(5);
+  });
+
+  it('rejects garbage', () => {
+    for (const bad of ['', 'hello', 'DRK1:@@@', 'DRK1:' + btoa('{"x":1}'), '{"total":"1","done":[]}']) expect(importSave(bad)).toBeNull();
+  });
+
+  it('handles non-ASCII text in the save', () => {
+    const s = createState();
+    s.log.unshift({ k: 'goal', a: ['Wyjdź poza Ziemię|Leave Earth'] });
+    expect(importSave(exportSave(s))!.log[0].a[0]).toBe('Wyjdź poza Ziemię|Leave Earth');
   });
 });

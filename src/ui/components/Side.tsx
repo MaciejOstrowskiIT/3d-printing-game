@@ -4,7 +4,7 @@ import { rate1 } from '../../core/formulas';
 import { fmt, li, logText, prefs, setPrefs, t } from '../i18n';
 import { buildRoom, roomSignature, type Stage } from '../scene/room';
 import { mountPrinter } from '../scene/printer';
-import { game, printedListeners, resetGame, useS } from '../store';
+import { dialog, game, printedListeners, resetGame, useS } from '../store';
 import { useHold } from './common';
 
 const STAGE_KEY = { garage: 'stGarage', shop: 'stShop', hall: 'stHall', space: 'stSpace' } as const;
@@ -98,6 +98,7 @@ export function Settings({ class: cls }: { class: string }) {
     <div class={cls}>
       <button onClick={() => setPrefs({ mute: !prefs.value.mute })}>{prefs.value.mute ? t('mOff') : t('mOn')}</button>
       <button onClick={() => setPrefs({ lang: prefs.value.lang === 'pl' ? 'en' : 'pl' })}>{t('langBtn')}</button>
+      <button onClick={() => { dialog.value = 'save'; }}>{t('sOpen')}</button>
       <button onClick={() => { if (sure) { resetGame('fresh'); setSure(false); } else setSure(true); }}>{sure ? t('sure') : t('reset')}</button>
     </div>
   );
