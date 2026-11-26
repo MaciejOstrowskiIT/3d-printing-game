@@ -5,10 +5,14 @@ import './styles.css';
 import { App } from './ui/components/App';
 import { platform } from './ui/platform';
 import { initAnalytics } from './ui/analytics';
-import { game, startLoop } from './ui/store';
+import { reloadPrefs } from './ui/i18n';
+import { game, loadSavedGame, startLoop } from './ui/store';
 
 async function boot() {
   await platform.init();
+  // Saves and preferences are read only now: on CrazyGames they come from the SDK's data module.
+  reloadPrefs();
+  loadSavedGame();
   render(<App />, document.getElementById('app')!);
   const splash = document.getElementById('boot');
   splash?.classList.add('gone');
