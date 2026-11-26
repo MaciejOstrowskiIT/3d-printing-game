@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { GOALS } from '../../content/goals';
 import { DEFAULT_MODEL, MODEL } from '../../content/models';
-import { gpu, rate1 } from '../../core/formulas';
+import { gpu, model, rate1, spaceRate } from '../../core/formulas';
+import { primaryRate } from '../../systems/fleet';
 import { fmt, li, logText, prefs, setPrefs, t } from '../i18n';
 import { buildRoom, roomSignature, type Stage } from '../scene/room';
 import { mountPrinter } from '../scene/printer';
@@ -86,13 +87,44 @@ function Goal() {
   );
 }
 
+function StationReadout() {
+  const v = useS(s => {
+    const m = model(s);
+    const space = s.ph === 2;
+    const speed = space ? spaceRate(s) : primaryRate(s) / m.seconds;
+    const out = !space && s.fil <= 0;
+    const status = s.end ? 'stationDone' : out ? 'stationEmpty' : s.brk > 0 ? 'stationFault'
+      : speed > 0 ? 'stationRunning' : space ? 'stationIdle' : 'stationManual';
+    return { name: space ? t('stSpace') : m.name[li()], status, speed: out || s.end ? 0 : speed } as const;
+  });
+  return (
+    <div class="station-readout">
+      <div class="station-status">
+        <span>{v.name}</span>
+        <span class={'station-state ' + v.status}>{t(v.status)}</span>
+      </div>
+      <div class="station-rate">
+        <span>{t('stationAutoRate')}</span>
+        <strong>{fmt(v.speed * 60, 1)} <small>{t('stationUnits')}</small></strong>
+      </div>
+    </div>
+  );
+}
+
 function Log() {
   const [open, setOpen] = useState(false);
-  const entries = useS(s => s.log.map(logText).join('\u0000'));
+  const entries = useS(s => s.log.map(logText).join('\u0000')).split('\u0000').filter(Boolean);
   return (
-    <ol class={'log' + (open ? ' open' : '')} onClick={() => setOpen(!open)}>
-      {entries.split('\u0000').filter(Boolean).map((x, i) => <li key={i}>{x}</li>)}
-    </ol>
+    <section class={'side-journal' + (open ? ' open' : '')} aria-label={t('stationLog')}>
+      <h2>{t('stationLog')}</h2>
+      <button class="journal-toggle" aria-expanded={open} aria-controls="workshop-log" onClick={() => setOpen(!open)}>
+        <span>{open ? t('stationLog') : entries[0] ?? t('stationLog')}</span>
+        <b aria-hidden="true">{open ? '▴' : '▾'}</b>
+      </button>
+      <ol class="log" id="workshop-log">
+        {entries.map((entry, i) => <li key={i}>{entry}</li>)}
+      </ol>
+    </section>
   );
 }
 
@@ -118,6 +150,7 @@ export function Side() {
         <Picture onToggleExpand={() => setExpand(!expand)} />
         <h1>{t('title')}</h1>
         <div class="count"><span class="num">{total}</span><small>{t('printed')}</small></div>
+        <StationReadout />
       </div>
       <PrintButton />
       <Goal />
