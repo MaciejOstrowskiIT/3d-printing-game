@@ -241,7 +241,7 @@ function Shape({ m, size = 36 }: { m: PrintModel; size?: number }) {
 /** Print models: owned ones can be selected for all printers, visible ones bought as designs. Data: content/models.ts. */
 function Models() {
   const v = useS(s => ({
-    cur: s.mdl, owned: s.mdls.join(','), zl: s.zl, total: s.total,
+    cur: s.mdl, owned: s.mdls.join(','), zl: s.zl, total: s.total, slow: s.slow || 1,
     visible: MODELS.filter(m => designVisible(s, m)).map(m => m.id).join(','),
   }));
   const visible = MODELS.filter(m => v.visible.split(',').includes(m.id));
@@ -254,7 +254,8 @@ function Models() {
       <p class="hint">{t('mdlHint')}</p>
       {visible.map(m => {
         const have = v.owned.split(',').includes(m.id), on = m.id === v.cur;
-        const stats = [t('mdlTime', nf(m.seconds, m.seconds < 1 ? 1 : 0)), t('mdlPay', nf(m.value, 2)), t('mdlMkt', nf(m.market, 2)), t('mdlMat', nf(m.material, 2))].join(' · ');
+        const secs = m.seconds * v.slow;
+        const stats = [t('mdlTime', nf(secs, secs < 1 ? 1 : 0)), t('mdlPay', nf(m.value, 2)), t('mdlMkt', nf(m.market, 2)), t('mdlMat', nf(m.material, 2))].join(' · ');
         return (
           <div key={m.id} class={'item model' + (on ? ' active' : '')}>
             <Shape m={m} />

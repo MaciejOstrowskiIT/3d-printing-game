@@ -20,8 +20,8 @@ export function marketSystem(s: GameState, dt: number, ctx: Ctx) {
   if (trendOn(s)) {
     s.trendT -= dt;
     if (s.trendT <= 0) {
-      let n: number;
-      do n = Math.floor(ctx.rng() * COLORS.length); while (n === s.trend);
+      // Any colour except the current trend, without a retry loop (a fixed rng would spin forever).
+      const n = (s.trend + 1 + Math.floor(ctx.rng() * (COLORS.length - 1))) % COLORS.length;
       s.trend = n;
       s.trendT = pick(ctx, BAL.trendEvery);
       log(s, ctx, 'trend', '&' + n);

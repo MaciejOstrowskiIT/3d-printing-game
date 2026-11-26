@@ -9,6 +9,7 @@ import { acceptMarketEvent, declineMarketEvent, marketEventsSystem } from '../sy
 import { acceptOrder, declineOrder, ordersSystem } from '../systems/orders';
 import { setQualityAction } from '../systems/printQuality';
 import { buySpool, productionSystem } from '../systems/production';
+import { claimOfflineBonus, grantOfflineBonus, offlineBonusSystem } from '../systems/offlineBonus';
 import { buyClickTool, buyDesign, printManual, selectModel } from '../systems/models';
 import { assignPoint, buyNode, computeSystem, goalsSystem, reputationSystem } from '../systems/research';
 import { changePrice, salesSystem } from '../systems/sales';
@@ -36,6 +37,7 @@ export const SYSTEMS: System[] = [
   reputationSystem,
   goalsSystem,
   achievementsSystem,
+  offlineBonusSystem,
 ];
 
 /** Player actions. The UI only sends these strings and never mutates game state itself. */
@@ -43,7 +45,7 @@ export type Action =
   | 'calibrate' | 'dryer' | 'precision'
   | 'print' | 'spool' | 'auto' | 'farm' | 'panel' | 'mkt' | 'drone' | 'fab'
   | 'pminus' | 'pplus' | 'oacc' | 'odec' | 'fix' | 'mevyes' | 'mevno' | 'tool'
-  | 'proc1' | 'procmax' | 'mem1' | 'memmax' | 'boost' | 'adfail' | 'prestige'
+  | 'proc1' | 'procmax' | 'mem1' | 'memmax' | 'boost' | 'adfail' | 'prestige' | 'prestigeR' | 'offx2'
   | `t:${string}` | `col:${number}` | `mdl:${string}` | `stl:${string}` | `am:${string}:${0 | 1}` | `pat:${string}`;
 
 export interface Game {
@@ -99,9 +101,10 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
       if (a === 'mevno') { declineMarketEvent(s, ctx); return true; }
       if (a === 'fix') { repair(s, ctx); sfx(ctx, 'buy'); return true; }
       if (a === 'boost') return activateBoost(s, ctx);
-      if (a === 'prestige') { const next = prestige(s, ctx); if (next) s = next; return !!next; }
+      if (a === 'prestige' || a === 'prestigeR') { const next = prestige(s, ctx, a === 'prestigeR'); if (next) s = next; return !!next; }
       if (a.startsWith('pat:')) { const ok = buyPatent(s, a.slice(4)); if (ok) sfx(ctx, 'buy'); return ok; }
       if (a === 'adfail') { log(s, ctx, 'boostFail'); return true; }
+      if (a === 'offx2') { const ok = claimOfflineBonus(s, ctx); if (ok) sfx(ctx, 'buy'); return ok; }
       if (a === 'proc1') { assignPoint(s, 'proc'); return true; }
       if (a === 'procmax') { assignPoint(s, 'proc', true); return true; }
       if (a === 'mem1') { assignPoint(s, 'mem'); return true; }
@@ -114,13 +117,19 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
     catchUp(seconds) {
       if (s.end || !Number.isFinite(seconds) || seconds <= 0) return;
       const before = { total: s.total, sold: s.sold };
-      const elapsed = Math.min(seconds, BAL.offlineMaxSeconds);
+      const elapsed = Math.min(seconds, s.slow > 1 ? BAL.realisticOfflineMax : BAL.offlineMaxSeconds);
       ctx.offline = true;
-      let rem = elapsed;
-      while (rem > 0) { const d = Math.min(1, rem); game.tick(d); rem -= d; }
+      let rem = elapsed, revenue = 0;
+      while (rem > 0) {
+        const d = Math.min(1, rem), sold = s.sold, price = s.price;
+        game.tick(d);
+        revenue += (s.sold - sold) * (price + s.price) / 2;
+        rem -= d;
+      }
       ctx.offline = false;
       const made = Math.floor(s.total - before.total);
       const sold = s.goal >= 1 ? s.sold - before.sold : 0;
+      grantOfflineBonus(s, elapsed, revenue, made);
       if (elapsed < 120 || (!made && !sold)) return;
       const duration = '~' + Math.round(elapsed);
       if (made && sold) log(s, ctx, 'offProductionSales', duration, made, sold);

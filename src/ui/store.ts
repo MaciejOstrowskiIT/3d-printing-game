@@ -14,11 +14,20 @@ function loadSaved() {
   try { const raw = platform.loadGame(); return raw ? migrate(JSON.parse(raw)) : undefined; } catch { return undefined; }
 }
 
-const saved = loadSaved();
-export const game = createGame({ state: saved });
+/** The game starts empty; loadSavedGame() fills it once the platform is ready (a portal SDK may hold the save). */
+export const game = createGame();
 export const awayReport = signal<ReturnType<typeof game.catchUp>>(undefined);
 let lastT = performance.now();
-let clock = new WorkshopClock(saved?.serverThrough ?? 0, lastT);
+let clock = new WorkshopClock(0, lastT);
+
+/** Loads the save through the platform. Call after platform.init(), before the first render. */
+export function loadSavedGame() {
+  const saved = loadSaved();
+  if (!saved) return;
+  game.load(saved);
+  lastT = performance.now();
+  clock = new WorkshopClock(saved.serverThrough ?? 0, lastT);
+}
 
 /** State version counter, bumped after every tick and action. Components read state through useS, which depends on it. */
 export const ver = signal(0);
@@ -62,14 +71,15 @@ function pushToast(id: string) {
 export const adPending = signal(false);
 let suspendedDuringAd = false;
 
-/** Shows a rewarded ad and grants the boost only if the platform confirms it was watched. */
-export async function watchAdForBoost() {
+/** Shows a rewarded ad and runs `reward` only if the platform confirms it was watched. */
+export async function watchAd(placement: string, reward: Action, failed?: Action) {
   if (adPending.value || !platform.rewardedAvailable) return;
   adPending.value = true;
   try {
     const ok = await platform.showRewardedAd();
-    act(ok ? 'boost' : 'adfail');
-    track('ad', { placement: 'boost', watched: ok });
+    if (ok) act(reward);
+    else if (failed) act(failed);
+    track('ad', { placement, watched: ok });
   } finally {
     if (suspendedDuringAd) {
       lastT = performance.now();
@@ -79,6 +89,10 @@ export async function watchAdForBoost() {
     adPending.value = false;
   }
 }
+
+export const watchAdForBoost = () => watchAd('boost', 'boost', 'adfail');
+/** "Watch an ad: ×2" on the away report. */
+export const watchAdForOfflineBonus = () => watchAd('offline', 'offx2');
 
 /** Core event listeners: sound, printer animation and analytics. */
 /** Called with the share of a piece each manual click printed (1 = a whole piece). */
@@ -90,7 +104,7 @@ game.on(e => {
   if (e.type === 'phase') track('liftoff');
   if (e.type === 'order') track('order', { result: e.result });
   if (e.type === 'end') track('end', { total: Math.floor(game.s.total) });
-  if (e.type === 'prestige') track('prestige', { gain: e.gain });
+  if (e.type === 'prestige') track('prestige', { gain: e.gain, realistic: !!e.realistic });
   if (e.type === 'market') track('market', { id: e.id, result: e.result });
   if (e.type === 'model') track('model', { id: e.id, action: e.action });
   if (e.type === 'achievement') { pushToast(e.id); track('achievement', { id: e.id }); }

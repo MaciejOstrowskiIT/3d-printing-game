@@ -50,8 +50,8 @@ export function printManual(s: GameState, ctx: Ctx): boolean {
   if (s.ph !== 1 || s.fil < g) return false;
   const work = Math.min(clickPower(s), s.fil / g);
   s.acc += work;
-  const n = Math.floor(s.acc);
-  s.acc -= n;
+  const n = Math.floor(s.acc + 1e-9); // ten clicks of 0.1 must make a whole figurine despite float rounding
+  s.acc = Math.max(0, s.acc - n);
   if (n > 0) { s.fil -= n * g; make(s, ctx, n); }
   const m = model(s);
   s.mp = (s.mp + work) % m.seconds;

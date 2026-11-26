@@ -26,7 +26,10 @@ export const modelDemand = (m: PrintModel) => m.value ** BAL.demandElasticity * 
 /** Figurines of work added by one click. */
 export const precisionSpeed = (s: GameState) => s.precision ? BAL.precisionSpeed : 1;
 export const realizedPrice = (s: GameState) => s.price * (1 + s.stockPremium);
-export const clickPower = (s: GameState) => BAL.clickWork * (1 + BAL.clickStep * s.clk) * precisionSpeed(s);
+export const clickPower = (s: GameState) => BAL.clickWork * (1 + BAL.clickStep * s.clk) * precisionSpeed(s) / (s.slow || 1);
+/** Print time of one piece of a model in seconds, as the player sees it (longer on a realistic line or in precision mode). */
+export const printSeconds = (s: GameState, m: PrintModel) => m.seconds * (s.slow || 1) / precisionSpeed(s);
+export const isRealistic = (s: GameState) => (s.slow || 1) > 1;
 export const clickCost = (s: GameState) => BAL.clickCost * BAL.clickGrowth ** s.clk;
 /** Price per figurine at which demand would be `sales` figurines/s (demand ∝ price^-elasticity). */
 export const clearingPrice = (s: GameState, sales: number) =>
@@ -55,7 +58,7 @@ export const demand = (s: GameState) =>
   modelDemand(model(s));
 
 export const boostMul = (s: GameState) => (s.boostT > 0 ? BAL.boostMultiplier : 1);
-export const rateBase = (s: GameState) => (s.auto + s.farm * BAL.farmPrinters * eff(s)) * s.spd * boostMul(s) * (1 + 0.15 * patLvl(s, 'speed')) * precisionSpeed(s);
+export const rateBase = (s: GameState) => (s.auto + s.farm * BAL.farmPrinters * eff(s)) * s.spd * boostMul(s) * (1 + 0.15 * patLvl(s, 'speed')) * precisionSpeed(s) / (s.slow || 1);
 export const rate1 = (s: GameState) => rateBase(s) * (1 - s.brk);
 
 const repBase = (s: GameState) => BAL.repThreshold * 0.9 ** patLvl(s, 'fame');

@@ -12,7 +12,7 @@ export type GameEvent =
   | { type: 'phase'; phase: 1 | 2 }
   | { type: 'order'; result: 'offered' | 'delivered' | 'failed' | 'expired' }
   | { type: 'achievement'; id: string }
-  | { type: 'prestige'; gain: number }
+  | { type: 'prestige'; gain: number; realistic?: boolean }
   | { type: 'model'; id: string; action: 'bought' | 'selected' }
   | { type: 'market'; id: string; result: 'started' | 'offered' | 'accepted' | 'declined' | 'expired' }
   | { type: 'end' };
