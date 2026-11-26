@@ -1,3 +1,4 @@
+import type { DailyOrder } from '../systems/dailyOrder';
 import { BAL } from '../content/balance';
 
 /** Log entry argument. String prefixes are kept for compatibility with old saves:
@@ -58,6 +59,8 @@ export interface GameState {
   offB: number; offBi: number; offBT: number;
   /** Print-time multiplier: 1 normally, BAL.realisticSlow on a realistic line. */
   slow: number;
+  /** Order of the day: last day seen (local day number), today's order, current and best streak. */
+  dday: number; dord: DailyOrder | null; dstreak: number; dbest: number;
   meta: Meta;
 }
 
@@ -87,6 +90,7 @@ export const createState = (): GameState => ({
   mdl: 'fig', mdls: ['fig'], clk: 0, mp: 0,
   offB: 0, offBi: 0, offBT: 0,
   slow: 1,
+  dday: 0, dord: null, dstreak: 0, dbest: 0,
   meta: { patents: 0, earned: 0, runs: 0, pat: {} },
 });
 

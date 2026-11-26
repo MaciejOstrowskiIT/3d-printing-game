@@ -59,13 +59,34 @@ function MarketEffects() {
   );
 }
 
+/** Order of the day: ship from stock any time today; days in a row raise the pay. */
+function DailyOrderCard() {
+  const d = useS(s => (s.ph === 1 && s.dord && s.dord.day === s.dday ? { ...s.dord, inv: s.inv, streak: s.dstreak } : null));
+  if (!d) return null;
+  const client = dict().clients[d.c] ?? '';
+  const streakShown = d.done ? d.streak : d.streak + 1;
+  return (
+    <div class={'ev daily' + (d.done ? ' done' : '')}>
+      <div class="evt">
+        <b>{t('dTitle')} <span class="dstreak">{t('dStreak', streakShown)}</span></b>
+        <p>{d.done ? t('dDoneTxt') : t('dDesc', client, fmt(d.n), money(d.pay))}</p>
+        {!d.done && <Meter tone="or" pct={Math.min(100, (100 * d.inv) / d.n)} />}
+        {!d.done && <small>{t('dNeed', fmt(Math.floor(d.inv)), fmt(d.n))}</small>}
+      </div>
+      {!d.done && <div class="evb"><button class="btn-main" disabled={d.inv < d.n} onClick={() => act('daily')}>{t('dBtn', fmt(d.n))}</button></div>}
+    </div>
+  );
+}
+
 function Events() {
   const o = useS(s => (s.ph === 1 && s.ord ? { ...s.ord } : null));
   const brk = useS(s => (s.ph === 1 && s.brk > 0 ? { brk: s.brk, c: s.brkC, fixT: s.fixT, cam: has(s, 'kamera') && !!s.amOn.kamera } : null));
   const market = useS(s => s.ph === 1 && (!!s.mev || s.mfx.length > 0));
-  if (!o && !brk && !market) return null;
+  const daily = useS(s => s.ph === 1 && !!s.dord && s.dord.day === s.dday);
+  if (!o && !brk && !market && !daily) return null;
   return (
     <div class="events">
+      <DailyOrderCard />
       <MarketEffects />
       <MarketOffer />
       {o && (
