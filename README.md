@@ -25,6 +25,12 @@ The only rewarded placement so far is **Overtime**: 2× production for 5 minutes
 
 `.github/workflows/deploy.yml` runs tests and the build on every pull request, and on every push to `main` it also deploys `dist/` to GitHub Pages. Pages must use **GitHub Actions** as its source (Settings → Pages → Build and deployment).
 
+## Analytics
+
+The GitHub Pages build can send anonymous events to a self-hosted [Umami](https://umami.is) instance: goal funnel with play time, liftoff, prestige, retention by day, rewarded-ad completion, uncaught errors. It is off unless the `UMAMI_HOST` and `UMAMI_WEBSITE_ID` repository variables are set. Setup, Docker Compose and the event list: [`infra/umami/README.md`](infra/umami/README.md).
+
+In code, call `track(name, data)` from `src/ui/analytics.ts`; it forwards to the portal SDK and to Umami and adds context (minutes played, line, goal, build). The build id (`version+sha`) is shown on the title screen.
+
 ## Architecture
 
 Three layers. The core knows nothing about the browser, the UI only reads state and dispatches actions, and everything that depends on where the game runs sits behind the platform interface.

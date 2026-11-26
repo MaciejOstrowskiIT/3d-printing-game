@@ -236,6 +236,8 @@ h2{font-size:21px;margin:0;line-height:1.1}
 /* title screen */
 .title-screen{min-height:100vh;min-height:100dvh;display:grid;place-items:center;padding:24px 16px;background:#1e2128;color:#f1efe9}
 body.space .title-screen{background:#14122b}
+.title-screen{position:relative}
+.build-id{position:absolute;right:12px;bottom:8px;margin:0;font-size:11px;color:#8a8f99;font-variant-numeric:tabular-nums;user-select:all}
 .title-box{width:min(100%,420px);display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px}
 .title-pic{margin:0;width:min(100%,320px);aspect-ratio:4/3;border-radius:16px;overflow:hidden;background:linear-gradient(#e6e9ee,#c9ced6);box-shadow:0 12px 32px #0006}
 .title-pic svg{width:100%;height:100%;display:block}

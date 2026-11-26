@@ -7,6 +7,7 @@ import type { GameState } from '../core/state';
 import { play } from './audio';
 import { prefs } from './i18n';
 import { platform } from './platform';
+import { setTrackContext, track } from './analytics';
 
 function loadSaved() {
   try { const raw = platform.loadGame(); return raw ? migrate(JSON.parse(raw)) : undefined; } catch { return undefined; }
@@ -54,6 +55,7 @@ export async function watchAdForBoost() {
   try {
     const ok = await platform.showRewardedAd();
     act(ok ? 'boost' : 'adfail');
+    track('ad', { placement: 'boost', watched: ok });
   } finally {
     adPending.value = false;
   }
@@ -64,12 +66,22 @@ export const printedListeners = new Set<() => void>();
 game.on(e => {
   if (e.type === 'sfx') play(e.name);
   if (e.type === 'printed') printedListeners.forEach(fn => fn());
-  if (e.type === 'goal') platform.track('goal', { index: e.index });
-  if (e.type === 'phase') platform.track('liftoff');
-  if (e.type === 'order') platform.track('order', { result: e.result });
-  if (e.type === 'end') platform.track('end', { total: game.s.total });
-  if (e.type === 'achievement') { pushToast(e.id); platform.track('achievement', { id: e.id }); }
+  if (e.type === 'goal') track('goal', { index: e.index });
+  if (e.type === 'phase') track('liftoff');
+  if (e.type === 'order') track('order', { result: e.result });
+  if (e.type === 'end') track('end', { total: Math.floor(game.s.total) });
+  if (e.type === 'prestige') track('prestige', { gain: e.gain });
+  if (e.type === 'achievement') { pushToast(e.id); track('achievement', { id: e.id }); }
 });
+
+/** Context attached to every analytics event: where in the run the player is. */
+setTrackContext(() => ({
+  min: Math.floor(game.s.play / 60),
+  line: game.s.meta.runs + 1,
+  goal: game.s.goal,
+  platform: platform.name,
+  build: __BUILD__,
+}));
 
 /** Title screen first; the simulation only runs on the game screen. */
 export const screen = signal<'title' | 'game'>('title');
@@ -77,8 +89,10 @@ export const screen = signal<'title' | 'game'>('title');
 export const dialog = signal<null | 'save'>(null);
 
 export function startGame(fresh = false) {
+  const resumed = game.s.total > 0 || game.s.meta.runs > 0;
   if (fresh) resetGame('fresh');
   screen.value = 'game';
+  track('session', { kind: fresh ? 'new' : resumed ? 'continue' : 'first' });
   platform.gameplayStart();
 }
 
@@ -87,9 +101,12 @@ export function loadImported(s: GameState) {
   game.load(s);
   save();
   bump();
+  track('import');
 }
 
-let lastT = performance.now(), sinceSave = 0;
+/** Active-play heartbeat: session length distribution without relying on page visibility. */
+const HEARTBEAT_S = 300;
+let lastT = performance.now(), sinceSave = 0, sinceBeat = 0;
 export function startLoop() {
   setInterval(() => {
     const now = performance.now(), dt = Math.min(1, (now - lastT) / 1000);
@@ -99,6 +116,8 @@ export function startLoop() {
     bump();
     sinceSave += dt;
     if (sinceSave > 5) { sinceSave = 0; save(); }
+    sinceBeat += dt;
+    if (sinceBeat >= HEARTBEAT_S) { sinceBeat = 0; track('heartbeat'); }
   }, 100);
   document.addEventListener('visibilitychange', save);
   window.addEventListener('pagehide', save);
