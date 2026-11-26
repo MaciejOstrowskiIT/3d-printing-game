@@ -76,4 +76,12 @@ export const BAL = {
 
   // offline
   offlineMaxSeconds: 8 * 3600,
+
+  // market events (content/events.ts): first one after the first order goal, then every 90-150 s
+  marketEventFirst: 60,
+  marketEventEvery: [90, 150],
+  marketEventOffer: 25,       // seconds to decide on an offer
+  marketMulRange: [0.5, 4],   // stacked effects are clamped to this demand/price multiplier range
+  marketMinMoney: 50,         // smallest price of a money offer
+  clearanceDiscount: 0.5,
 } as const;

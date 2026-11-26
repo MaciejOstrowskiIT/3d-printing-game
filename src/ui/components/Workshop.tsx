@@ -6,18 +6,66 @@ import {
 } from '../../core/formulas';
 import { has } from '../../core/state';
 import { boostUnlocked } from '../../systems/boost';
+import { canAfford } from '../../systems/marketEvents';
+import { MARKET_EVENT } from '../../content/events';
 import { platform } from '../platform';
 import { act, adPending, useS, watchAdForBoost } from '../store';
 import { clock, colorName, dict, dur, fmt, li, money, nf, t } from '../i18n';
 import { BuyButton, CardHead, Item, Meter, Tile, useHold } from './common';
 import { PrestigeCard } from './Prestige';
 
+/** A market event offer (content/events.ts) with its price, countdown and a take-it-or-leave-it choice. */
+function MarketOffer() {
+  const m = useS(s => (s.ph === 1 && s.mev ? { ...s.mev, ok: canAfford(s) } : null));
+  if (!m) return null;
+  const e = MARKET_EVENT[m.id];
+  if (!e?.offer) return null;
+  const cost = money(m.cost);
+  return (
+    <div class={'ev' + (e.counter ? ' bad' : '')}>
+      <div class="evt">
+        <b>{e.name[li()]}</b>
+        <p>{e.desc[li()].replace('{0}', cost)} {t('mevExp', Math.ceil(m.offer))}</p>
+        <Meter tone="or" pct={(100 * m.offer) / BAL.marketEventOffer} />
+      </div>
+      <div class="evb">
+        <button class="btn-main" disabled={!m.ok} onClick={() => act('mevyes')}>{e.offer.btn[li()]}</button>
+        <button onClick={() => act('mevno')}>{t('decline')}</button>
+      </div>
+    </div>
+  );
+}
+
+/** Running market effects as small chips with a countdown; red when the effect hurts. */
+function MarketEffects() {
+  const fx = useS(s => (s.ph === 1 ? s.mfx.map(f => `${f.id}:${Math.ceil(f.t)}`).join(',') : ''));
+  if (!fx) return null;
+  return (
+    <div class="mfx" aria-label={t('fxTitle')}>
+      {fx.split(',').map(item => {
+        const [id, left] = item.split(':');
+        const e = MARKET_EVENT[id];
+        if (!e) return null;
+        const bad = (e.demand ?? 1) < 1 || (e.spool ?? 1) > 1;
+        return (
+          <span key={id} class={'mchip' + (bad ? ' bad' : '')} title={e.desc[li()].replace('{0}', '…')}>
+            {e.name[li()]} · {t('fxLeft', clock(+left))}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
 function Events() {
   const o = useS(s => (s.ph === 1 && s.ord ? { ...s.ord } : null));
   const brk = useS(s => (s.ph === 1 && s.brk > 0 ? { brk: s.brk, c: s.brkC, fixT: s.fixT, cam: has(s, 'kamera') && !!s.amOn.kamera } : null));
-  if (!o && !brk) return null;
+  const market = useS(s => s.ph === 1 && (!!s.mev || s.mfx.length > 0));
+  if (!o && !brk && !market) return null;
   return (
     <div class="events">
+      <MarketEffects />
+      <MarketOffer />
       {o && (
         <div class="ev">
           <div class="evt">

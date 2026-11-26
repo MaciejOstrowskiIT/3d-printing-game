@@ -5,6 +5,7 @@ import { activateBoost, boostSystem } from '../systems/boost';
 import { breakdownsSystem, repair } from '../systems/breakdowns';
 import { energySystem } from '../systems/energy';
 import { marketSystem, setColor } from '../systems/market';
+import { acceptMarketEvent, declineMarketEvent, marketEventsSystem } from '../systems/marketEvents';
 import { acceptOrder, declineOrder, ordersSystem } from '../systems/orders';
 import { buySpool, printManual, productionSystem } from '../systems/production';
 import { assignPoint, buyNode, computeSystem, goalsSystem, reputationSystem } from '../systems/research';
@@ -25,6 +26,7 @@ export const SYSTEMS: System[] = [
   energySystem,
   salesSystem,
   marketSystem,
+  marketEventsSystem,
   ordersSystem,
   breakdownsSystem,
   spaceSystem,
@@ -37,7 +39,7 @@ export const SYSTEMS: System[] = [
 /** Player actions. The UI only sends these strings and never mutates game state itself. */
 export type Action =
   | 'print' | 'spool' | 'auto' | 'farm' | 'panel' | 'mkt' | 'drone' | 'fab'
-  | 'pminus' | 'pplus' | 'oacc' | 'odec' | 'fix'
+  | 'pminus' | 'pplus' | 'oacc' | 'odec' | 'fix' | 'mevyes' | 'mevno'
   | 'proc1' | 'procmax' | 'mem1' | 'memmax' | 'boost' | 'adfail' | 'prestige'
   | `t:${string}` | `col:${number}` | `am:${string}:${0 | 1}` | `pat:${string}`;
 
@@ -86,6 +88,8 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
       if (a === 'pplus') { changePrice(s, 0.1); return true; }
       if (a === 'oacc') { acceptOrder(s); sfx(ctx, 'buy'); return true; }
       if (a === 'odec') { declineOrder(s, ctx); return true; }
+      if (a === 'mevyes') { const ok = acceptMarketEvent(s, ctx); if (ok) sfx(ctx, 'buy'); return ok; }
+      if (a === 'mevno') { declineMarketEvent(s, ctx); return true; }
       if (a === 'fix') { repair(s, ctx); sfx(ctx, 'buy'); return true; }
       if (a === 'boost') return activateBoost(s, ctx);
       if (a === 'prestige') { const next = prestige(s, ctx); if (next) s = next; return !!next; }

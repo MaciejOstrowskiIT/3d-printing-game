@@ -53,6 +53,7 @@ Every event carries `min` (minutes of active play on this line), `line` (product
 | `end` | `total` | how many finish a line |
 | `prestige` | `gain` | how many start a second line |
 | `order` | `result` | whether orders are worth keeping |
+| `market` | `id`, `result`: started / offered / accepted / declined / expired | which market events players take or ignore |
 | `achievement` | `id` | which achievements are reached |
 | `ad` | `placement`, `watched` | rewarded-ad completion rate |
 | `heartbeat` | | every 5 min of active play: session length distribution |

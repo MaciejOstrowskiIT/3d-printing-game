@@ -88,6 +88,7 @@ game.on(e => {
   if (e.type === 'order') track('order', { result: e.result });
   if (e.type === 'end') track('end', { total: Math.floor(game.s.total) });
   if (e.type === 'prestige') track('prestige', { gain: e.gain });
+  if (e.type === 'market') track('market', { id: e.id, result: e.result });
   if (e.type === 'achievement') { pushToast(e.id); track('achievement', { id: e.id }); }
 });
 

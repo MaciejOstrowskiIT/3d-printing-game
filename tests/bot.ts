@@ -33,6 +33,8 @@ export function playthrough(seed = 1, maxHours = 6, dt = 0.25, meta?: Partial<Me
         else if (autoCost(s) < (s.zl - reserve) * 0.5) game.act('auto');
         if (!(has(s, 'slicer') && s.farm >= 5) && mktCost(s) < (s.zl - reserve) * 0.3) game.act('mkt');
         if (s.ord && !s.ord.acc) game.act('oacc');
+        // Market offers: take them when they cost under a third of what the bot has.
+        if (s.mev && s.mev.cost < s.zl / 3) game.act('mevyes');
         if (s.brk > 0) game.act('fix');
         if (s.col !== s.trend && s.goal >= 2) game.act(`col:${s.trend}`);
       } else {
