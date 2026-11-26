@@ -7,7 +7,7 @@ import type { GameState } from '../core/state';
 import { modelStock } from './inventory';
 import { printWork } from './production';
 
-/** Print models: buying designs, switching the fleet to another model, manual printing with click tools.
+/** Print models: buying designs, switching the main model, manual printing with click tools.
  *  All model numbers come from content/models.ts; nothing here is specific to one model. */
 
 /** A design shows up in the shop once enough figurines have been printed. */
@@ -25,7 +25,7 @@ export function buyDesign(s: GameState, ctx: Ctx, id: string): boolean {
   return true;
 }
 
-/** Switches all printers to another owned model. The price per figurine moves with the model's value,
+/** Switches the main printing group to another owned model. The price per figurine moves with the model's value,
  *  so the player lands at a comparable spot on the new demand curve. */
 export function selectModel(s: GameState, ctx: Ctx, id: string): boolean {
   if (!Object.hasOwn(MODEL, id)) return false;
@@ -34,6 +34,10 @@ export function selectModel(s: GameState, ctx: Ctx, id: string): boolean {
   modelStock(s, cur.id).price = s.price;
   const stock = modelStock(s, next.id);
   s.price = stock.price || Math.max(0.1, Math.round(s.price * (next.value / cur.value) * 100) / 100);
+  if (id === s.fleetModel) {
+    s.fleetModel = cur.id;
+    s.fleetPrinters = s.auto - s.fleetPrinters;
+  }
   s.mdl = id;
   s.mp = 0;
   log(s, ctx, 'mdlSel', '*' + id);

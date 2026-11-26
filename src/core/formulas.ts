@@ -37,7 +37,7 @@ export const spoolPrice = (s: GameState, stock = material(s)) =>
 /** Selected print model (falls back to the figurine for unknown ids). */
 export const model = (s: GameState): PrintModel => MODEL[s.mdl] ?? DEFAULT_MODEL;
 /** Filament per figurine of work: base nozzle consumption × the model's material factor. */
-export const gpu = (s: GameState) => s.g * model(s).material;
+export const gpu = (s: GameState, m = model(s)) => s.g * m.material;
 /** Market size of a model in figurines/s at the same price per figurine (see content/models.ts). */
 export const modelDemand = (m: PrintModel) => m.value ** BAL.demandElasticity * m.market * m.seconds;
 /** Figurines of work added by one click. */

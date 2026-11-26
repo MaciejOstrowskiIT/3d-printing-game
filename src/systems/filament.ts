@@ -1,6 +1,7 @@
 import { BAL } from '../content/balance';
 import { MATERIAL, MATERIALS } from '../content/materials';
 import { log, sfx, type Ctx } from '../core/ctx';
+import { fleetFilamentPerSecond } from './fleet';
 import { gpu, rate1 } from '../core/formulas';
 import { has, type GameState } from '../core/state';
 import { materialStock, selectMaterial } from './materials';
@@ -12,7 +13,7 @@ export const autobuyOn = (s: GameState) => has(s, 'autobuy') && !!s.amOn.autobuy
 
 /** Seconds of printing left at the current rate (Infinity when nothing prints). */
 export function filamentRunway(s: GameState): number {
-  const use = rate1(s) * gpu(s);
+  const use = fleetFilamentPerSecond(s);
   return use > 0 ? s.fil / use : Infinity;
 }
 

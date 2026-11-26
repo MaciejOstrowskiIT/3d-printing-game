@@ -1,4 +1,6 @@
 import { bookCash } from './workshopStats';
+import { MODEL } from '../content/models';
+import { fleetFilamentPerSecond, secondaryRate } from './fleet';
 import { BAL } from '../content/balance';
 import { modelStock, putPieces } from './inventory';
 import { log, sfx, type Ctx } from '../core/ctx';
@@ -8,10 +10,9 @@ import { pickOrderCooldown } from './orders';
 import { stockedAlternative } from './filament';
 
 /** New figurines fill an accepted order first; the rest goes to stock. */
-export function make(s: GameState, ctx: Ctx, n: number, premium = s.precision ? BAL.precisionPremium : 0) {
+export function make(s: GameState, ctx: Ctx, n: number, premium = s.precision ? BAL.precisionPremium : 0, m = model(s)) {
   s.total += n;
   if (s.ph === 2) { s.inv += n; return; }
-  const m = model(s);
   modelStock(s, m.id).printed += n / m.seconds;
   const o = s.ord;
   if (o && o.acc && o.got < o.n) {
@@ -42,8 +43,8 @@ export function buySpool(s: GameState): boolean {
   return true;
 }
 
-export function printWork(s: GameState, ctx: Ctx, requested: number) {
-  const g = gpu(s), m = model(s);
+export function printWork(s: GameState, ctx: Ctx, requested: number, m = model(s)) {
+  const g = gpu(s, m);
   const work = Math.min(requested, s.fil / g);
   if (work <= 0) return 0;
   s.fil = Math.max(0, s.fil - work * g);
@@ -56,7 +57,7 @@ export function printWork(s: GameState, ctx: Ctx, requested: number) {
   if (printed) {
     const blended = (previous * lot.progressPremium + (printed - previous) * premium) / printed;
     lot.progressPremium = premium;
-    make(s, ctx, printed, blended);
+    make(s, ctx, printed, blended, m);
   } else {
     lot.progressPremium = (previous * lot.progressPremium + work * premium) / total;
   }
@@ -66,12 +67,17 @@ export function printWork(s: GameState, ctx: Ctx, requested: number) {
 export function productionSystem(s: GameState, dt: number, ctx: Ctx) {
   if (s.ph !== 1) return;
   const g = gpu(s);
-  const work = rate1(s) * dt;
+  const rate = rate1(s);
+  const secondary = secondaryRate(s, rate);
+  const grams = fleetFilamentPerSecond(s) * dt;
   if (s.amOn.autobuy && has(s, 'autobuy')) {
-    const need = g * Math.max(1, work * 3);
+    const need = Math.max(g, grams * 3);
     while (s.fil < need && buySpool(s)) { /* keep buying */ }
   }
-  printWork(s, ctx, work);
+  // If stock is low, keep both groups running in the configured proportion.
+  const fraction = grams > 0 ? Math.min(1, s.fil / grams) : 0;
+  printWork(s, ctx, (rate - secondary) * dt * fraction);
+  if (secondary > 0) printWork(s, ctx, secondary * dt * fraction, MODEL[s.fleetModel]);
 
   if (s.fil < g && !s.warn && s.total > 0) { s.warn = true; log(s, ctx, 'noFil'); sfx(ctx, 'alert'); }
 
