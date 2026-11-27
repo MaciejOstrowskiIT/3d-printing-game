@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { GOALS } from '../src/content/goals';
 import { NODE } from '../src/content/tree';
 import type { GameState } from '../src/core/state';
+import { BAL } from '../src/content/balance';
 import { playthrough } from './bot';
 
 const LIFTOFF = GOALS.findIndex(g => g.t[1] === 'Leave Earth');
@@ -50,4 +51,16 @@ describe('balance: bot that uses the quantum computer', () => {
       expect(last!.done.some(id => NODE[id]?.qp)).toBe(true);
     }, 60_000);
   }
+});
+
+/** A realistic line is a challenge: much longer than a normal one, but still finishable. */
+describe('balance: realistic line', () => {
+  it('the bot needs about 3x longer than on a normal line, 4 to 8 hours', () => {
+    const normal = playthrough(1);
+    const r = playthrough(1, 12, 0.5, undefined, undefined, { slow: BAL.realisticSlow });
+    expect(r.ended).toBe(true);
+    expect(r.minutes).toBeGreaterThan(240);
+    expect(r.minutes).toBeLessThan(480);
+    expect(r.minutes).toBeGreaterThan(normal.minutes * 2.8);
+  }, 120_000);
 });
