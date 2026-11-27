@@ -14,7 +14,7 @@ export const canBuy = (s: GameState, n: TreeNode) => s.ops >= n.ops && s.zl >= n
 
 export function nodeStatus(s: GameState, n: TreeNode): NodeStatus {
   if (has(s, n.id)) return 'done';
-  if ((n.req ?? []).some(r => !has(s, r))) return 'locked';
+  if ((n.req ?? []).some(r => !has(s, r)) || (n.reqAny?.length && !n.reqAny.some(r => has(s, r)))) return 'locked';
   if (n.need && n.need.value(s) < n.need.target) return 'need';
   return canBuy(s, n) ? 'ready' : 'avail';
 }

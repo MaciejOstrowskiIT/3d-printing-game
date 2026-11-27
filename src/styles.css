@@ -153,6 +153,8 @@ h2{font-size:21px;margin:0;line-height:1.1}
 .tree svg{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
 .tree path{fill:none;stroke:var(--line);stroke-width:2;stroke-dasharray:4 4}
 .tree path.on{stroke:var(--acc);stroke-dasharray:none}
+.tree path.alt{stroke-dasharray:1 5;stroke-linecap:round}
+.tree path.alt.on{stroke-dasharray:1 5}
 .bh{font:700 17px "Barlow Condensed",sans-serif;padding-bottom:3px;border-bottom:2px solid var(--line);align-self:end}
 .bh small{display:block;font:500 12.5px Barlow,sans-serif;color:var(--mute)}
 .node{position:relative;z-index:1;text-align:left;display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-width:1.5px;font-weight:400;min-height:0;line-height:1.3}

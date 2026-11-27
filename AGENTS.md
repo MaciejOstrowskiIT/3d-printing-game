@@ -24,7 +24,8 @@ Planned work and its order: `ROADMAP.md` (task board). Pick cards from "Next up"
 | #51 / `fix/continuous-finance-line` | Codex | Live finance chart data, PL/EN tooltip, Playwright rollover coverage |
 | #56 / `test/qa4-layout-stability` | Codex | Playwright layout tests and config, workshop and research UI stability, PL/EN maintenance text, README |
 | #54 / `feat/tree-audit` | Claude | `tests/treeAudit.ts`, `scripts/treeaudit.ts`, `docs/tree-audit.md`, README |
-| `feat/tree-progression` | Claude | `content/tree.ts`, `tests/tree.test.ts`, `docs/tree-audit.md` (R2, then R3 joins) |
+| #55 / `feat/tree-progression` | Claude | `content/tree.ts`, `tests/tree.test.ts`, `docs/tree-audit.md` (R2) |
+| #57 / `feat/tree-joins` | Claude | `content/tree.ts`, `systems/research.ts`, `core/saveValidation.ts`, `Research.tsx` lines, tests (R3) |
 
 Merged: #8–#41 (see `ROADMAP.md` → Done).
 

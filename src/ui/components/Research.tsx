@@ -119,13 +119,13 @@ function useTreeLines(treeRef: { current: HTMLDivElement | null }, svgRef: { cur
     svg.setAttribute('width', String(tr.width));
     svg.setAttribute('height', String(tr.height));
     let h = '';
-    for (const n of TREE) for (const r of n.req ?? []) {
+    for (const n of TREE) for (const r of [...(n.req ?? []), ...(n.reqAny ?? [])]) {
       if (n.col === 3 && r === 'replik') continue;
       const A = tree.querySelector<HTMLElement>('#n-' + r), B = tree.querySelector<HTMLElement>('#n-' + n.id);
       if (!A?.offsetParent || !B?.offsetParent) continue;
       const a = A.getBoundingClientRect(), b = B.getBoundingClientRect();
       const x1 = a.left + a.width / 2 - tr.left, y1 = a.bottom - tr.top, x2 = b.left + b.width / 2 - tr.left, y2 = b.top - tr.top, m = (y1 + y2) / 2;
-      h += `<path class="${A.classList.contains('done') ? 'on' : ''}" d="M${x1} ${y1} C${x1} ${m} ${x2} ${m} ${x2} ${y2}"/>`;
+      h += `<path class="${(A.classList.contains('done') ? 'on' : '') + (n.reqAny?.includes(r) ? ' alt' : '')}" d="M${x1} ${y1} C${x1} ${m} ${x2} ${m} ${x2} ${y2}"/>`;
     }
     svg.innerHTML = h;
   };

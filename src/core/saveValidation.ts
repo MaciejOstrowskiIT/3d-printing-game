@@ -2,7 +2,7 @@ import { BAL } from '../content/balance';
 import { COLORS } from '../content/colors';
 import { GOALS } from '../content/goals';
 import { KEPT_AUTOMATION, PATENT } from '../content/patents';
-import { NODE } from '../content/tree';
+import { NODE, type TreeNode } from '../content/tree';
 import { validMarketState } from '../systems/marketEvents';
 import { validMaterialState } from '../systems/materials';
 import { validFleet } from '../systems/fleet';
@@ -32,6 +32,11 @@ function validPatents(meta: GameState['meta']) {
 }
 
 /** Check persisted data before any simulation, achievement lookup or offline reward. */
+/** A bought node must have its prerequisites. Joins added after a save was made (`reqNew`) are not required of old saves. */
+function savedPrereqMissing(done: string[], n: TreeNode) {
+  return (n.req ?? []).some(r => !n.reqNew?.includes(r) && !done.includes(r)) || !!(n.reqAny?.length && !n.reqAny.some(r => done.includes(r)));
+}
+
 export function validSave(s: GameState, defaults: GameState) {
   for (const key of Object.keys(defaults) as (keyof GameState)[]) {
     const value = s[key];
@@ -54,7 +59,7 @@ export function validSave(s: GameState, defaults: GameState) {
       integer(s.ord.c, 0, 6) && s.ord.got <= s.ord.n)) return false;
   if (!validPatents(s.meta)) return false;
   const kept = KEPT_AUTOMATION[s.meta.pat.keep ?? 0];
-  if (s.done.some(id => !kept.includes(id) && NODE[id].req?.some(req => !s.done.includes(req)))) return false;
+  if (s.done.some(id => !kept.includes(id) && savedPrereqMissing(s.done, NODE[id]))) return false;
   if (!validMarketState(s) || !validModelState(s) || !validInventory(s) || !validFleet(s) || !validMaterialState(s) || !validOfflineBonus(s) || ![1, BAL.realisticSlow].includes(s.slow) || !validDailyState(s) || !validStoryState(s) || s.play < 0) return false;
   if (!validWorkshopStats(s)) return false;
   if (s.stockPremium < 0 || s.stockPremium > BAL.precisionPremium + 1e-9) return false;
