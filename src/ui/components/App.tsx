@@ -9,10 +9,13 @@ import { ReportDialog } from './ReportDialog';
 import { SaveDialog } from './SaveDialog';
 import { Title } from './Title';
 import { PrestigeButton } from './Prestige';
-import { Hud, Tabs, useBadges, useResearchUnlocked } from './Hud';
+import { Hud } from './Hud';
+import { Tabs, useBadges, useResearchUnlocked } from './hud/tabs';
 import { Research } from './Research';
 import { AchievementsCard } from './Achievements';
-import { PrintButton, Settings, Side } from './Side';
+import { Side } from './Side';
+import { PrintButton } from './side/printControls';
+import { Settings } from './side/settings';
 import { Workshop } from './Workshop';
 
 const NavIcon = ({ d }: { d: string }) => (

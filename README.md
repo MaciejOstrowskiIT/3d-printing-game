@@ -105,7 +105,7 @@ src/
   content/     game data: balance.ts (all numbers), tree.ts, goals.ts, colors.ts, i18n/
   ui/          Preact + @preact/signals
     store.ts     game instance, 10 Hz loop, useS() state selector, saving
-    components/  App, Side, Hud, Workshop, Research, common
+    components/  App, Side, Hud, Workshop, Research (each composes the cards in its folder: side/, hud/, workshop/, research/), common
     scene/       isometric floor and printer animation (imperative SVG)
   platform/    Platform interface + local adapter (localStorage); Poki and CrazyGames adapters go here
 legacy/        previous single-file version, kept for comparison
@@ -117,7 +117,7 @@ tests/         system tests and the balance bot
 1. Add a file in `src/systems/` exporting `(s, dt, ctx) => void`.
 2. Register it in the `SYSTEMS` list in `src/core/game.ts`.
 3. Add new state fields to `GameState` and `createState()`. If you change the meaning of existing fields, bump `SAVE_VERSION` and add a migration in `save.ts`.
-4. Put numbers in `content/balance.ts` and texts in `content/i18n/pl.ts` and `en.ts`.
+4. Put numbers in `content/balance.ts` and texts in `content/i18n/pl/<area>.ts` and `en/<area>.ts` (one key per line; `pl.ts` and `en.ts` only compose them).
 5. Run `npm test`: the balance bot shows whether pacing still holds.
 
 ### Adding content (data-driven)

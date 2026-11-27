@@ -1,98 +1,16 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { BAL } from '../../content/balance';
 import { autobuyOn, filamentRunway } from '../../systems/filament';
-import { MATERIALS } from '../../content/materials';
 import { MODELS } from '../../content/models';
 import { piecesInStock } from '../../systems/inventory';
-import { materialStock } from '../../systems/materials';
-import { TREE } from '../../content/tree';
-import { eff, freePts, gpu, opsCap } from '../../core/formulas';
-import { has } from '../../core/state';
-import { nodeStatus, researchUnlocked } from '../../systems/research';
-import { dur, fmt, li, mass, money, playtime, t } from '../i18n';
+import { eff, gpu, opsCap } from '../../core/formulas';
+import { dur, fmt, mass, money, playtime, t } from '../i18n';
 import { currentSecondIncome } from '../../systems/workshopStats';
-import { ui, useS } from '../store';
+import { useS } from '../store';
 import { WorkshopStats } from './WorkshopStats';
-
-type PopId = 'funds' | 'stock' | 'fil';
-/** Chip that can open a panel on hover (mouse), tap or Enter (touch and keyboard). */
-interface PopControl { open: PopId | null; toggle: (id: PopId, el: HTMLElement) => void; show: (id: PopId, el: HTMLElement) => void; hideSoon: () => void }
-
-const Chip = ({ label, value, warn, show = true, sub, meter, big, pop, popId }: { label: string; value: string; warn?: boolean; show?: boolean; sub?: string; meter?: number; big?: boolean; pop?: PopControl; popId?: PopId }) =>
-  show ? (
-    <div class={'chip' + (warn ? ' warn' : '') + (big ? ' big' : '') + (pop && popId ? ' has-pop' : '')}
-      {...(pop && popId ? {
-        role: 'button', tabIndex: 0, 'aria-haspopup': 'dialog', 'aria-expanded': pop.open === popId,
-        onPointerEnter: (e: PointerEvent) => { if (e.pointerType === 'mouse') pop.show(popId, e.currentTarget as HTMLElement); },
-        onPointerLeave: (e: PointerEvent) => { if (e.pointerType === 'mouse') pop.hideSoon(); },
-        onClick: (e: MouseEvent) => { if ((e as unknown as PointerEvent).pointerType !== 'mouse') pop.toggle(popId, e.currentTarget as HTMLElement); },
-        onKeyDown: (e: KeyboardEvent) => { if (e.key === 'Enter') pop.toggle(popId, e.currentTarget as HTMLElement); },
-      } : {})}>
-      <small>{label}</small><b>{value}</b>
-      {sub && <small class="chip-sub">{sub}</small>}
-      {meter !== undefined && <span class="chip-meter"><i style={{ width: Math.max(0, Math.min(100, meter)) + '%' }} /></span>}
-    </div>
-  ) : null;
-
-function StockPanel() {
-  const rows = useS(s => MODELS.filter(m => s.mdls.includes(m.id)).map(m => m.id + ':' + piecesInStock(s, m.id)).join(','));
-  const list = rows.split(',').filter(Boolean).map(r => r.split(':')).map(([id, n]) => ({ m: MODELS.find(m => m.id === id)!, n: Number(n) }));
-  return (
-    <section class="pop-body">
-      <h2>{t('popStock')}</h2>
-      <ul class="pop-list">
-        {list.map(({ m, n }) => <li key={m.id} class={n > 0 ? '' : 'zero'}><span>{m.name[li()]}</span><b>{fmt(Math.floor(n))}</b></li>)}
-      </ul>
-    </section>
-  );
-}
-
-function FilamentPanel() {
-  const rows = useS(s => MATERIALS.filter(m => m.id === s.materialId || materialStock(s, m.id) > 0).map(m => m.id + ':' + materialStock(s, m.id)).join(','));
-  const active = useS(s => s.materialId);
-  const list = rows.split(',').filter(Boolean).map(r => r.split(':')).map(([id, g]) => ({ m: MATERIALS.find(m => m.id === id)!, g: Number(g) }));
-  return (
-    <section class="pop-body">
-      <h2>{t('popFil')}</h2>
-      <ul class="pop-list">
-        {list.map(({ m, g }) => <li key={m.id} class={m.id === active ? 'active' : ''}>
-          <span>{m.name[li()]}{m.id === active && <small>{t('popFilActive')}</small>}</span><b>{mass(g)}</b>
-        </li>)}
-      </ul>
-    </section>
-  );
-}
-
-/** Whether the Research tab is unlocked yet. */
-export const useResearchUnlocked = () => useS(researchUnlocked);
-
-/** Pending items in Research (buyable nodes + free points) and the Workshop alert flag. */
-export function useBadges() {
-  const research = useS(s => TREE.filter(n => nodeStatus(s, n) === 'ready').length + Math.max(0, freePts(s)));
-  const workshop = useS(s => s.tab !== 'w' && s.ph === 1 && ((!!s.ord && !s.ord.acc) || (s.brk > 0 && !(has(s, 'kamera') && s.amOn.kamera))));
-  return { research, workshop };
-}
-
-export function Tabs({ class: cls }: { class?: string }) {
-  const tab = useS(s => s.tab);
-  const unlocked = useResearchUnlocked();
-  const b = useBadges();
-  return (
-    <>
-      <button class={'tab tabW ' + (cls ?? '')} role="tab" aria-selected={tab === 'w'} onClick={() => ui(s => { s.tab = 'w'; })}>
-        <span>{t('tabW')}</span>{b.workshop && <span class="dot">!</span>}
-      </button>
-      {unlocked && (
-        <button class={'tab tabR ' + (cls ?? '')} role="tab" aria-selected={tab === 'r'} onClick={() => ui(s => { s.tab = 'r'; })}>
-          <span>{t('tabR')}</span>{b.research > 0 && <span class="dot" key={b.research}>{b.research}</span>}
-        </button>
-      )}
-      <button class={'tab tabA ' + (cls ?? '')} role="tab" aria-selected={tab === 'a'} onClick={() => ui(s => { s.tab = 'a'; })}>
-        <span>{t('tabA')}</span>
-      </button>
-    </>
-  );
-}
+import { Chip, PopControl, PopId } from './hud/chip';
+import { FilamentPanel, StockPanel } from './hud/panels';
+import { Tabs, useResearchUnlocked } from './hud/tabs';
 
 function PlaytimeChip() {
   const total = useS(s => Math.floor(s.priorPlay + s.play));
