@@ -59,6 +59,7 @@ export function printManual(s: GameState, ctx: Ctx): boolean {
   if (s.ph !== 1) return false;
   const work = printWork(s, ctx, clickPower(s));
   if (!work) return false;
+  s.manualWork += work;
   const m = model(s);
   s.mp = modelStock(s, m.id).progress;
   ctx.emit({ type: 'printed', manual: true, share: work / m.seconds });
