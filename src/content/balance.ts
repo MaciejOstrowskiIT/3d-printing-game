@@ -1,10 +1,10 @@
 /** All balance numbers in one place. Change them here and the bot test in tests/balance.sim.test.ts
  *  shows right away how pacing is affected. */
 export const BAL = {
-  /** Global game length knob. 1 = the original pacing (bot finishes in ~1.5 h), 50 = a game 50× longer.
+  /** Global game length knob. 1 = the original pacing (bot finishes in ~1.5 h), 5 = a game 5× longer (the shipped value).
    *  It divides every flow rate (printers, clicks, demand, compute, space), so money, research and the
    *  goals that depend on them stretch together. Real-time timers (events, offers, spool drift) are untouched. */
-  pace: 50,
+  pace: 5,
   onboardingSeconds: 5 * 60, // at the baseline game pace
   startPrice: 5,
   startFilament: 1000,
