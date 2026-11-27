@@ -12,6 +12,7 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 
 | Card | PR | Notes |
 |---|---|---|
+| **QA6: i18n and content integrity tests** | #67 | `tests/i18n.test.ts`: same keys, placeholders and texts in PL and EN; no content gaps found |
 | **Clicker achievement** | #64 | Unlocks at 1,000 figurines of manual work (#59) |
 | **Explain when the next daily order is available** | #62 | Clarifies the calendar-day limit and streak in PL/EN (#58) |
 | **R6: Quantum branch** | #65 | Ninth branch of 10 nodes paid in QP, 2 joins, 3 links to regular nodes |
