@@ -20,6 +20,7 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 
 | Card | Branch | Owner |
 |---|---|---|
+| **QA4: Repeatable layout stability tests** | `test/qa4-layout-stability` | Codex |
 | **R1: Tech tree audit** | `feat/tree-audit` | Claude |
 
 ## 🚦 Next up
@@ -36,7 +37,6 @@ Every prompt below implicitly starts with: *"Read `AGENTS.md` and `README.md` fi
 
 | # | Card | Effort | Prompt |
 |---|---|---|---|
-| QA4 | **Layout stability check ("nothing jumps")** | M | Add `e2e/layout.spec.ts`. For each stage fixture (QA2) at 1280×800 and 390×844: (1) collect Cumulative Layout Shift with a `PerformanceObserver` over 20 s of live ticking and assert it stays below 0.02; (2) every 1 s record the bounding boxes of the main cards, tab bar, HUD, Print button and buy buttons, and assert none moves by more than 2 px vertically while the player does nothing (unlock/purchase moments excluded, list them explicitly); (3) assert no horizontal scrollbar (`scrollWidth <= clientWidth`) and that no element overflows the viewport. Fix the layout bugs you find in small commits (`font-variant-numeric: tabular-nums`, min-widths, reserved space for toasts and event cards) or, if a fix is big, add a Backlog card instead of fixing it. |
 | QA5 | **Component render tests without a browser** | S | Add `jsdom` + `@testing-library/preact` and `tests/ui.render.test.tsx`. Using `playthrough(..., observe)` from `tests/bot.ts`, snapshot the game state at about 15 moments (every goal, liftoff, after prestige) and render `<App/>` for each in PL and EN. Assert it renders without throwing, has no `NaN`/`undefined`/`Infinity`/raw i18n keys in the text, and that every `<button>` has a non-empty accessible name. Keep it fast (under 20 s). |
 | QA6 | **i18n and content integrity tests** | S | Add `tests/i18n.test.ts`: PL and EN dictionaries have exactly the same keys, no empty values, the same `{placeholders}` in both, and every key used in `src/` via `t('...')` exists (grep the sources in the test). Also check that every goal, achievement, tree node, model, material and event has texts in both languages, and fix whatever it finds. |
 | QA7 | **Save compatibility fixtures** | S | Add `tests/fixtures/saves/` with one real save per `SAVE_VERSION` (generate them from git history of `core/save.ts` if needed, otherwise hand-built) plus a save mid-space-phase and one after a prestige. Test that each loads through `migrate()` + `validSave()`, runs 10 minutes of ticks with no NaN in any numeric field, and renders in the QA5 harness. This is the guard for the `AGENTS.md` rule "do not rename state fields". |
