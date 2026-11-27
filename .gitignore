@@ -4,6 +4,7 @@ dist
 .DS_Store
 dist-crazygames
 dist-poki
+dist-qa
 promo/out
 e2e/out/
 playwright-report/

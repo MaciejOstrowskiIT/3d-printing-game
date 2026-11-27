@@ -31,6 +31,20 @@ manual printing and navigation on desktop and at 390×844 with touch enabled. Ad
 `-- --headed` to watch the tests or `-- --project=chromium-mobile` to run only the phone
 scenario. Failure traces are written to `e2e/out/`.
 
+### Debugging game stages
+
+`npm run dev` exposes `window.__drk` after the game boots. To test a built version,
+run `npm run build:qa` and `npm run preview -- --mode qa --outDir dist-qa`, then open
+the preview with `#debug` in the URL. The release and portal builds exclude the hook.
+
+Use `load(json)` with a save object or JSON string, `step(seconds)` to advance the
+simulation in chunks of at most 0.25 s, `act(action)` to dispatch a normal game action,
+and `state()` to read a detached snapshot. Loading a fixture opens the game screen and
+keeps the persisted save intact. The real-time loop continues to run.
+
+Debug specs live under `e2e/debug/` and use the separate QA preview. Navigate to
+`/#debug` and call `loadStage(page, 'factory')` to load a committed promo state.
+
 ### Portals and rewarded ads
 
 The platform is chosen at build time (`--mode crazygames|poki`, see `.env.*`); unused adapters are tree-shaken out. Each adapter loads its SDK, reports loading/gameplay events, mutes audio and pauses the game during ads, and exposes `showRewardedAd()`.

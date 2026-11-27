@@ -41,7 +41,10 @@ export function useS<T>(fn: (s: GameState) => T): T {
   return c.value;
 }
 
+let debugStateLoaded = false;
+
 const save = () => {
+  if ((import.meta.env.DEV || import.meta.env.MODE === 'qa') && debugStateLoaded) return;
   game.s.serverThrough = clock.checkpoint(lastT);
   platform.saveGame(serialize(game.s));
 };
@@ -153,6 +156,37 @@ export function loadImported(s: GameState) {
   track('import');
 }
 
+/** Load a fixture for this page. Keep the player's persisted save intact. */
+export function loadDebugState(s: GameState) {
+  debugStateLoaded = true;
+  lastT = performance.now();
+  clock = new WorkshopClock(0, lastT);
+  game.load(s);
+  awayReport.value = undefined;
+  toasts.value = [];
+  dialog.value = null;
+  mobileView.value = 'p';
+  screen.value = 'game';
+  bump();
+}
+
+function tickGame(seconds: number, maxStep = seconds) {
+  for (let remaining = seconds; remaining > 0;) {
+    const dt = Math.min(remaining, maxStep);
+    game.tick(dt);
+    remaining -= dt;
+  }
+}
+
+export function stepDebugState(seconds: number) {
+  if (!Number.isSafeInteger(Math.ceil(seconds * 4)) || seconds < 0) {
+    throw new RangeError('Expected a finite, non-negative step duration');
+  }
+  tickGame(seconds, 0.25);
+  lastT = performance.now();
+  bump();
+}
+
 let pendingSync: WorkshopClock | null = null;
 
 function restartClock() {
@@ -212,7 +246,7 @@ export function startLoop() {
       const report = game.catchUp(dt);
       if (report) awayReport.value = report;
     } else {
-      game.tick(dt);
+      tickGame(dt);
       sinceBeat += dt;
       if (sinceBeat >= HEARTBEAT_S) {
         sinceBeat -= HEARTBEAT_S;

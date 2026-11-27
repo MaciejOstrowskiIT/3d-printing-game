@@ -6,7 +6,8 @@ import { App } from './ui/components/App';
 import { platform } from './ui/platform';
 import { initAnalytics } from './ui/analytics';
 import { reloadPrefs } from './ui/i18n';
-import { game, loadSavedGame, startLoop } from './ui/store';
+import { installDebugHook } from './ui/debug';
+import { loadSavedGame, startLoop } from './ui/store';
 
 async function boot() {
   await platform.init();
@@ -17,11 +18,9 @@ async function boot() {
   const splash = document.getElementById('boot');
   splash?.classList.add('gone');
   setTimeout(() => splash?.remove(), 400);
+  if (import.meta.env.DEV || (import.meta.env.MODE === 'qa' && location.hash === '#debug')) installDebugHook();
   startLoop();
   platform.loadingFinished();
   initAnalytics();
 }
 void boot();
-
-// Console handle for debugging, dev mode only (stripped from production builds).
-if (import.meta.env.DEV) (window as unknown as { __drk: unknown }).__drk = game;
