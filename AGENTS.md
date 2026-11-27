@@ -23,7 +23,7 @@ There is no table in this file any more: it conflicted on every parallel PR. Ope
 - Before you start: `gh pr list --state open` and skim the titles; for overlap, `gh pr diff <n> --name-only`.
 - When you open a PR, add a line **Touches:** to its description listing the files or areas it changes, so other
   agents can check for overlap without opening the diff.
-- Do not add per-PR rows or status lists to this file or to `ROADMAP.md` (card numbers in `ROADMAP.md` are fine).
+- Do not add per-PR rows or status lists to this file or to `ROADMAP.md` (status lives in issues and PRs).
 
 Merged: #8–#41 (see `ROADMAP.md` → Done).
 
