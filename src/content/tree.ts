@@ -55,7 +55,7 @@ const auto = (id: string) => (s: GameState) => { s.amOn[id] = true; };
 
 export const TREE: TreeNode[] = [
   { id: 'dysza', col: 0, row: 1, n: ['Dysza ze stali hartowanej', 'Hardened steel nozzle'], d: ['Figurka zużywa 25% mniej filamentu.', 'Figurines use 25% less filament.'], ops: 500, need: { label: ['100 figurek', '100 figurines'], value: s => s.total, target: 100 }, fx: s => { s.g *= 0.75; } },
-  { id: 'fw', col: 0, row: 2, n: ['Nowy firmware', 'New firmware'], d: ['Drukarki automatyczne +25% szybciej.', 'Auto printers +25% faster.'], ops: 1200, req: ['dysza'], need: { label: ['5 drukarek', '5 printers'], value: s => s.auto, target: 5 }, fx: s => { s.spd *= 1.25; } },
+  { id: 'fw', col: 0, row: 2, n: ['Nowy firmware', 'New firmware'], d: ['Drukarki +25% szybciej.', 'Printers +25% faster.'], ops: 1200, req: ['dysza'], need: { label: ['5 drukarek', '5 printers'], value: s => s.auto, target: 5 }, fx: s => { s.spd *= 1.25; } },
   { id: 'hurt', col: 0, row: 3, n: ['Umowa z hurtownią', 'Wholesale deal'], d: ['Filament w paczkach po 5 kg, 15% taniej.', 'Filament in 5 kg packs, 15% cheaper.'], ops: 2500, zl: 1000, req: ['fw'], fx: s => { s.spoolG = 5000; } },
   { id: 'shaping', col: 0, row: 4, n: ['Input shaping', 'Input shaping'], d: ['Drukarki +50% szybciej.', 'Printers +50% faster.'], ops: 5000, req: ['hurt'], need: { label: ['12 drukarek', '12 printers'], value: s => s.auto, target: 12 }, fx: s => { s.spd *= 1.5; } },
   { id: 'farma', col: 0, row: 6, n: ['Projekt farmy drukarek', 'Printer farm design'], d: ['Odblokowuje farmy (60 drukarek) i zasilanie.', 'Unlocks farms (60 printers) and power.'], ops: 8000, zl: 5000, req: ['shaping'], need: { label: ['20 drukarek', '20 printers'], value: s => s.auto, target: 20 }, fx: s => { s.farmOn = true; } },
@@ -86,7 +86,7 @@ export const TREE: TreeNode[] = [
   { id: 'grawi', col: 3, row: 18, n: ['Kowadło grawitacyjne', 'Gravity anvil'], d: ['Fabryki 10× wydajniejsze.', 'Factories 10× better.'], ops: 250000, wyd: 2e10, req: ['sondy'], fx: s => { s.fMul *= 10; } },
 
   // ---- More Production (col 0) ----
-  { id: 'leasing', col: 0, row: 5, n: ['Leasing drukarek', 'Printer leasing'], d: ['Drukarki automatyczne 15% taniej.', 'Auto printers 15% cheaper.'], ops: 1300, req: ['hurt'], need: { label: ['8 drukarek', '8 printers'], value: s => s.auto, target: 8 }, mods: { printerCost: 0.85 } },
+  { id: 'leasing', col: 0, row: 5, n: ['Leasing drukarek', 'Printer leasing'], d: ['Dodatkowe drukarki 15% taniej.', 'Extra printers 15% cheaper.'], ops: 1300, req: ['hurt'], need: { label: ['8 drukarek', '8 printers'], value: s => s.auto, target: 8 }, mods: { printerCost: 0.85 } },
   { id: 'hotend', col: 0, row: 7, n: ['Hotend wysokoprzepływowy', 'High-flow hotend'], d: ['Druk +20% szybciej.', 'Printing +20% faster.'], ops: 3900, zl: 15000, req: ['shaping'], mods: { speed: 1.2 } },
   { id: 'prefab', col: 0, row: 9, n: ['Hale prefabrykowane', 'Prefab halls'], d: ['Farmy 15% taniej.', 'Farms 15% cheaper.'], ops: 5800, req: ['farma', 'taryfa'], reqNew: ['taryfa'], need: { label: ['2 farmy', '2 farms'], value: s => s.farm, target: 2 }, mods: { farmCost: 0.85 } },
   { id: 'corexy', col: 0, row: 10, n: ['Kinematyka CoreXY', 'CoreXY motion'], d: ['Druk +25% szybciej.', 'Printing +25% faster.'], ops: 9100, zl: 80000, req: ['hotend', 'baterie'], reqNew: ['baterie'], need: { label: ['40 drukarek', '40 printers'], value: s => s.auto, target: 40 }, mods: { speed: 1.25 } },

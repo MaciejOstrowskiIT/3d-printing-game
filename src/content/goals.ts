@@ -5,9 +5,9 @@ export interface Goal { t: L; h: L; p: (s: GameState) => [number, number] }
 
 /** Goal path guiding the player through the whole game. Order matters: s.goal is an index into this array. */
 export const GOALS: Goal[] = [
-  { t: ['Wydrukuj 10 figurek', 'Print 10 figurines'], h: ['Klikaj „Drukuj figurkę”. Każda zużywa 20 g filamentu.', 'Click “Print a figurine”. Each uses 20 g of filament.'], p: s => [s.total, 10] },
+  { t: ['Wydrukuj 10 figurek', 'Print 10 figurines'], h: ['Drukarka pracuje sama. „Przyspiesz druk” (Spacja) dokłada pracy. Każda figurka zużywa 20 g filamentu.', 'The printer runs on its own; “Speed up printing” (Space) adds work. Each figurine uses 20 g of filament.'], p: s => [s.total, 10] },
   { t: ['Sprzedaj 30 figurek', 'Sell 30 figurines'], h: ['Pojawił się panel Sprzedaż. Klienci kupują sami. Im niższa cena, tym więcej ich przychodzi.', 'The Sales panel is open. Customers buy on their own; a lower price brings more of them.'], p: s => [s.sold, 30] },
-  { t: ['Kup drukarkę automatyczną', 'Buy an auto printer'], h: ['Uzbieraj na drukarkę i kup ją w panelu Produkcja. Będzie drukować za ciebie.', 'Save up and buy a printer in Production. It prints for you.'], p: s => [s.auto, 1] },
+  { t: ['Kup dodatkową drukarkę', 'Buy an extra printer'], h: ['Uzbieraj na drukarkę i kup ją w panelu Produkcja. Będzie drukować obok pierwszej.', 'Save up and buy a printer in Production. It prints next to the first one.'], p: s => [s.auto, 1] },
   { t: ['Zrealizuj pierwsze zamówienie', 'Deliver your first order'], h: ['Co jakiś czas klient zamawia większą partię. Przyjmij ją w Warsztacie i drukuj, zanim minie czas.', 'Now and then a client wants a big batch. Accept it in the Workshop and print before time runs out.'], p: s => [s.ordDone, 1] },
   { t: ['Zdobądź punkt reputacji', 'Earn a reputation point'], h: ['Reputację dają kolejne figurki. Pilnuj filamentu, a gdy zapas rośnie, obniż cenę.', 'More figurines bring reputation. Keep filament stocked and lower the price if stock piles up.'], p: s => [s.total, 500] },
   { t: ['Odblokuj pierwszy węzeł', 'Unlock your first node'], h: ['Otwórz zakładkę Rozwój. Moc obliczeniowa rośnie sama. Wydaj ją na węzeł podświetlony na pomarańczowo.', 'Open Research. Compute grows by itself; spend it on an orange node.'], p: s => [s.done.length, 1] },

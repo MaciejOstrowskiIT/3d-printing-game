@@ -65,8 +65,10 @@ describe('realistic mode', () => {
       return g.s.total;
     };
     const normal = run(1), real = run(BAL.realisticSlow);
-    expect(normal).toBeCloseTo(BAL.offlineMaxSeconds, -2);
-    expect(real).toBeCloseTo((BAL.realisticOfflineMax / BAL.realisticSlow) * BAL.realisticSpeedMul, -2);
+    // The garage printer works too, next to the one extra printer.
+    const printers = BAL.basePrinters + 1;
+    expect(normal).toBeCloseTo(BAL.offlineMaxSeconds * printers, -2);
+    expect(real).toBeCloseTo((BAL.realisticOfflineMax / BAL.realisticSlow) * BAL.realisticSpeedMul * printers, -2);
   });
 
   it('saves: old ones load as normal lines; other speeds are rejected', () => {

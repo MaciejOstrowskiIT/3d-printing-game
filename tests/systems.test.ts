@@ -102,6 +102,7 @@ describe('offline', () => {
   it('reports sales from existing stock even when production is idle', () => {
     const g = newGame();
     g.s.inv = 3;
+    g.s.fil = 0; // the garage printer has nothing to print with
     g.s.goal = 2;
     expect(g.catchUp(120)).toMatchObject({ k: 'offSales', a: ['~120', 3] });
     expect(g.s.total).toBe(0);

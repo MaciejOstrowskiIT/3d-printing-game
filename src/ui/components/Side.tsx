@@ -1,3 +1,4 @@
+import { BAL } from '../../content/balance';
 import { reporter } from '../report';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { GOALS } from '../../content/goals';
@@ -20,7 +21,7 @@ function Picture({ onToggleExpand }: { onToggleExpand: () => void }) {
   const canRoom = useS(s => s.ph === 2 || s.auto > 0 || s.farm > 0);
   const sig = useS(roomSignature);
   const busy = useS(s => s.ph === 2 || (rate1(s) > 0 && s.fil >= gpu(s)));
-  const counts = useS(s => (s.ph === 2 ? `${s.drones}/${s.fabs}` : String(s.auto + s.farm * 60)));
+  const counts = useS(s => (s.ph === 2 ? `${s.drones}/${s.fabs}` : String(BAL.basePrinters + s.auto + s.farm * BAL.farmPrinters)));
   const lang = prefs.value.lang;
   const view = !canRoom ? 'close' : prefs.value.view ?? 'room';
 
@@ -36,7 +37,7 @@ function Picture({ onToggleExpand }: { onToggleExpand: () => void }) {
   const s = game.s;
   const cap = info.stage === 'space'
     ? t('capS', t('stSpace'), fmt(s.drones), fmt(s.fabs))
-    : t('capP', t(STAGE_KEY[info.stage]), fmt(s.auto + s.farm * 60));
+    : t('capP', t(STAGE_KEY[info.stage]), fmt(BAL.basePrinters + s.auto + s.farm * BAL.farmPrinters));
   void counts; void lang;
 
   const click = (which: 'room' | 'close') => () => {

@@ -3,19 +3,19 @@ import { MODEL, type PrintModel } from '../content/models';
 import { eff, gpu, model, rate1 } from '../core/formulas';
 import type { GameState } from '../core/state';
 
-/** Auto printers can be dedicated to other models once there are at least two printers and two designs. */
+/** Extra printers can be dedicated to other models once there are at least two printers and two designs. */
 export const splitUnlocked = (s: GameState) => s.ph === 1 && s.auto >= 2 && s.mdls.length >= 2;
 
-/** Auto printers dedicated to models other than the main one. */
+/** Extra printers dedicated to models other than the main one. */
 export const dedicated = (s: GameState) => Object.values(s.fleet).reduce((sum, n) => sum + n, 0);
 
-/** Auto printers working on a model. The main model gets every printer not dedicated elsewhere. */
-export const printersOn = (s: GameState, id: string) => id === s.mdl ? s.auto - dedicated(s) : s.fleet[id] ?? 0;
+/** Printers working on a model. The main model gets every printer not dedicated elsewhere. */
+export const printersOn = (s: GameState, id: string) => id === s.mdl ? BAL.basePrinters + s.auto - dedicated(s) : s.fleet[id] ?? 0;
 
 /** Print rate (figurine work/s) of a model. Farms, manual work and new printers always go to the main model;
  *  all standalone printers share the same speed, boost and breakdown modifiers. */
 export function rateOn(s: GameState, id: string, totalRate = rate1(s)) {
-  const effectivePrinters = s.auto + s.farm * BAL.farmPrinters * eff(s);
+  const effectivePrinters = BAL.basePrinters + s.auto + s.farm * BAL.farmPrinters * eff(s);
   if (effectivePrinters <= 0) return 0;
   const perPrinter = totalRate / effectivePrinters;
   return id === s.mdl ? totalRate - perPrinter * dedicated(s) : perPrinter * (s.fleet[id] ?? 0);
@@ -30,7 +30,7 @@ export function printing(s: GameState, totalRate = rate1(s)): { m: PrintModel; r
 
 export const fleetFilamentPerSecond = (s: GameState) => printing(s).reduce((sum, p) => sum + p.rate * gpu(s, p.m), 0);
 
-/** Dedicates `count` auto printers to a model other than the main one (0 returns them to the main model). */
+/** Dedicates `count` extra printers to a model other than the main one (0 returns them to the main model). */
 export function setFleet(s: GameState, id: string, count: number) {
   if (!splitUnlocked(s) || !Object.hasOwn(MODEL, id) || id === s.mdl || !s.mdls.includes(id)) return false;
   if (!Number.isSafeInteger(count) || count < 0 || count === (s.fleet[id] ?? 0)) return false;

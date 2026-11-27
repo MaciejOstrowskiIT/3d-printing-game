@@ -6,7 +6,7 @@ import { TREE } from './tree';
 export const HINTS = [
   {
     id: 'print',
-    text: ['Przytrzymaj „Drukuj figurkę”, aby zacząć produkcję.', 'Hold Print a figurine to start production.'],
+    text: ['Drukarka pracuje sama. Przytrzymaj „Przyspiesz druk” albo Spację, żeby ją pogonić.', 'The printer runs on its own. Hold Speed up printing or Space to push it.'],
     when: (s: GameState) => s.goal === 0 && s.fil > 0,
   },
   {
@@ -21,7 +21,7 @@ export const HINTS = [
   },
   {
     id: 'printer',
-    text: ['Stać cię na pierwszą drukarkę automatyczną. Kup ją w panelu Inwestycje.', 'You can afford your first auto printer. Buy it in Investments.'],
+    text: ['Stać cię na pierwszą dodatkową drukarkę. Kup ją w panelu Inwestycje.', 'You can afford your first extra printer. Buy it in Investments.'],
     when: (s: GameState) => s.goal >= 2 && s.auto === 0 && s.zl >= autoCost(s),
   },
   {

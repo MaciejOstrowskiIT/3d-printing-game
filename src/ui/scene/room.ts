@@ -94,7 +94,7 @@ export function buildRoom(svg: SVGSVGElement, s: GameState): RoomInfo {
 
   const items: { d: number; s: string }[] = [];
   let shown = 0;
-  const total = s.auto + s.farm * BAL.farmPrinters;
+  const total = BAL.basePrinters + s.auto + s.farm * BAL.farmPrinters;
   items.push({ d: 5.2 + 5.2 + 1.6, s: printerU(5.2, 5.2, 0, 1.6, 32, 0, col) });
   const place = (cells: [number, number][], stack: number) => {
     let left = s.auto, k = 1;
