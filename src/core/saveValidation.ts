@@ -52,7 +52,7 @@ export function validSave(s: GameState, defaults: GameState) {
   }
   if (!integer(s.goal, 0, GOALS.length) || !integer(s.ph, 1, 2) || !integer(s.br, 0, 3) ||
       !integer(s.col, 0, COLORS.length - 1) || !integer(s.trend, 0, COLORS.length - 1) ||
-      !['w', 'r'].includes(s.tab) || s.total < 0 || s.manualWork < 0 || s.g <= 0 || s.price <= 0) return false;
+      !['w', 'r', 'a'].includes(s.tab) || s.total < 0 || s.manualWork < 0 || s.g <= 0 || s.price <= 0) return false;
   if (![s.auto, s.farm, s.mkt, s.rep, s.drones, s.fabs, s.panels, s.sold].every(v => integer(v)) ||
       !integer(s.proc, 1) || !integer(s.mem, 1) || s.proc + s.mem - 2 > s.rep) return false;
   if (!Array.isArray(s.done) || !s.done.every(id => typeof id === 'string' && Object.hasOwn(NODE, id)) ||

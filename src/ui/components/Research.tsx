@@ -5,7 +5,6 @@ import { nextResearch, nodeShown, nodeStatus, nodeZl } from '../../systems/resea
 import { has } from '../../core/state';
 import { fmt, li, money, prefs, t } from '../i18n';
 import { act, game, ui, useS } from '../store';
-import { AchievementsCard } from './Achievements';
 import { PatentsCard } from './Prestige';
 import { Quantum } from './Quantum';
 import { CardHead, Meter } from './common';
@@ -263,5 +262,5 @@ function Tree() {
 }
 
 export function Research() {
-  return (<div><Computer /><Quantum /><PatentsCard /><Tree /><AchievementsCard /></div>);
+  return (<div><Computer /><Quantum /><PatentsCard /><Tree /></div>);
 }

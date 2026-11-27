@@ -43,7 +43,7 @@ export interface GameState {
   mat: number; mat0: number; drones: number; fabs: number; ft: number; dMul: number; fMul: number;
   end: boolean;
   amOn: Record<string, boolean>; amT: number;
-  goal: number; tab: 'w' | 'r'; br: number; warn: boolean;
+  goal: number; tab: 'w' | 'r' | 'a'; br: number; warn: boolean;
   ord: Order | null; ordT: number; ordDone: number; ordFail: number; pen: number;
   brk: number; brkC: number; brkT: number; fixT: number; fails: number;
   panels: number; pwWarn: boolean; ts: number; serverThrough: number;
