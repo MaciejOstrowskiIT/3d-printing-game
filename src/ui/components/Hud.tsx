@@ -10,6 +10,7 @@ import { notifRequest, useS } from '../store';
 import { WorkshopStats } from './WorkshopStats';
 import { Chip, PopControl, PopId } from './hud/chip';
 import { CountUp, GainFloats, countText } from './hud/countUp';
+import { FundsSparkline } from './hud/fundsSparkline';
 import { NoteToasts, NotificationPanel, NotificationsButton } from './hud/notifications';
 import { FilamentPanel, StockPanel } from './hud/panels';
 import { Tabs, useResearchUnlocked } from './hud/tabs';
@@ -64,7 +65,7 @@ export function Hud() {
     <nav class="hud" ref={hud}>
       <div class="chips">
         <Chip show={!v.sp && v.g >= 1} big label={t('funds')} value={<CountUp value={v.zl} format={money} />} pop={control} popId="funds"
-          sub={(v.earn > 0 ? '+' : '') + t('moneyRate', money(v.earn))}><GainFloats /></Chip>
+          sub={<>{(v.earn > 0 ? '+' : '') + t('moneyRate', money(v.earn))}<FundsSparkline /></>}><GainFloats /></Chip>
         <Chip show={v.g >= 1} label={t('stock')} value={<CountUp value={v.inv} format={countText} />} pop={v.sp ? undefined : control} popId="stock" />
         <Chip show={!v.sp} label={t('filament')} value={v.fil} warn={v.filWarn} pop={control} popId="fil"
           sub={Number.isFinite(v.run) && !v.auto ? t('filLeft', dur(Math.round(v.run))) : undefined}
