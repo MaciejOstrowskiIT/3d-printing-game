@@ -20,9 +20,9 @@ Planned work and its order: `ROADMAP.md` (task board). Pick cards from "Next up"
 ## In flight
 | PR / branch | Agent | Touches |
 |---|---|---|
-| `feat/workshop-redesign` | Claude | **Please avoid until merged:** `ui/components/Workshop.tsx`, `Hud.tsx`, `App.tsx` (dock), `common.tsx` (`BuyButton`), `styles.css`, `systems/fleet.ts` (N-model allocation replaces `fleetModel`/`fleetPrinters`, `SAVE_VERSION` 7 migration), `systems/production.ts`, `systems/automation.ts` (per-model capacity), i18n `fleet*`/`mdl*` keys |
+| `test/qa2-debug-hook` | Codex | `window.__drk` debug hook, `e2e/` fixtures |
 
-Merged: #8–#16 (analytics, portal assets, workshop discovery, save validation, market events, print models, mobile touch, early balance).
+Merged: #8–#41 (see `ROADMAP.md` → Done).
 
 Cross-branch notes:
 - `validSave()` calls `validMarketState()` and `validModelState()`; new state with objects or arrays needs its own
