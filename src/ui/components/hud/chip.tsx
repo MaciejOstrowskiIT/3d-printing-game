@@ -1,3 +1,5 @@
+import type { ComponentChildren } from 'preact';
+
 
 
 export type PopId = 'funds' | 'stock' | 'fil' | 'notif';
@@ -14,12 +16,13 @@ export const popHandlers = (pop: PopControl, popId: PopId) => ({
   onKeyDown: (e: KeyboardEvent) => { if (e.key === 'Enter') pop.toggle(popId, e.currentTarget as HTMLElement); },
 });
 
-export const Chip = ({ label, value, warn, show = true, sub, meter, big, pop, popId }: { label: string; value: string; warn?: boolean; show?: boolean; sub?: string; meter?: number; big?: boolean; pop?: PopControl; popId?: PopId }) =>
+export const Chip = ({ label, value, warn, show = true, sub, meter, big, pop, popId, children }: { label: string; value: ComponentChildren; warn?: boolean; show?: boolean; sub?: string; meter?: number; big?: boolean; pop?: PopControl; popId?: PopId; children?: ComponentChildren }) =>
   show ? (
     <div class={'chip' + (warn ? ' warn' : '') + (big ? ' big' : '') + (pop && popId ? ' has-pop' : '')}
       {...(pop && popId ? popHandlers(pop, popId) : {})}>
       <small>{label}</small><b>{value}</b>
       {sub && <small class="chip-sub">{sub}</small>}
       {meter !== undefined && <span class="chip-meter"><i style={{ width: Math.max(0, Math.min(100, meter)) + '%' }} /></span>}
+      {children}
     </div>
   ) : null;

@@ -9,6 +9,7 @@ import { currentSecondIncome } from '../../systems/workshopStats';
 import { notifRequest, useS } from '../store';
 import { WorkshopStats } from './WorkshopStats';
 import { Chip, PopControl, PopId } from './hud/chip';
+import { CountUp, GainFloats, countText } from './hud/countUp';
 import { NoteToasts, NotificationPanel, NotificationsButton } from './hud/notifications';
 import { FilamentPanel, StockPanel } from './hud/panels';
 import { Tabs, useResearchUnlocked } from './hud/tabs';
@@ -20,7 +21,7 @@ function PlaytimeChip() {
 
 export function Hud() {
   const v = useS(s => ({
-    sp: s.ph === 2, g: s.goal, zl: money(s.zl), inv: fmt(s.ph === 2 ? Math.floor(s.inv) : MODELS.reduce((sum, m) => sum + piecesInStock(s, m.id), 0)), fil: mass(s.fil), filWarn: s.ph === 1 && (s.fil < gpu(s) || (filamentRunway(s) < BAL.filamentWarnSeconds && !autobuyOn(s) && s.total > 0)),
+    sp: s.ph === 2, g: s.goal, zl: s.zl, inv: s.ph === 2 ? Math.floor(s.inv) : MODELS.reduce((sum, m) => sum + piecesInStock(s, m.id), 0), fil: mass(s.fil), filWarn: s.ph === 1 && (s.fil < gpu(s) || (filamentRunway(s) < BAL.filamentWarnSeconds && !autobuyOn(s) && s.total > 0)),
     earn: s.ph === 1 ? currentSecondIncome(s) : 0, run: s.ph === 1 ? filamentRunway(s) : Infinity, auto: autobuyOn(s),
     real: (s.slow || 1) > 1, farmOn: s.farmOn, en: Math.round(eff(s) * 100), ops: fmt(Math.floor(s.ops)) + ' / ' + fmt(opsCap(s)), mat: fmt(s.mat) + ' t',
   }), );
@@ -62,9 +63,9 @@ export function Hud() {
     <>
     <nav class="hud" ref={hud}>
       <div class="chips">
-        <Chip show={!v.sp && v.g >= 1} big label={t('funds')} value={v.zl} pop={control} popId="funds"
-          sub={(v.earn > 0 ? '+' : '') + t('moneyRate', money(v.earn))} />
-        <Chip show={v.g >= 1} label={t('stock')} value={v.inv} pop={v.sp ? undefined : control} popId="stock" />
+        <Chip show={!v.sp && v.g >= 1} big label={t('funds')} value={<CountUp value={v.zl} format={money} />} pop={control} popId="funds"
+          sub={(v.earn > 0 ? '+' : '') + t('moneyRate', money(v.earn))}><GainFloats /></Chip>
+        <Chip show={v.g >= 1} label={t('stock')} value={<CountUp value={v.inv} format={countText} />} pop={v.sp ? undefined : control} popId="stock" />
         <Chip show={!v.sp} label={t('filament')} value={v.fil} warn={v.filWarn} pop={control} popId="fil"
           sub={Number.isFinite(v.run) && !v.auto ? t('filLeft', dur(Math.round(v.run))) : undefined}
           meter={Number.isFinite(v.run) && !v.auto ? (100 * v.run) / 600 : undefined} />
