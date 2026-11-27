@@ -21,7 +21,7 @@ Planned work and its order: `ROADMAP.md` (task board). Pick cards from "Next up"
 | PR / branch | Agent | Touches |
 |---|---|---|
 | #82 / `fix/order-card-height` | Codex | Special order card layout and Playwright acceptance coverage |
-| #83 / `feat/achievements-tab` | Claude | Separate Achievements tab: `Hud.tsx` (Tabs), `App.tsx` (Dock), `Research.tsx`, `state.ts` tab type, save validation, i18n |
+| #81 / `fix/tree-done-nodes-expanded` | Claude | `styles.css` (finished tree nodes stay expanded) |
 | #75 / `feat/skywalker-playtime` | Codex | SkyWalker achievement, play time across lines, HUD and end screen |
 | #76 / `feat/three-crowns` | Codex | Completion tracking, save validation and achievement tests |
 | #64 / `feat/clicker-achievement` | Codex | Manual print progress, Clicker achievement in PL/EN, save and prestige tests |
