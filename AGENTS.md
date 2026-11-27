@@ -22,6 +22,7 @@ Planned work and its order: `ROADMAP.md` (task board). Pick cards from "Next up"
 |---|---|---|
 | #51 / `fix/continuous-finance-line` | Codex | Live finance chart data, PL/EN tooltip, Playwright rollover coverage |
 | #52 / `test/qa3-browser-playthrough` | Codex | Shared balance bot, QA debug driver, Playwright playthrough and config, README |
+| `feat/tree-audit` | Claude | `tests/treeAudit.ts`, `docs/tree-audit.md`, `package.json` script |
 
 Merged: #8–#41 (see `ROADMAP.md` → Done).
 

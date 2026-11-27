@@ -20,6 +20,7 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 
 | Card | Branch | Owner |
 |---|---|---|
+| **R1: Tech tree audit** | `feat/tree-audit` | Claude |
 
 ## 🚦 Next up
 
@@ -78,7 +79,6 @@ Design decisions for R5 and R6 (change them in the PR if the audit says otherwis
 
 | # | Card | Effort | Prompt |
 |---|---|---|---|
-| R1 | **Tech tree audit** | S | Add `tests/treeAudit.ts` and `npm run treeaudit` that prints and writes `docs/tree-audit.md`, no tree changes. For every node: depth in the `req` graph, whether `row` equals depth, prerequisites, `need`, ops/zl/wyd cost, and the game time at which the balance bot (`tests/bot.ts`, 5 seeds) can first buy it after its last prerequisite ("gap"). List: (1) nodes with a gap under 60 s, (2) nodes with one prerequisite and no `need`, (3) branches that are pure chains, (4) cross-branch links, (5) cycles or unreachable nodes. End with a proposal per branch (which nodes need a harder gate, where to add joins). Findings only; fixes belong to R2 and R3. |
 | R2 | **Step-by-step progression** | M | Using `docs/tree-audit.md`, rework `req`, `need` and costs in `content/tree.ts` so research goes step by step: every node except the eight branch roots requires at least one earlier node, no node can be bought right after its prerequisite without a real new condition (a `need` that matches the stage, or a cost jump), and `row` equals depth in the graph (derive it in a test instead of trusting hand-written rows; fix the rows). Do not rename ids or change what a node does, only when it opens. Add to `tests/tree.test.ts`: depth rule, no node below the audit's minimum gap, graph is acyclic and every node is reachable from a root. Run `balance.sim.test.ts`; if pacing moves, adjust costs, not effects, and report the before/after goal times. |
 | R3 | **Merging paths and joins** | M | Make the tree a graph, not parallel chains. Add 8 to 12 joins: nodes that require two or more prerequisites from different branches (for example a Production node plus an Energy node), each with a clear in-game reason in its text. Add an optional `reqAny?: string[]` ("any one of these", an alternative route) for 2 or 3 nodes, with `nodeStatus` and the bot support it. Keep `req` (all of) as is. Old saves must keep working: only gate nodes that are not yet bought; a node already in `s.done` stays done. Tests: join and alternative routes behave as documented, nothing becomes unreachable, balance bot still finishes within range. Depends on R2. |
 | R4 | **Tree view: show the connections** | M | Update `ui/components/Research.tsx` for the graph from R3. Edges that cross to another branch or page are not drawn today, so show them as a small "requires: Name (Branch)" chip on the node that jumps to that node on click. Hovering or focusing a node highlights its whole prerequisite path; `reqAny` edges use a different line style and the legend explains it. Keyboard accessible, works on mobile (tap to highlight), no layout jump when highlighting. Check PL and EN text lengths. Depends on R3. |
