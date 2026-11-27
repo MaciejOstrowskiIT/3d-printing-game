@@ -6,7 +6,7 @@ import { TREE } from '../../content/tree';
 import { eff, freePts, gpu, opsCap } from '../../core/formulas';
 import { has } from '../../core/state';
 import { nodeStatus } from '../../systems/research';
-import { dur, fmt, money, t } from '../i18n';
+import { dur, fmt, money, playtime, t } from '../i18n';
 import { incomePerSecond } from '../../systems/workshopStats';
 import { ui, useS } from '../store';
 
@@ -47,6 +47,17 @@ export function Tabs({ class: cls }: { class?: string }) {
   );
 }
 
+function PlaytimeChips() {
+  const line = useS(s => Math.floor(s.play));
+  const total = useS(s => Math.floor(s.priorPlay + s.play));
+  return (
+    <>
+      <Chip label={t('linePlaytime')} value={playtime(line)} />
+      <Chip label={t('totalPlaytime')} value={playtime(total)} />
+    </>
+  );
+}
+
 export function Hud() {
   const v = useS(s => ({
     sp: s.ph === 2, g: s.goal, zl: money(s.zl), inv: fmt(s.ph === 2 ? Math.floor(s.inv) : MODELS.reduce((sum, m) => sum + piecesInStock(s, m.id), 0)), fil: fmt(s.fil) + ' g', filWarn: s.ph === 1 && (s.fil < gpu(s) || (filamentRunway(s) < BAL.filamentWarnSeconds && !autobuyOn(s) && s.total > 0)),
@@ -66,6 +77,7 @@ export function Hud() {
         <Chip show={unlocked} label={t('compute')} value={v.ops} />
         <Chip show={v.sp} label={t('matter')} value={v.mat} />
         <Chip show={v.real} label={t('realBadge')} value={t('realBadgeV')} />
+        <PlaytimeChips />
       </div>
       <div class="tabs" role="tablist"><Tabs /></div>
     </nav>

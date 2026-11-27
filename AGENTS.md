@@ -20,6 +20,7 @@ Planned work and its order: `ROADMAP.md` (task board). Pick cards from "Next up"
 ## In flight
 | PR / branch | Agent | Touches |
 |---|---|---|
+| #75 / `feat/skywalker-playtime` | Codex | SkyWalker achievement, play time across lines, HUD and end screen |
 | #64 / `feat/clicker-achievement` | Codex | Manual print progress, Clicker achievement in PL/EN, save and prestige tests |
 | #62 / `fix/daily-order-streak` | Codex | Daily order copy in PL/EN and Playwright coverage |
 | #51 / `fix/continuous-finance-line` | Codex | Live finance chart data, PL/EN tooltip, Playwright rollover coverage |
@@ -28,6 +29,7 @@ Planned work and its order: `ROADMAP.md` (task board). Pick cards from "Next up"
 | #55 / `feat/tree-progression` | Claude | `content/tree.ts`, `tests/tree.test.ts`, `docs/tree-audit.md` (R2) |
 | #57 / `feat/tree-joins` | Claude | `content/tree.ts`, `systems/research.ts`, `core/saveValidation.ts`, `Research.tsx` lines, tests (R3) |
 | #73 / `feat/report-moderation` | Claude | `infra/report-worker/` (moderation, wrangler.toml, README), `tests/reportWorker.test.ts` |
+| #71 / `feat/realistic-harder` | Claude | `balance.ts` (realistic*), `formulas.ts`, `breakdowns.ts`, Prestige text, realistic and balance tests |
 | #69 / `feat/quantum-rebalance` | Claude | `tests/bot.ts` (opt-in quantum), `balance.sim.test.ts`, `achievements.ts`, `docs/tree-audit.md`, README (R7) |
 | #67 / `test/qa6-i18n-integrity` | Claude | `tests/i18n.test.ts`, ROADMAP |
 | #65 / `feat/quantum-branch` | Claude | `content/tree.ts` (Quantum branch), `systems/research.ts`, `Research.tsx`, i18n, tests (R6) |

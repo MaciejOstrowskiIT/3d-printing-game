@@ -9,8 +9,10 @@ import { patLvl, type GameState } from './state';
 
 /** Pure formulas derived from state. No side effects: used by core, UI and tests. */
 
-export const autoCost = (s: GameState) => BAL.printerCost * BAL.printerCostGrowth ** s.auto * mod(s, 'printerCost');
-export const farmCost = (s: GameState) => BAL.farmCost * BAL.farmCostGrowth ** s.farm * mod(s, 'farmCost');
+/** Extra hardship of a realistic line: 1 on a normal one. Space-phase output is not touched. */
+const hard = (s: GameState, v: number) => ((s.slow || 1) > 1 ? v : 1);
+export const autoCost = (s: GameState) => BAL.printerCost * BAL.printerCostGrowth ** s.auto * mod(s, 'printerCost') * hard(s, BAL.realisticCostMul);
+export const farmCost = (s: GameState) => BAL.farmCost * BAL.farmCostGrowth ** s.farm * mod(s, 'farmCost') * hard(s, BAL.realisticCostMul);
 export const panelCost = (s: GameState) => BAL.panelCost * BAL.panelCostGrowth ** s.panels;
 export const mktCost = (s: GameState) => BAL.marketingCost * BAL.marketingCostGrowth ** (s.mkt - 1) * mod(s, 'marketingCost');
 /** Product of a multiplier over running market effects, clamped so stacked events cannot break the economy. */
@@ -34,7 +36,7 @@ export function calendarMul(s: GameState, modelId = s.mdl) {
 
 export const material = (s: GameState) => MATERIAL[s.materialId] ?? DEFAULT_MATERIAL;
 export const spoolPrice = (s: GameState, stock = material(s)) =>
-  (s.spoolG > 1000 ? s.spool * 5 * BAL.bulkPackDiscount : s.spool) * marketMul(s, 'spool') * stock.price * mod(s, 'spool');
+  (s.spoolG > 1000 ? s.spool * 5 * BAL.bulkPackDiscount : s.spool) * marketMul(s, 'spool') * stock.price * mod(s, 'spool') * hard(s, BAL.realisticSpoolMul);
 /** Selected print model (falls back to the figurine for unknown ids). */
 export const model = (s: GameState): PrintModel => MODEL[s.mdl] ?? DEFAULT_MODEL;
 /** Filament per figurine of work: base nozzle consumption × the model's material factor. */
@@ -76,10 +78,10 @@ export const demand = (s: GameState, m = model(s), price = s.price) =>
   (1 + 0.15 * patLvl(s, 'brand')) *
   marketMul(s, 'demand', m.id) *
   modelDemand(m) * materialDemand(material(s), m.id) *
-  mod(s, 'demand');
+  mod(s, 'demand') * hard(s, BAL.realisticDemandMul);
 
 export const boostMul = (s: GameState) => (s.boostT > 0 ? BAL.boostMultiplier : 1);
-export const rateBase = (s: GameState) => (s.auto + s.farm * BAL.farmPrinters * eff(s)) * s.spd * boostMul(s) * (1 + 0.15 * patLvl(s, 'speed')) * precisionSpeed(s) / (s.slow || 1) * mod(s, 'speed');
+export const rateBase = (s: GameState) => (s.auto + s.farm * BAL.farmPrinters * eff(s)) * s.spd * boostMul(s) * (1 + 0.15 * patLvl(s, 'speed')) * precisionSpeed(s) * hard(s, BAL.realisticSpeedMul) / (s.slow || 1) * mod(s, 'speed');
 export const rate1 = (s: GameState) => rateBase(s) * (1 - s.brk);
 
 const repBase = (s: GameState) => BAL.repThreshold * 0.9 ** patLvl(s, 'fame') * mod(s, 'rep');
