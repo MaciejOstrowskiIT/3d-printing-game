@@ -7,6 +7,7 @@ import { qualityTexts } from './pl/quality';
 import { researchTexts } from './pl/research';
 import { sideTexts } from './pl/side';
 import { statsTexts } from './pl/stats';
+import { summaryTexts } from './pl/summary';
 import { workshopTexts } from './pl/workshop';
 import { clients, causes } from './pl/lists';
 import { logTexts } from './pl/log';
@@ -22,6 +23,7 @@ export const pl = {
   ...researchTexts,
   ...sideTexts,
   ...statsTexts,
+  ...summaryTexts,
   ...workshopTexts,
   L: logTexts,
   clients,

@@ -1,7 +1,7 @@
 import { useEffect } from 'preact/hooks';
 import { HINTS } from '../../content/hints';
-import { fmt, li, playtime, prefs, reducedMotion, t } from '../i18n';
-import { act, dialog, mobileView, resetGame, screen, ui, useS } from '../store';
+import { li, prefs, reducedMotion, t } from '../i18n';
+import { act, dialog, mobileView, screen, ui, useS } from '../store';
 import { Toasts } from './Achievements';
 import { AlphaBadge } from './AlphaBadge';
 import { AwayDialog } from './AwayDialog';
@@ -10,7 +10,7 @@ import { ReportDialog } from './ReportDialog';
 import { SaveDialog } from './SaveDialog';
 import { SettingsDialog } from './SettingsDialog';
 import { Title } from './Title';
-import { PrestigeButton } from './Prestige';
+import { End } from './End';
 import { Hud } from './Hud';
 import { Tabs, useBadges, useResearchUnlocked } from './hud/tabs';
 import { Research } from './Research';
@@ -50,25 +50,6 @@ function Dock() {
         <span>{t('tabA')}</span>
       </button>
     </nav>
-  );
-}
-
-function End() {
-  const result = useS(s => s.end ? { total: s.total, play: s.play, totalPlay: s.priorPlay + s.play } : null);
-  if (!result) return null;
-  return (
-    <div class="end">
-      <div>
-        <h2>{t('endTitle')}</h2>
-        <p>{t('endTxt', fmt(result.total))}</p>
-        <p>{t('linePlaytime')} <b>{playtime(result.play)}</b> · {t('totalPlaytime')} <b>{playtime(result.totalPlay)}</b></p>
-        <div class="end-actions">
-          <PrestigeButton class="btn-main big" />
-          <PrestigeButton class="big" realistic />
-          <button onClick={() => resetGame('again')}>{t('again')}</button>
-        </div>
-      </div>
-    </div>
   );
 }
 

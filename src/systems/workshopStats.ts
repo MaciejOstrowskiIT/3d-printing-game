@@ -1,5 +1,6 @@
 import { MODEL } from '../content/models';
 import type { GameState } from '../core/state';
+import { recordEarning } from './runStats';
 
 export const PERIOD_SECONDS = 30;
 export const PERIOD_COUNT = 10;
@@ -78,6 +79,7 @@ export function stockGrowth(s: GameState, id: string) {
 export function bookCash(s: GameState, kind: CashKind, amount: number, sale?: { modelId: string; pieces: number; cost?: number | null }) {
   const incoming = kind === 'sales' || kind === 'orders' || kind === 'bonus';
   s.zl += incoming ? amount : -amount;
+  if (incoming) recordEarning(s, amount, sale?.modelId);
   if (!amount || s.ph !== 1) return;
   if (incoming) {
     incomeTotal.set(s, incomeSinceLoad(s) + amount);

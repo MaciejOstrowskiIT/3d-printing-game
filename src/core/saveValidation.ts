@@ -14,6 +14,7 @@ import { validDailyState } from '../systems/dailyOrder';
 import { validStoryState } from '../systems/story';
 import { validHints } from '../systems/hints';
 import { validWorkshopStats } from '../systems/workshopStats';
+import { validRunStats } from '../systems/runStats';
 import type { GameState } from './state';
 
 const record = (v: unknown): v is Record<string, unknown> =>
@@ -72,7 +73,7 @@ export function validSave(s: GameState, defaults: GameState) {
   const kept = KEPT_AUTOMATION[s.meta.pat.keep ?? 0];
   if (s.done.some(id => !kept.includes(id) && savedPrereqMissing(s.done, NODE[id]))) return false;
   if (!validMarketState(s) || !validModelState(s) || !validInventory(s) || !validFleet(s) || !validMaterialState(s) || !validOfflineBonus(s) || ![1, BAL.realisticSlow].includes(s.slow) || !validDailyState(s) || !validStoryState(s) || s.play < 0) return false;
-  if (!validWorkshopStats(s) || !validQuantum(s) || !validRewarded(s)) return false;
+  if (!validWorkshopStats(s) || !validQuantum(s) || !validRewarded(s) || !validRunStats(s)) return false;
   if (s.stockPremium < 0 || s.stockPremium > BAL.precisionPremium + 1e-9) return false;
   return s.boostT >= 0 && s.boostT <= BAL.boostSeconds &&
     s.boostCd >= s.boostT && s.boostCd <= BAL.boostCooldown;

@@ -97,6 +97,11 @@ export interface GameState {
   hints: HintProgress;
   /** Rewarded placements besides Overtime: game seconds until each can be watched again (systems/rewarded.ts). */
   adCd: { order: number; repair: number };
+  /** Run summary (systems/runSummary.ts): money earned on this line, sales revenue per model id,
+   *  and the line play time (s) at which each goal was reached (-1: reached before this was tracked). */
+  runEarned: number;
+  modelRev: Record<string, number>;
+  goalAt: number[];
 }
 
 export const SAVE_VERSION = 7;
@@ -143,6 +148,9 @@ export const createState = (): GameState => ({
   priorCompletions: 0,
   hints: { seen: [], active: null, retired: false },
   adCd: { order: 0, repair: 0 },
+  runEarned: 0,
+  modelRev: {},
+  goalAt: [],
 });
 
 export const has = (s: GameState, id: string) => s.done.includes(id);

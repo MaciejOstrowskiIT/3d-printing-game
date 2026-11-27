@@ -5,6 +5,7 @@ import { log, sfx, type Ctx } from '../core/ctx';
 import { freePts, opsCap, opsRate, repNext } from '../core/formulas';
 import { has, patLvl, type GameState } from '../core/state';
 import { quantumVisible } from './quantum';
+import { recordGoal } from './runStats';
 
 export type NodeStatus = 'done' | 'locked' | 'need' | 'ready' | 'avail';
 
@@ -69,6 +70,7 @@ export function goalsSystem(s: GameState, _dt: number, ctx: Ctx) {
     if (a < b) break;
     log(s, ctx, 'goal', GOALS[s.goal].t[0] + '|' + GOALS[s.goal].t[1]);
     ctx.emit({ type: 'goal', index: s.goal });
+    recordGoal(s);
     s.goal++;
     sfx(ctx, 'goal');
   }
