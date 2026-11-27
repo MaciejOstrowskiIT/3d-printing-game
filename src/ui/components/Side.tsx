@@ -1,3 +1,4 @@
+import { reporter } from '../report';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { GOALS } from '../../content/goals';
 import { DEFAULT_MODEL, MODEL } from '../../content/models';
@@ -136,6 +137,7 @@ export function Settings({ class: cls }: { class: string }) {
       <button onClick={() => setPrefs({ mute: !prefs.value.mute })}>{prefs.value.mute ? t('mOff') : t('mOn')}</button>
       <button onClick={() => setPrefs({ lang: prefs.value.lang === 'pl' ? 'en' : 'pl' })}>{t('langBtn')}</button>
       <button onClick={() => { dialog.value = 'save'; }}>{t('sOpen')}</button>
+      {reporter.enabled && <button onClick={() => { dialog.value = 'report'; }}>{t('rOpen')}</button>}
       <button onClick={() => { if (sure) { resetGame('fresh'); setSure(false); } else setSure(true); }}>{sure ? t('sure') : t('reset')}</button>
     </div>
   );

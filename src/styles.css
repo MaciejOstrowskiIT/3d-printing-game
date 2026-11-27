@@ -542,3 +542,6 @@ body.space .side{background-color:var(--bg);color:var(--ink)}
   .dock.nav4 .pbtn{grid-column:3;width:76px;height:76px;min-height:76px;padding:0;margin:-30px auto 0;border-radius:50%;border:5px solid var(--bg);font-size:15px}
   .dock.nav4 .pbtn kbd{display:none}
 }
+
+/* alpha badge: translucent, never blocks clicks */
+.alpha-badge{position:fixed;top:4px;right:6px;z-index:30;pointer-events:none;user-select:none;font:700 10px/1 'Barlow Condensed',system-ui,sans-serif;letter-spacing:.14em;color:var(--mute);opacity:.55;border:1px solid currentColor;border-radius:4px;padding:2px 5px}

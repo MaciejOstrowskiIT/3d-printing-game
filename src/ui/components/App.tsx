@@ -4,6 +4,8 @@ import { act, adPending, awayReport, dialog, mobileView, resetGame, screen, ui, 
 import { offlineBonusReady } from '../../systems/offlineBonus';
 import { platform } from '../platform';
 import { Toasts } from './Achievements';
+import { AlphaBadge } from './AlphaBadge';
+import { ReportDialog } from './ReportDialog';
 import { SaveDialog } from './SaveDialog';
 import { Title } from './Title';
 import { PrestigeButton } from './Prestige';
@@ -88,7 +90,7 @@ export function App() {
     return () => document.removeEventListener('keydown', onKey);
   }, []);
 
-  if (screen.value === 'title') return (<><Title /><SaveDialog /></>);
+  if (screen.value === 'title') return (<><Title /><SaveDialog /><ReportDialog /></>);
 
   return (
     <>
@@ -111,6 +113,8 @@ export function App() {
       <Toasts />
       <End />
       <SaveDialog />
+      <ReportDialog />
+      <AlphaBadge />
     </>
   );
 }

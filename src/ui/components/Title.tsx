@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { createState } from '../../core/state';
+import { AlphaBadge } from './AlphaBadge';
 import { fmt, prefs, setPrefs, t } from '../i18n';
 import { mountPrinter } from '../scene/printer';
+import { reporter } from '../report';
 import { dialog, game, startGame, useS } from '../store';
 
 /** Title screen: animated printer, continue / new game / load save, language and sound. */
@@ -37,9 +39,11 @@ export function Title() {
         </div>
         <div class="settings title-settings">
           <button onClick={() => setPrefs({ lang: prefs.value.lang === 'pl' ? 'en' : 'pl' })}>{t('langBtn')}</button>
+          {reporter.enabled && <button onClick={() => { dialog.value = 'report'; }}>{t('rOpen')}</button>}
           <button onClick={() => setPrefs({ mute: !prefs.value.mute })}>{prefs.value.mute ? t('mOff') : t('mOn')}</button>
         </div>
       </div>
+      <AlphaBadge />
       <p class="build-id">v{__BUILD__}</p>
     </div>
   );
