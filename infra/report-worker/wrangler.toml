@@ -14,4 +14,8 @@ type = "ratelimit"
 namespace_id = "1001"
 simple = { limit = 3, period = 60 }
 
+# Workers AI (free tier): Llama Guard checks each report before it is published. Optional: without it nothing is checked.
+[ai]
+binding = "AI"
+
 # Secret, set once with: npx wrangler secret put GITHUB_TOKEN
