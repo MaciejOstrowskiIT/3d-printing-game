@@ -11,7 +11,12 @@ const KEY = 'drukarnia-report-at';
 export type ReportResult = { ok: true } | { ok: false; reason: 'short' | 'cooldown' | 'unavailable'; waitMs?: number };
 
 export interface Reporter {
+  /** A real transport is configured (endpoint or Umami). */
   readonly enabled: boolean;
+  /** Show the button and form: real transport, or preview mode for testing the UI. */
+  readonly visible: boolean;
+  /** Visible but nothing is sent (no transport configured). */
+  readonly previewOnly: boolean;
   /** Milliseconds until the next report is allowed; 0 when the player can send now. */
   wait(): number;
   send(description: string, context?: EventData): ReportResult;
@@ -20,6 +25,8 @@ export interface Reporter {
 export interface ReporterDeps {
   endpoint?: string;
   analytics: Analytics;
+  /** Dev and QA builds: show the form even without a transport; reports are only logged to the console. */
+  preview?: boolean;
   now?: () => number;
   /** Persisted so a page reload does not reset the cooldown. */
   load?: () => number;
@@ -37,17 +44,21 @@ export function createReporter(d: ReporterDeps): Reporter {
   const save = d.save ?? (t => { try { localStorage.setItem(KEY, String(t)); } catch { /* private mode */ } });
   const post = d.post ?? browserPost;
   const enabled = !!d.endpoint || d.analytics.enabled;
+  const previewOnly = !enabled && !!d.preview;
   const wait = () => Math.max(0, load() + REPORT_COOLDOWN_MS - now());
   return {
     enabled,
+    visible: enabled || previewOnly,
+    previewOnly,
     wait,
     send(description, context = {}) {
       const text = description.trim().slice(0, REPORT_MAX);
-      if (!enabled) return { ok: false, reason: 'unavailable' };
+      if (!enabled && !previewOnly) return { ok: false, reason: 'unavailable' };
       if (text.length < REPORT_MIN) return { ok: false, reason: 'short' };
       const w = wait();
       if (w > 0) return { ok: false, reason: 'cooldown', waitMs: w };
       save(now());
+      if (previewOnly) { console.info('[bug report preview, not sent]', text, context); return { ok: true }; }
       try {
         if (d.endpoint) post(d.endpoint, JSON.stringify({ type: 'bug_report', description: text, ...context, at: new Date(now()).toISOString() }));
         else d.analytics.event('bug_report', { ...context, d1: text.slice(0, 200), d2: text.slice(200, 400), d3: text.slice(400, 600) });

@@ -45,6 +45,7 @@ export function ReportDialog() {
       <form class="modal-box" onSubmit={submit}>
         <div class="ch"><h2 id="report-title">{t('rTitle')}</h2><button type="button" class="x" onClick={close} aria-label={t('sClose')}>×</button></div>
         <p class="hint">{t('rHint')}</p>
+        {reporter.previewOnly && <p class="hint bad">{t('rPreview')}</p>}
         <textarea aria-label={t('rField')} placeholder={t('rPh')} rows={5} maxLength={REPORT_MAX} value={text} autofocus
           onInput={e => { setText((e.currentTarget as HTMLTextAreaElement).value); if (status !== 'idle') setStatus('idle'); }} />
         <div class="ctl">

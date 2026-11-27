@@ -51,6 +51,21 @@ describe('bug reporter', () => {
     expect(r.send('a perfectly valid description')).toEqual({ ok: false, reason: 'unavailable' });
   });
 
+  it('preview mode shows the form, applies the cooldown, and sends nothing', () => {
+    const hits: unknown[] = [];
+    let stored = 0;
+    const r = createReporter({ analytics: noAnalytics, preview: true, now: () => 5_000_000, load: () => stored, save: t => { stored = t; }, post: (...a) => hits.push(a) });
+    expect([r.enabled, r.visible, r.previewOnly]).toEqual([false, true, true]);
+    expect(r.send('a perfectly valid description')).toEqual({ ok: true });
+    expect(r.send('a perfectly valid description')).toMatchObject({ ok: false, reason: 'cooldown' });
+    expect(hits).toEqual([]);
+  });
+
+  it('is visible, and not preview-only, with a real transport', () => {
+    const { r } = setup('https://x.example.com');
+    expect([r.enabled, r.visible, r.previewOnly]).toEqual([true, true, false]);
+  });
+
   it('caps the description length', () => {
     const { r, posts } = setup('https://x.example.com');
     r.send('y'.repeat(5000));
