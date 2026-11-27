@@ -102,6 +102,12 @@ body.space .side .pbtn,body.space .dock .pbtn{display:none}
 .mfx .mchip.bad{background:var(--badS);color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,transparent)}
 .mfx .mchip.cal{background:var(--card);color:var(--ink);border-color:var(--line)}
 .evb{display:flex;gap:6px}
+.ev.order-card{display:grid;grid-template-columns:minmax(0,1fr) auto}
+/* Both order states size the same rows, including when a translation wraps. */
+.order-card-state{display:grid;align-items:center}
+.order-card-state>*{grid-area:1/1}
+.order-card-state>[aria-hidden=true]{visibility:hidden}
+.order-card-footer{grid-column:1/-1}
 .btn-main{background:#1c1b22;color:#fff;border-color:#1c1b22}
 .btn-main:hover:not(:disabled){background:#2c2b34;border-color:#1c1b22}
 

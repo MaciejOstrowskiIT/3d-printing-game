@@ -20,8 +20,8 @@ Planned work and its order: `ROADMAP.md` (task board). Pick cards from "Next up"
 ## In flight
 | PR / branch | Agent | Touches |
 |---|---|---|
-| `feat/achievements-tab` | Claude | Separate Achievements tab: `Hud.tsx` (Tabs), `App.tsx` (Dock), `Research.tsx`, `state.ts` tab type, save validation, i18n |
-| `feat/game-pace` | Claude | `BAL.pace` / `SPEED` in `balance.ts`, `formulas.ts`, orders, daily order, market offers, `tests/setup.ts`, balance sim, README |
+| #82 / `fix/order-card-height` | Codex | Special order card layout and Playwright acceptance coverage |
+| #83 / `feat/achievements-tab` | Claude | Separate Achievements tab: `Hud.tsx` (Tabs), `App.tsx` (Dock), `Research.tsx`, `state.ts` tab type, save validation, i18n |
 | #75 / `feat/skywalker-playtime` | Codex | SkyWalker achievement, play time across lines, HUD and end screen |
 | #76 / `feat/three-crowns` | Codex | Completion tracking, save validation and achievement tests |
 | #64 / `feat/clicker-achievement` | Codex | Manual print progress, Clicker achievement in PL/EN, save and prestige tests |
