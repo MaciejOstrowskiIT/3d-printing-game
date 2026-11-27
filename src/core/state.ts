@@ -95,6 +95,8 @@ export interface GameState {
   /** Finished games before the current production line. */
   priorCompletions: number;
   hints: HintProgress;
+  /** Rewarded placements besides Overtime: game seconds until each can be watched again (systems/rewarded.ts). */
+  adCd: { order: number; repair: number };
 }
 
 export const SAVE_VERSION = 7;
@@ -140,6 +142,7 @@ export const createState = (): GameState => ({
   autoDroneBuilt: false,
   priorCompletions: 0,
   hints: { seen: [], active: null, retired: false },
+  adCd: { order: 0, repair: 0 },
 });
 
 export const has = (s: GameState, id: string) => s.done.includes(id);

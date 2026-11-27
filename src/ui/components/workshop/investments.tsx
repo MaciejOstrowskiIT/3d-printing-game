@@ -6,6 +6,7 @@ import { act, adPending, useS, watchAdForBoost } from '../../store';
 import { clock, dur, fmt, li, mass, money, nf, t } from '../../i18n';
 import { BuyButton, CardHead, Item } from '../common';
 import { filamentNotice } from './events';
+import { RewardedRows } from './rewarded';
 
 /** Rewarded "overtime" boost. Shown only where the platform can serve rewarded ads. */
 export function BoostRow() {
@@ -45,6 +46,7 @@ export function Investments() {
     <section class="card workshop-production v-p">
       <CardHead title={t(v.goal >= 2 ? 'investTitle' : 'production')} aside={v.goal >= 2 ? t('investAside') : undefined} />
       <BoostRow />
+      <RewardedRows />
       <Item className="spool-row" name={t(v.bulk ? 'spool5Item' : 'spoolItem')} sub={v.showFeedstock ? v.feedstock + ' · ' + spoolSub : spoolSub}>
         <BuyButton action="spool" cost={v.spool} have={v.zl} label={money(v.spool)} />
       </Item>

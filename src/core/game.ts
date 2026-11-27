@@ -5,6 +5,7 @@ import { achievementsSystem } from '../systems/achievements';
 import { dismissHint, hintsSystem } from '../systems/hints';
 import { automationSystem } from '../systems/automation';
 import { activateBoost, boostSystem } from '../systems/boost';
+import { instantDelivery, rewardedSystem, skipBreakdown } from '../systems/rewarded';
 import { breakdownsSystem, repair } from '../systems/breakdowns';
 import { energySystem } from '../systems/energy';
 import { selectMaterial } from '../systems/materials';
@@ -52,6 +53,7 @@ export const SYSTEMS: System[] = [
   filamentSystem,
   quantumSystem,
   hintsSystem,
+  rewardedSystem,
 ];
 
 /** Player actions. The UI only sends these strings and never mutates game state itself. */
@@ -60,7 +62,7 @@ export type Action =
   | 'print' | 'spool' | 'auto' | 'farm' | 'panel' | 'mkt' | 'drone' | 'fab'
   | `spool:${string}`
   | 'pminus' | 'pplus' | `price:${string}:${PriceEdit}:${number}` | 'oacc' | 'odec' | 'fix' | 'mevyes' | 'mevno' | 'tool'
-  | 'proc1' | 'procmax' | 'mem1' | 'memmax' | 'boost' | 'adfail' | 'prestige' | 'prestigeR' | 'offx2' | 'daily' | 'msgok' | 'qbuy' | 'qup'
+  | 'proc1' | 'procmax' | 'mem1' | 'memmax' | 'boost' | 'adorder' | 'adrepair' | 'adfail' | 'prestige' | 'prestigeR' | 'offx2' | 'daily' | 'msgok' | 'qbuy' | 'qup'
   | `t:${string}` | `col:${number}` | `material:${string}` | `price-up:${string}` | `price-down:${string}` | `fleet:${string}:${number}` | `mdl:${string}` | `stl:${string}` | `day:${number}` | `am:${string}:${0 | 1}` | `pat:${string}`;
 
 export interface Game {
@@ -131,6 +133,8 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
       if (a === 'mevno') { declineMarketEvent(s, ctx); return true; }
       if (a === 'fix') { repair(s, ctx); sfx(ctx, 'buy'); return true; }
       if (a === 'boost') return activateBoost(s, ctx);
+      if (a === 'adorder') return instantDelivery(s, ctx);
+      if (a === 'adrepair') return skipBreakdown(s, ctx);
       if (a === 'prestige' || a === 'prestigeR') { const next = prestige(s, ctx, a === 'prestigeR'); if (next) s = next; return !!next; }
       if (a.startsWith('pat:')) { const ok = buyPatent(s, a.slice(4)); if (ok) sfx(ctx, 'buy'); return ok; }
       if (a === 'adfail') { log(s, ctx, 'boostFail'); return true; }

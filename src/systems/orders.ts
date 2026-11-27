@@ -1,4 +1,5 @@
 import { MODEL } from '../content/models';
+import { bookCash } from './workshopStats';
 import { putPieces } from './inventory';
 import { BAL, SPEED } from '../content/balance';
 import { log, pick, sfx, type Ctx } from '../core/ctx';
@@ -22,6 +23,21 @@ function spawnOrder(s: GameState, ctx: Ctx) {
   log(s, ctx, 'oNew', '#' + c);
   ctx.emit({ type: 'order', result: 'offered' });
   sfx(ctx, 'alert');
+}
+
+/** Pays the accepted order and clears it, from production or from a rewarded instant delivery. */
+export function completeOrder(s: GameState, ctx: Ctx) {
+  const o = s.ord;
+  if (!o) return;
+  bookCash(s, 'orders', o.pay);
+  s.ordDone++;
+  log(s, ctx, 'oOk', '$' + o.pay);
+  ctx.emit({ type: 'order', result: 'delivered' });
+  s.ord = null;
+  s.orderStock = {};
+  for (const stock of Object.values(s.modelStock)) delete stock.reservedCost;
+  s.ordT = pickOrderCooldown(ctx);
+  sfx(ctx, 'goal');
 }
 
 export function acceptOrder(s: GameState) {
