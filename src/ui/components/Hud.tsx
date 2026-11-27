@@ -7,7 +7,7 @@ import { eff, freePts, gpu, opsCap } from '../../core/formulas';
 import { has } from '../../core/state';
 import { nodeStatus, researchUnlocked } from '../../systems/research';
 import { dur, fmt, mass, money, playtime, t } from '../i18n';
-import { incomePerSecond } from '../../systems/workshopStats';
+import { currentSecondIncome } from '../../systems/workshopStats';
 import { ui, useS } from '../store';
 
 const Chip = ({ label, value, warn, show = true, sub, meter, big }: { label: string; value: string; warn?: boolean; show?: boolean; sub?: string; meter?: number; big?: boolean }) =>
@@ -64,14 +64,15 @@ function PlaytimeChips() {
 export function Hud() {
   const v = useS(s => ({
     sp: s.ph === 2, g: s.goal, zl: money(s.zl), inv: fmt(s.ph === 2 ? Math.floor(s.inv) : MODELS.reduce((sum, m) => sum + piecesInStock(s, m.id), 0)), fil: mass(s.fil), filWarn: s.ph === 1 && (s.fil < gpu(s) || (filamentRunway(s) < BAL.filamentWarnSeconds && !autobuyOn(s) && s.total > 0)),
-    earn: s.ph === 1 ? incomePerSecond(s) : 0, run: s.ph === 1 ? filamentRunway(s) : Infinity, auto: autobuyOn(s),
+    earn: s.ph === 1 ? currentSecondIncome(s) : 0, run: s.ph === 1 ? filamentRunway(s) : Infinity, auto: autobuyOn(s),
     real: (s.slow || 1) > 1, farmOn: s.farmOn, en: Math.round(eff(s) * 100), ops: fmt(Math.floor(s.ops)) + ' / ' + fmt(opsCap(s)), mat: fmt(s.mat) + ' t',
   }), );
   const unlocked = useResearchUnlocked();
   return (
     <nav class="hud">
       <div class="chips">
-        <Chip show={!v.sp && v.g >= 1} big label={t('funds')} value={v.zl} sub={v.earn > 0 ? '+' + t('moneyRate', money(v.earn)) : '\u00a0'} />
+        <Chip show={!v.sp && v.g >= 1} big label={t('funds')} value={v.zl}
+          sub={(v.earn > 0 ? '+' : '') + t('moneyRate', money(v.earn))} />
         <Chip show={v.g >= 1} label={t('stock')} value={v.inv} />
         <Chip show={!v.sp} label={t('filament')} value={v.fil} warn={v.filWarn}
           sub={Number.isFinite(v.run) && !v.auto ? t('filLeft', dur(Math.round(v.run))) : undefined}

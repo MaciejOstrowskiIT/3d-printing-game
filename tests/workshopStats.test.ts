@@ -4,9 +4,34 @@ import { autoCost, spoolPrice, unitCost } from '../src/core/formulas';
 import { exportSave, importSave } from '../src/core/save';
 import { putPieces } from '../src/systems/inventory';
 import { salesSystem } from '../src/systems/sales';
-import { expenses, income, PERIOD_COUNT, PERIOD_SECONDS, stockGrowth } from '../src/systems/workshopStats';
+import { bookCash, currentSecondIncome, expenses, income, PERIOD_COUNT, PERIOD_SECONDS, stockGrowth } from '../src/systems/workshopStats';
 
 describe('workshop cash flow', () => {
+  it('counts actual receipts in the current second without subtracting purchases', () => {
+    const g = createGame();
+    g.tick(0.25);
+    bookCash(g.s, 'sales', 8);
+    g.tick(0.25);
+    bookCash(g.s, 'orders', 20);
+    bookCash(g.s, 'bonus', 2);
+    bookCash(g.s, 'equipment', 5);
+    expect(currentSecondIncome(g.s)).toBe(30);
+    expect(currentSecondIncome(importSave(exportSave(g.s))!)).toBe(0);
+
+    g.tick(0.5);
+    expect(currentSecondIncome(g.s)).toBe(0);
+    bookCash(g.s, 'sales', 4);
+    expect(currentSecondIncome(g.s)).toBe(4);
+    expect(income(g.s.finance[0])).toBe(34);
+  });
+
+  it('keeps offline sales in finance history without showing them as live income', () => {
+    const g = createGame();
+    putPieces(g.s, 'fig', 4, 0);
+    g.catchUp(1);
+    expect(income(g.s.finance[0])).toBeGreaterThan(0);
+    expect(currentSecondIncome(g.s)).toBe(0);
+  });
   it('keeps sale receipts by model separate from purchases in the same period', () => {
     const g = createGame();
     g.s.mdls.push('keychain');

@@ -1,4 +1,4 @@
-import { bookCash } from '../systems/workshopStats';
+import { bookCash, clearCurrentIncome } from '../systems/workshopStats';
 import { setFleet } from '../systems/fleet';
 import { BAL } from '../content/balance';
 import { achievementsSystem } from '../systems/achievements';
@@ -155,6 +155,7 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
         rem -= d;
       }
       ctx.offline = false;
+      clearCurrentIncome(s);
       const filament = ctx.tally.filament;
       ctx.tally = undefined;
       const made = Math.floor(s.total - before.total);

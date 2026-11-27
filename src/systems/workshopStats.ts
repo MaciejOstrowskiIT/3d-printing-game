@@ -26,12 +26,16 @@ export const newPeriod = (index: number): CashPeriod => ({
 export const income = ({ cash }: CashPeriod) => cash.sales + cash.orders + cash.bonus;
 export const expenses = ({ cash }: CashPeriod) => cash.filament + cash.equipment + cash.other;
 
-/** Average income per second over the current and the previous 30 s period (sales, orders, bonuses). */
-export function incomePerSecond(s: GameState) {
-  const index = periodIndex(s);
-  const recent = s.finance.filter(p => p.index >= index - 1);
-  const seconds = s.financeTime - Math.max(0, index - 1) * PERIOD_SECONDS;
-  return seconds > 1 ? recent.reduce((sum, p) => sum + income(p), 0) / seconds : 0;
+// The live counter is transient. Saved finance periods do not have second-by-second data.
+const latestIncome = new WeakMap<GameState, { second: number; amount: number }>();
+
+export function currentSecondIncome(s: GameState): number {
+  const entry = latestIncome.get(s);
+  return entry?.second === Math.floor(s.financeTime) ? entry.amount : 0;
+}
+
+export function clearCurrentIncome(s: GameState) {
+  latestIncome.delete(s);
 }
 
 function currentPeriod(s: GameState) {
@@ -68,8 +72,12 @@ export function stockGrowth(s: GameState, id: string) {
 }
 
 export function bookCash(s: GameState, kind: CashKind, amount: number, sale?: { modelId: string; pieces: number; cost?: number | null }) {
-  s.zl += kind === 'filament' || kind === 'equipment' || kind === 'other' ? -amount : amount;
+  const incoming = kind === 'sales' || kind === 'orders' || kind === 'bonus';
+  s.zl += incoming ? amount : -amount;
   if (!amount || s.ph !== 1) return;
+  if (incoming) {
+    latestIncome.set(s, { second: Math.floor(s.financeTime), amount: currentSecondIncome(s) + amount });
+  }
   currentPeriod(s).cash[kind] += amount;
   if (sale) {
     const model = modelActivity(s, sale.modelId);
