@@ -86,3 +86,19 @@ h2{font-size:21px;margin:0;line-height:1.1}
 
 .onboarding-hint{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;padding:8px 12px;background:var(--card);border:1px solid var(--line);border-radius:12px;font-size:14px}
 .onboarding-hint button{flex:none}
+
+/* Resource chips that open a panel on hover / tap (funds chart, stock by project, filament by type). */
+.chip.has-pop{cursor:pointer}
+.chip.has-pop:hover,.chip.has-pop[aria-expanded=true]{border-color:var(--acc)}
+.hud-pop{position:absolute;top:calc(100% + 4px);z-index:7;width:min(320px,calc(100% - 16px));max-height:min(72vh,640px);overflow:auto;padding:14px 16px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px #0004}
+.hud-pop.pop-funds{width:min(640px,calc(100% - 16px))}
+.hud-pop .card{margin:0;padding:0;border:0;box-shadow:none;background:none}
+.pop-x{position:absolute;top:6px;right:8px;z-index:1;min-height:32px;width:32px;padding:0;font-size:20px;line-height:1;border-color:transparent;background:transparent}
+.hud-pop .stats-head,.pop-body h2{padding-right:36px}
+.pop-body h2{font-size:18px;margin:0 0 8px}
+.pop-list{margin:0;padding:0;list-style:none;display:grid;gap:4px}
+.pop-list li{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:6px 10px;background:var(--sub);border-radius:9px}
+.pop-list li.zero{color:var(--mute)}
+.pop-list li.active{box-shadow:inset 0 0 0 1.5px var(--acc)}
+.pop-list small{display:block;color:var(--mute);font-size:12px}
+.pop-list b{font-variant-numeric:tabular-nums;white-space:nowrap}
