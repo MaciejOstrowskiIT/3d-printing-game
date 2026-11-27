@@ -20,7 +20,7 @@ Planned work and its order: `ROADMAP.md` (task board). Pick cards from "Next up"
 ## In flight
 | PR / branch | Agent | Touches |
 |---|---|---|
-| #44 / `feat/workshop-finance-chart` | Codex | Workshop finance chart, PL/EN labels, styles, Playwright coverage |
+| #47 / `fix/smooth-finance-chart-scroll` | Codex | Workshop finance chart rollover animation, styles, Playwright coverage |
 | #43 / `test/qa2-debug-hook` | Codex | Debug hook and store, Playwright QA projects and fixtures, workshop promo save, README |
 
 Merged: #8–#41 (see `ROADMAP.md` → Done).
