@@ -102,7 +102,15 @@ export interface GameState {
   runEarned: number;
   modelRev: Record<string, number>;
   goalAt: number[];
+  /** Printers of types other than FDM (content/printerTypes.ts): type id → printers owned. Their allocation to
+   *  models lives in `fleet` next to the FDM one; FDM printers stay in `auto`. */
+  printers: Record<string, number>;
+  /** Finished pieces in post-processing (wash and cure), oldest first (systems/printerTypes.ts). */
+  curing: CuringBatch[];
 }
+
+/** Pieces of one model leaving post-processing together: work (figurines), seconds left, precision premium and filament cost (null = unknown). */
+export interface CuringBatch { id: string; w: number; t: number; p: number; c: number | null }
 
 export const SAVE_VERSION = 7;
 
@@ -151,6 +159,8 @@ export const createState = (): GameState => ({
   runEarned: 0,
   modelRev: {},
   goalAt: [],
+  printers: {},
+  curing: [],
 });
 
 export const has = (s: GameState, id: string) => s.done.includes(id);

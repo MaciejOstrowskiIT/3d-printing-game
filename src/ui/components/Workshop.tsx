@@ -13,6 +13,7 @@ import { Energy } from './workshop/energy';
 import { Investments } from './workshop/investments';
 import { Materials } from './workshop/materials';
 import { PrintQuality } from './workshop/printQuality';
+import { PrinterTypes } from './workshop/printerTypes';
 import { ProductionLine } from './workshop/productionLine';
 import { Sales } from './workshop/sales';
 import { Space } from './workshop/space';
@@ -62,6 +63,7 @@ export function Workshop() {
           <div class="workshop-stack">
             {v.designs && <Materials />}
             <Investments />
+            <PrinterTypes />
           </div>
           {support && <WorkshopSupport research={research} farm={v.farm} />}
         </div>

@@ -9,6 +9,12 @@ import { BAL } from '../src/content/balance';
 import { quantumUpgradeCost } from '../src/systems/quantum';
 import { nodeStatus, reserveWyd } from '../src/systems/research';
 import { MODELS } from '../src/content/models';
+import { MATERIAL } from '../src/content/materials';
+import { EXTRA_PRINTER_TYPES } from '../src/content/printerTypes';
+import { typeCost } from '../src/core/formulas';
+import { fleetFilamentPerSecond } from '../src/systems/fleet';
+import { materialStock } from '../src/systems/materials';
+import { typeModels, typeVisible } from '../src/systems/printerTypes';
 import { bestModel, designCost, designVisible } from '../src/systems/models';
 import { autoPrice, savingForLiftoff } from '../src/systems/automation';
 
@@ -44,6 +50,7 @@ export function botDecision(game: Pick<Game, 's' | 'act'>, t: number, opts: BotO
     if (s.auto < 15 && clickCost(s) < (s.zl - reserve) * 0.25) game.act('tool');
     for (const m of MODELS) if (!s.mdls.includes(m.id) && designVisible(s, m) && designCost(s, m) < (s.zl - reserve) * 0.3) game.act(`stl:${m.id}`);
     if (Math.round(t) % 10 === 0) { const best = bestModel(s); if (best !== s.mdl) game.act(`mdl:${best}`); }
+    botPrinterTypes(game, t, reserve);
     if (s.brk > 0) game.act('fix');
     if (s.col !== s.trend && s.goal >= 2) game.act(`col:${s.trend}`);
   } else {
@@ -61,6 +68,26 @@ export function botDecision(game: Pick<Game, 's' | 'act'>, t: number, opts: BotO
   // Like a sensible player: once liftoff is within reach, research only the liftoff node.
   const r = TREE.filter(n => nodeStatus(s, n) === 'ready' && (!savingForLiftoff(s) || n.liftoff)).sort((a, b) => a.ops - b.ops)[0];
   if (r) game.act(`t:${r.id}`);
+}
+
+/** Other printer types (resin): buy printers when cheap, keep their feedstock stocked, split them evenly between their models. */
+function botPrinterTypes(game: Pick<Game, 's' | 'act'>, t: number, reserve: number) {
+  const s = game.s;
+  for (const type of EXTRA_PRINTER_TYPES) {
+    const designs = typeModels(s, type);
+    if (!designs.length || !typeVisible(s, type)) continue;
+    if (typeCost(s, type) < (s.zl - reserve) * 0.3) game.act(`printer:${type.id}`);
+    const pool = s.printers[type.id] ?? 0;
+    if (!pool) continue;
+    const feed = MATERIAL[type.material];
+    if (materialStock(s, feed.id) < fleetFilamentPerSecond(s, type) * 30 && s.zl >= spoolPrice(s, feed) + reserve) game.act(`spool:${feed.id}`);
+    if (Math.round(t) % 10 !== 0) continue;
+    const want = designs.map((_, i) => Math.floor(pool / designs.length) + (i < pool % designs.length ? 1 : 0));
+    for (const pass of [0, 1]) designs.forEach((id, i) => {
+      const cur = s.fleet[id] ?? 0;
+      if (pass === 0 ? want[i] < cur : want[i] > cur) game.act(`fleet:${id}:${want[i]}`);
+    });
+  }
 }
 
 /** Bot that plays like a skilled player: clicks early, watches filament and price, buys sensibly, takes orders. */

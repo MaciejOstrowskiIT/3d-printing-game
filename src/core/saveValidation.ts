@@ -6,6 +6,7 @@ import { NODE, type TreeNode } from '../content/tree';
 import { validMarketState } from '../systems/marketEvents';
 import { validMaterialState } from '../systems/materials';
 import { validFleet } from '../systems/fleet';
+import { validPrinterTypes } from '../systems/printerTypes';
 import { validInventory } from '../systems/inventory';
 import { validModelState } from '../systems/models';
 import { validOfflineBonus } from '../systems/offlineBonus';
@@ -72,7 +73,7 @@ export function validSave(s: GameState, defaults: GameState) {
   if (!validHints(s.hints)) return false;
   const kept = KEPT_AUTOMATION[s.meta.pat.keep ?? 0];
   if (s.done.some(id => !kept.includes(id) && savedPrereqMissing(s.done, NODE[id]))) return false;
-  if (!validMarketState(s) || !validModelState(s) || !validInventory(s) || !validFleet(s) || !validMaterialState(s) || !validOfflineBonus(s) || ![1, BAL.realisticSlow].includes(s.slow) || !validDailyState(s) || !validStoryState(s) || s.play < 0) return false;
+  if (!validMarketState(s) || !validModelState(s) || !validInventory(s) || !validPrinterTypes(s) || !validFleet(s) || !validMaterialState(s) || !validOfflineBonus(s) || ![1, BAL.realisticSlow].includes(s.slow) || !validDailyState(s) || !validStoryState(s) || s.play < 0) return false;
   if (!validWorkshopStats(s) || !validQuantum(s) || !validRewarded(s) || !validRunStats(s)) return false;
   if (s.stockPremium < 0 || s.stockPremium > BAL.precisionPremium + 1e-9) return false;
   return s.boostT >= 0 && s.boostT <= BAL.boostSeconds &&

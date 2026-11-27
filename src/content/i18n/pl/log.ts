@@ -22,6 +22,7 @@ export const logTexts = {
   noFil: 'Skończył się filament. Kup szpulę w panelu Produkcja.',
   mkt: 'Kampania ruszyła. Marketing: poziom {0}.',
   firstPr: 'Pierwsza dodatkowa drukarka dołączyła do garażu.',
+  ptFirst: 'Nowy rodzaj drukarki dołączył do linii. Drukuje: {0}.',
   farm: 'Farma nr {0} podłączona.',
   node: 'Odblokowano: {0}.',
   board: 'Zarząd kupił: {0}.',

@@ -5,6 +5,7 @@ import { DEFAULT_MATERIAL, MATERIAL, materialDemand } from '../content/materials
 import { MARKET_EVENT } from '../content/events';
 import { calendarOn } from '../content/calendar';
 import { DEFAULT_MODEL, MODEL, type PrintModel } from '../content/models';
+import { typeOf, type PrinterType } from '../content/printerTypes';
 import { patLvl, type GameState } from './state';
 
 /** Pure formulas derived from state. No side effects: used by core, UI and tests. */
@@ -41,8 +42,12 @@ export const spoolPrice = (s: GameState, stock = material(s)) =>
 export const model = (s: GameState): PrintModel => MODEL[s.mdl] ?? DEFAULT_MODEL;
 /** Filament per figurine of work: base nozzle consumption × the model's material factor. */
 export const gpu = (s: GameState, m = model(s)) => s.g * m.material * mod(s, 'filament');
+/** What buyers pay per printer-second relative to the figurine, with the detail of the model's printer type. */
+export const modelValue = (m: PrintModel) => m.value * typeOf(m).detail;
+/** Material a model is printed from: its printer type's feedstock, or the selected filament for FDM. */
+export const feedstock = (s: GameState, m = model(s)) => MATERIAL[typeOf(m).material] ?? material(s);
 /** Market size of a model in figurines/s at the same price per figurine (see content/models.ts). */
-export const modelDemand = (m: PrintModel) => m.value ** BAL.demandElasticity * m.market * m.seconds;
+export const modelDemand = (m: PrintModel) => modelValue(m) ** BAL.demandElasticity * m.market * m.seconds;
 /** Figurines of work added by one click. */
 export const precisionSpeed = (s: GameState) => s.precision ? BAL.precisionSpeed : 1;
 export const realizedPrice = (s: GameState, id = s.mdl) => stockPrice(s, id) * (1 + premiumFor(s, id));
@@ -55,7 +60,7 @@ export const clickCost = (s: GameState) => BAL.clickCost * BAL.clickGrowth ** s.
 export const clearingPrice = (s: GameState, sales: number, m = model(s), price = stockPrice(s, m.id)) =>
   price * (demand(s, m, price) / Math.max(sales, 1e-6)) ** (1 / BAL.demandElasticity);
 
-export const unitCost = (s: GameState, m = model(s)) => (spoolPrice(s) / s.spoolG) * gpu(s, m);
+export const unitCost = (s: GameState, m = model(s)) => (spoolPrice(s, feedstock(s, m)) / s.spoolG) * gpu(s, m);
 export const droneCost = (s: GameState) => BAL.droneCost * BAL.droneCostGrowth ** s.drones;
 export const fabCost = (s: GameState) => BAL.fabCost * BAL.fabCostGrowth ** s.fabs;
 
@@ -77,12 +82,18 @@ export const demand = (s: GameState, m = model(s), price = s.price) =>
   (inTrend(s) ? BAL.trendBonus : 1) *
   (1 + 0.15 * patLvl(s, 'brand')) *
   marketMul(s, 'demand', m.id) *
-  modelDemand(m) * materialDemand(material(s), m.id) *
+  modelDemand(m) * materialDemand(feedstock(s, m), m.id) *
   mod(s, 'demand') * hard(s, BAL.realisticDemandMul) * SPEED;
 
 export const boostMul = (s: GameState) => (s.boostT > 0 ? BAL.boostMultiplier : 1);
 export const rateBase = (s: GameState) => (BAL.basePrinters + s.auto + s.farm * BAL.farmPrinters * eff(s)) * s.spd * boostMul(s) * (1 + 0.15 * patLvl(s, 'speed')) * precisionSpeed(s) * hard(s, BAL.realisticSpeedMul) * SPEED / (s.slow || 1) * mod(s, 'speed');
 export const rate1 = (s: GameState) => rateBase(s) * (1 - s.brk);
+/** Work per second of one printer of a type other than FDM: same research, boost and breakdown modifiers as FDM. */
+export const typeSpeed = (s: GameState, type: PrinterType) =>
+  type.speed * s.spd * boostMul(s) * (1 + 0.15 * patLvl(s, 'speed')) * precisionSpeed(s) * hard(s, BAL.realisticSpeedMul) * SPEED / (s.slow || 1) * mod(s, 'speed') * (1 - s.brk);
+/** Price of the next printer of a type other than FDM. */
+export const typeCost = (s: GameState, type: PrinterType) =>
+  type.cost * type.costGrowth ** (s.printers?.[type.id] ?? 0) * mod(s, 'printerCost') * hard(s, BAL.realisticCostMul);
 
 const repBase = (s: GameState) => BAL.repThreshold * 0.9 ** patLvl(s, 'fame') * mod(s, 'rep');
 export const repNext = (s: GameState) => repBase(s) * (s.rep + 1) ** 2;
