@@ -11,7 +11,7 @@ const BASE_CAUSES = 5;
 export function repair(s: GameState, ctx: Ctx) {
   if (s.brk <= 0) return;
   s.brk = 0;
-  s.brkT = pick(ctx, BAL.breakdownEvery) / mod(s, 'breakdown');
+  s.brkT = pick(ctx, BAL.breakdownEvery) / (mod(s, 'breakdown') * ((s.slow || 1) > 1 ? BAL.realisticBreakdownMul : 1));
   log(s, ctx, 'fix');
 }
 
@@ -25,7 +25,7 @@ export function breakdownsSystem(s: GameState, dt: number, ctx: Ctx) {
       const cause = Math.floor(ctx.rng() * causeCount);
       if ((s.bedCalibrated && (cause === BED_ADHESION || cause === SPAGHETTI)) ||
           (s.dryerInstalled && cause === WET_FILAMENT)) {
-        s.brkT = pick(ctx, BAL.breakdownEvery) / mod(s, 'breakdown');
+        s.brkT = pick(ctx, BAL.breakdownEvery) / (mod(s, 'breakdown') * ((s.slow || 1) > 1 ? BAL.realisticBreakdownMul : 1));
         return;
       }
       s.brk = share;

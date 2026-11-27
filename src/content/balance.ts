@@ -111,7 +111,12 @@ export const BAL = {
 
   // realistic mode: a challenge chosen when starting a new production line (core/prestige.ts)
   realisticSlow: 10,               // printing takes 10× longer (printers and clicks; the space phase is unchanged)
-  realisticPatentMult: 2,          // patents for finishing such a line
+  realisticPatentMult: 3,          // patents for finishing such a line
+  realisticSpoolMul: 2,          // filament costs this much more
+  realisticDemandMul: 0.4,         // customers are harder to win
+  realisticCostMul: 2.5,           // printers and farms cost this much more
+  realisticSpeedMul: 0.35,          // printers (not clicks) run at this extra fraction of speed, on top of realisticSlow
+  realisticBreakdownMul: 2.5,      // breakdowns come this much more often
   realisticOfflineMax: 24 * 3600,  // longer offline progress, made for playing in the background
 
   // order of the day (systems/dailyOrder.ts)

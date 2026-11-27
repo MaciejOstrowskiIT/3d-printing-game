@@ -33,7 +33,7 @@ export function PrestigeCard() {
       <div class="ctl"><PrestigeButton /></div>
       <div class="real-offer">
         <b>{t('prReal')}</b>
-        <p class="hint">{t('prRealDesc', BAL.realisticSlow, BAL.realisticOfflineMax / 3600, BAL.realisticPatentMult)}</p>
+        <p class="hint">{t('prRealDesc', BAL.realisticSlow, BAL.realisticOfflineMax / 3600, BAL.realisticPatentMult, BAL.realisticSpoolMul, BAL.realisticCostMul, Math.round((1 - BAL.realisticDemandMul) * 100), BAL.realisticBreakdownMul)}</p>
         <div class="ctl"><PrestigeButton class="" realistic /></div>
       </div>
     </section>

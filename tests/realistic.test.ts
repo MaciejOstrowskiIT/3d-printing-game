@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { BAL } from '../src/content/balance';
 import { MODEL } from '../src/content/models';
-import { clickPower, printSeconds, rate1 } from '../src/core/formulas';
+import { autoCost, clickPower, demand, farmCost, printSeconds, rate1, spoolPrice } from '../src/core/formulas';
 import { createGame } from '../src/core/game';
 import { nextPatentAt, patentsFor } from '../src/core/prestige';
 import { migrate } from '../src/core/save';
@@ -27,7 +27,7 @@ describe('realistic mode', () => {
   it('slows printers and clicks, not the space phase', () => {
     const normal = { ...createState(), auto: 10 };
     const real = { ...normal, slow: BAL.realisticSlow };
-    expect(rate1(real)).toBeCloseTo(rate1(normal) / BAL.realisticSlow);
+    expect(rate1(real)).toBeCloseTo((rate1(normal) / BAL.realisticSlow) * BAL.realisticSpeedMul);
     expect(clickPower(real)).toBeCloseTo(clickPower(normal) / BAL.realisticSlow);
     expect(printSeconds(real, MODEL.fig)).toBe(BAL.realisticSlow);
     expect(printSeconds(normal, MODEL.bust)).toBe(MODEL.bust.seconds);
@@ -39,6 +39,17 @@ describe('realistic mode', () => {
     expect(g.s.total).toBe(0);
     g.act('print');
     expect(g.s.total).toBe(1);
+  });
+
+  it('is harder in more than speed: costs, demand and breakdowns', () => {
+    const normal = { ...createState(), auto: 3, farm: 1, brkT: 100 }, real = { ...normal, slow: BAL.realisticSlow };
+    expect(autoCost(real)).toBeCloseTo(autoCost(normal) * BAL.realisticCostMul);
+    expect(farmCost(real)).toBeCloseTo(farmCost(normal) * BAL.realisticCostMul);
+    expect(spoolPrice(real)).toBeCloseTo(spoolPrice(normal) * BAL.realisticSpoolMul);
+    expect(demand(real)).toBeCloseTo(demand(normal) * BAL.realisticDemandMul);
+    expect(rate1(real)).toBeCloseTo((rate1(normal) / BAL.realisticSlow) * BAL.realisticSpeedMul);
+    const next = (s: GameState) => { const g = createGame({ state: { ...s, brkT: 0, brk: 0 }, rng: () => 0.5 }); g.tick(0.1); return g.s.brkT; };
+    expect(next(real)).toBeCloseTo(next(normal) / BAL.realisticBreakdownMul, 0);
   });
 
   it('pays more patents for the same progress', () => {
@@ -55,7 +66,7 @@ describe('realistic mode', () => {
     };
     const normal = run(1), real = run(BAL.realisticSlow);
     expect(normal).toBeCloseTo(BAL.offlineMaxSeconds, -2);
-    expect(real).toBeCloseTo(BAL.realisticOfflineMax / BAL.realisticSlow, -2);
+    expect(real).toBeCloseTo((BAL.realisticOfflineMax / BAL.realisticSlow) * BAL.realisticSpeedMul, -2);
   });
 
   it('saves: old ones load as normal lines; other speeds are rejected', () => {
