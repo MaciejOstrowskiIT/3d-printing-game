@@ -33,6 +33,8 @@ export interface PrintModel {
   unlockAt: number;
   /** Layer widths for the printer close-up, bottom to top (px in a 320×240 scene, build plate is 188 wide). */
   shape: number[];
+  /** Printer type that makes it (content/printerTypes.ts); omitted = FDM. The shape must fit the type's build volume. */
+  printerType?: string;
 }
 
 export const MODELS: PrintModel[] = [
@@ -61,6 +63,12 @@ export const MODELS: PrintModel[] = [
     shape: [96, 104, 108, 100, 84, 70, 56, 62, 70, 58, 40, 30],
   },
   {
+    id: 'miniature', seconds: 6, value: 1, market: 0.12, material: 0.35, design: 6000, unlockAt: 20000, printerType: 'resin',
+    name: ['Figurka bitewna', 'Tabletop miniature'],
+    desc: ['Drobny detal z żywicy. Gracze bitewni płacą za każdy szczegół.', 'Fine resin detail. Tabletop players pay for every rivet.'],
+    shape: [40, 40, 24, 28, 34, 30, 22, 26, 30, 20, 14],
+  },
+  {
     id: 'helmet', seconds: 60, value: 1.6, market: 0.04, material: 1.4, design: 300000, unlockAt: 200000,
     name: ['Hełm do cosplayu', 'Cosplay helmet'],
     desc: ['Godzina pracy farmy na sztukę. Mało klientów, ale płacą najwięcej.', 'An hour of farm time per piece. Few buyers, but they pay the most.'],
@@ -71,6 +79,12 @@ export const MODELS: PrintModel[] = [
     name: ['Grzebień do kabli', 'Cable comb'],
     desc: ['Praktyczny organizer do kabli. Niskie zużycie filamentu sprzyja dużym seriom.', 'A practical cable organizer. Low filament use suits large batches.'],
     shape: [96, 96, 92, 80, 80, 76],
+  },
+  {
+    id: 'pendant', seconds: 10, value: 1.15, market: 0.07, material: 0.25, design: 90000, unlockAt: 240000, printerType: 'resin',
+    name: ['Wisior biżuteryjny', 'Jewellery pendant'],
+    desc: ['Gładka żywica bez śladów warstw. Mały rynek, bardzo wysoka cena.', 'Smooth resin with no layer lines. A small market and a very high price.'],
+    shape: [12, 22, 32, 40, 44, 44, 40, 32, 22, 14, 10],
   },
   {
     id: 'planter', seconds: 12, value: 1.3, market: 0.14, material: 0.92, design: 420000, unlockAt: 320000,

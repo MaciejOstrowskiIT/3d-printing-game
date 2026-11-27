@@ -3,6 +3,7 @@ import { dialogsTexts } from './en/dialogs';
 import { eventsTexts } from './en/events';
 import { hudTexts } from './en/hud';
 import { lineTexts } from './en/line';
+import { printersTexts } from './en/printers';
 import { progressTexts } from './en/progress';
 import { qualityTexts } from './en/quality';
 import { researchTexts } from './en/research';
@@ -19,6 +20,7 @@ export const en: Dict = {
   ...eventsTexts,
   ...hudTexts,
   ...lineTexts,
+  ...printersTexts,
   ...progressTexts,
   ...qualityTexts,
   ...researchTexts,

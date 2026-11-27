@@ -1,22 +1,42 @@
 import { bookCash, recordStockOutput } from './workshopStats';
 import { MATERIAL } from '../content/materials';
-import { MODEL } from '../content/models';
+import { MODEL, type PrintModel } from '../content/models';
+import { typeOf } from '../content/printerTypes';
 import { fleetFilamentPerSecond, printing } from './fleet';
 import { BAL } from '../content/balance';
 import { modelStock, putPieces } from './inventory';
 import { log, sfx, type Ctx } from '../core/ctx';
-import { gpu, model, rate1, spoolPrice, unitCost } from '../core/formulas';
+import { feedstock, gpu, model, rate1, spoolPrice, unitCost } from '../core/formulas';
 import { has, type GameState } from '../core/state';
 import { completeOrder } from './orders';
 import { stockedAlternative } from './filament';
-import { addMaterial } from './materials';
+import { addMaterial, materialStock } from './materials';
 
-/** New figurines fill an accepted order first; the rest goes to stock. */
+/** New figurines count as printed at once. Pieces whose printer type needs post-processing (wash and cure) wait in
+ *  `s.curing` first (systems/printerTypes.ts); the rest are delivered right away. */
 export function make(s: GameState, ctx: Ctx, n: number, premium = s.precision ? BAL.precisionPremium : 0, cost: number | null = null, m = model(s)) {
   s.total += n;
   if (s.ph === 2) { s.inv += n; return; }
+  modelStock(s, m.id).printed += n / m.seconds;
+  const cure = typeOf(m).cure;
+  if (cure > 0) { queueCuring(s, m, n, premium, cost, cure); return; }
+  deliver(s, ctx, n, premium, cost, m);
+}
+
+/** Joins pieces finished within the same second into one batch, so the queue stays short. */
+function queueCuring(s: GameState, m: PrintModel, w: number, p: number, c: number | null, cure: number) {
+  let last = null;
+  for (const b of s.curing) if (b.id === m.id) last = b;
+  if (last && last.t > cure - 1) {
+    last.p = (last.p * last.w + p * w) / (last.w + w);
+    last.c = last.c === null || c === null ? null : last.c + c;
+    last.w += w;
+  } else s.curing.push({ id: m.id, w, t: cure, p, c });
+}
+
+/** Finished figurines fill an accepted order first; the rest goes to stock. */
+export function deliver(s: GameState, ctx: Ctx, n: number, premium: number, cost: number | null, m: PrintModel) {
   const lot = modelStock(s, m.id);
-  lot.printed += n / m.seconds;
   const o = s.ord;
   if (o && o.acc && o.got < o.n) {
     const k = Math.min(n, Math.ceil((o.n - o.got) / m.seconds) * m.seconds);
@@ -47,11 +67,12 @@ export function buySpool(s: GameState, id = s.materialId): boolean {
   return true;
 }
 
+/** Prints `requested` figurines of work of a model, as far as its feedstock lasts (the selected filament for FDM). */
 export function printWork(s: GameState, ctx: Ctx, requested: number, m = model(s)) {
-  const g = gpu(s, m);
-  const work = Math.min(requested, s.fil / g);
+  const g = gpu(s, m), feed = feedstock(s, m).id;
+  const work = Math.min(requested, materialStock(s, feed) / g);
   if (work <= 0) return 0;
-  s.fil = Math.max(0, s.fil - work * g);
+  addMaterial(s, feed, -Math.min(materialStock(s, feed), work * g));
   if (ctx.tally) ctx.tally.filament += work * g;
   const lot = modelStock(s, m.id);
   const premium = s.precision ? BAL.precisionPremium : 0;

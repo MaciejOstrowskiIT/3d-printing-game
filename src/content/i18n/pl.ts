@@ -2,6 +2,7 @@ import { dialogsTexts } from './pl/dialogs';
 import { eventsTexts } from './pl/events';
 import { hudTexts } from './pl/hud';
 import { lineTexts } from './pl/line';
+import { printersTexts } from './pl/printers';
 import { progressTexts } from './pl/progress';
 import { qualityTexts } from './pl/quality';
 import { researchTexts } from './pl/research';
@@ -18,6 +19,7 @@ export const pl = {
   ...eventsTexts,
   ...hudTexts,
   ...lineTexts,
+  ...printersTexts,
   ...progressTexts,
   ...qualityTexts,
   ...researchTexts,

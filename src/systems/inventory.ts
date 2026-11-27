@@ -2,6 +2,7 @@ import { recordStockShipment } from './workshopStats';
 import { BAL } from '../content/balance';
 import { MODEL, MODELS } from '../content/models';
 import type { GameState } from '../core/state';
+import { typeOf } from '../content/printerTypes';
 
 export interface ModelStock {
   pieces: number;
@@ -29,7 +30,9 @@ export function piecesInStock(s: GameState, id: string) {
 }
 
 export const stockPrice = (s: GameState, id: string) =>
-  id === s.mdl ? s.price : s.modelStock[id]?.price || s.price * MODEL[id].value / MODEL[s.mdl].value;
+  id === s.mdl ? s.price : s.modelStock[id]?.price || s.price * valueOf(id) / valueOf(s.mdl);
+/** Model value with its printer type's detail (same as formulas.modelValue, kept here to avoid an import cycle). */
+const valueOf = (id: string) => MODEL[id].value * typeOf(MODEL[id]).detail;
 export function setStockPrice(s: GameState, id: string, price: number) {
   if (id === s.mdl) s.price = price;
   else modelStock(s, id).price = price;
