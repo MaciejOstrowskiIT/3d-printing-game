@@ -13,6 +13,7 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 | Card | PR | Notes |
 |---|---|---|
 | **Explain when the next daily order is available** | #62 | Clarifies the calendar-day limit and streak in PL/EN (#58) |
+| **R1: Tech tree audit** | #54 | `npm run treeaudit` and `docs/tree-audit.md`; findings for R2 and R3 |
 | **Keep the live finance line continuous** | #51 | Smooth transition into a new empty interval |
 | **QA4: Repeatable layout stability tests** | #56 | Run with `npm run e2e:layout` |
 | **Bug report preview mode** | #46 | Form visible in dev and QA `#debug` without a transport |
@@ -21,7 +22,7 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 
 | Card | Branch | Owner |
 |---|---|---|
-| **R1: Tech tree audit** | `feat/tree-audit` | Claude |
+| **R2: Step-by-step progression** | `feat/tree-progression` | Claude |
 
 ## 🚦 Next up
 
