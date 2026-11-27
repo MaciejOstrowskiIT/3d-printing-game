@@ -15,7 +15,7 @@ for (const { locale, price, sales, input, expected, increase, decrease } of [
       await page.goto('/#debug');
       await page.waitForFunction(() => Boolean(window.__drk));
       await page.evaluate(save => window.__drk!.load(save), { ...createState(), goal: 1, total: 10 });
-      if (isMobile) await page.getByRole('tab', { name: sales, exact: true }).click();
+      if (isMobile) await page.locator('.dock').getByRole('button', { name: sales, exact: true }).click();
 
       const field = page.getByRole('textbox', { name: price });
       await field.fill(input);

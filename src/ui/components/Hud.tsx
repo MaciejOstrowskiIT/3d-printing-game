@@ -14,6 +14,7 @@ import { FundsSparkline } from './hud/fundsSparkline';
 import { NoteToasts, NotificationPanel, NotificationsButton } from './hud/notifications';
 import { FilamentPanel, StockPanel } from './hud/panels';
 import { Tabs, useResearchUnlocked } from './hud/tabs';
+import { onTablistKey } from '../tablist';
 
 function PlaytimeChip() {
   const total = useS(s => Math.floor(s.priorPlay + s.play));
@@ -30,9 +31,16 @@ export function Hud() {
   const hud = useRef<HTMLElement>(null);
   const [pop, setPop] = useState<{ id: PopId; left: number } | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout>>();
-  const close = () => { clearTimeout(timer.current); setPop(null); };
+  // The chip that opened the panel: focus goes back to it when the panel closes from inside (Escape, the × button).
+  const opener = useRef<HTMLElement | null>(null);
+  const close = () => {
+    clearTimeout(timer.current);
+    if (document.activeElement?.closest('.hud-pop')) opener.current?.focus();
+    setPop(null);
+  };
   const show = (id: PopId, el: HTMLElement) => {
     clearTimeout(timer.current);
+    opener.current = el;
     const bar = hud.current?.getBoundingClientRect(), chip = el.getBoundingClientRect();
     if (!bar) return;
     const width = Math.min(id === 'funds' ? 640 : id === 'notif' ? 440 : 320, bar.width - 16);
@@ -62,8 +70,9 @@ export function Hud() {
   }, [request]);
   return (
     <>
-    <nav class="hud" ref={hud}>
-      <div class="chips">
+    <nav class="hud" ref={hud} aria-label={t('hudNav')}>
+      {/* In space no chip opens a panel; the strip can still scroll sideways, so it takes the focus itself. */}
+      <div class="chips" tabIndex={v.sp ? 0 : undefined} role={v.sp ? 'group' : undefined} aria-label={v.sp ? t('hudNav') : undefined}>
         <Chip show={!v.sp && v.g >= 1} big label={t('funds')} value={<CountUp value={v.zl} format={money} />} pop={control} popId="funds"
           sub={<>{(v.earn > 0 ? '+' : '') + t('moneyRate', money(v.earn))}<FundsSparkline /></>}><GainFloats /></Chip>
         <Chip show={v.g >= 1} label={t('stock')} value={<CountUp value={v.inv} format={countText} />} pop={v.sp ? undefined : control} popId="stock" />
@@ -77,11 +86,12 @@ export function Hud() {
         <PlaytimeChip />
       </div>
       <div class="hud-notif"><NotificationsButton pop={control} /></div>
-      <div class="hud-tabs"><div class="tabs" role="tablist"><Tabs /></div></div>
+      <div class="hud-tabs"><div class="tabs" role="tablist" aria-label={t('tabsNav')} onKeyDown={onTablistKey}><Tabs /></div></div>
       <NoteToasts hidden={pop?.id === 'notif'} />
       {pop && (
-        <div class={'hud-pop pop-' + pop.id} role="dialog" aria-label={t(pop.id === 'funds' ? 'statsTitle' : pop.id === 'stock' ? 'popStock' : pop.id === 'notif' ? 'notifTitle' : 'popFil')}
-          style={{ left: pop.left + 'px' }} onPointerEnter={() => clearTimeout(timer.current)} onPointerLeave={e => { if (e.pointerType === 'mouse') control.hideSoon(); }}>
+        <div class={'hud-pop pop-' + pop.id} role="dialog" tabIndex={-1} aria-label={t(pop.id === 'funds' ? 'statsTitle' : pop.id === 'stock' ? 'popStock' : pop.id === 'notif' ? 'notifTitle' : 'popFil')}
+          style={{ left: pop.left + 'px' }} onPointerEnter={() => clearTimeout(timer.current)} onPointerLeave={e => { if (e.pointerType === 'mouse') control.hideSoon(); }}
+          onFocusOut={e => { const to = e.relatedTarget as HTMLElement | null; if (to && !to.closest('.hud-pop, .chip.has-pop')) close(); }}>
           <button class="pop-x" aria-label={t('popClose')} onClick={close}>×</button>
           {pop.id === 'funds' ? <WorkshopStats /> : pop.id === 'stock' ? <StockPanel /> : pop.id === 'notif' ? <NotificationPanel /> : <FilamentPanel />}
         </div>

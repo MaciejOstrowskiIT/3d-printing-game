@@ -24,7 +24,7 @@
 .stats-crosshair{stroke:var(--mute);stroke-dasharray:2 4;opacity:.75}
 .stats-line{fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 .stats-in{color:var(--acc)}
-.stats-out{color:var(--or)}
+.stats-out{color:var(--orT)}
 .stats-line.stats-in,.stats-line.stats-out{stroke:currentColor}
 .stats-line.stats-out{stroke-dasharray:5 4}
 .stats-points button{position:absolute;inset-block:0;min-width:0;padding:0;border:0;border-radius:6px;background:transparent}

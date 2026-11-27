@@ -5,6 +5,7 @@ import { has } from '../../../core/state';
 import { fmt, li, money, prefs, reducedMotion, t } from '../../i18n';
 import { act, game, ui, useS } from '../../store';
 import { CardHead } from '../common';
+import { onTablistKey } from '../../tablist';
 
 export function costText(n: TreeNode) {
   const c = n.ops ? [t('cOps', fmt(n.ops))] : [];
@@ -138,11 +139,11 @@ export function Tree() {
       </div>
       <p class="hint tree-hint">{t('tHint')}</p>
       {pages.length > 1 && (
-        <div class="tpages" role="tablist">
+        <div class="tpages" role="tablist" aria-label={t('tree')} onKeyDown={onTablistKey}>
           {pages.map(p => {
             const n = p.cols.reduce((a, c) => a + counts[c], 0);
             return (
-              <button key={p.i} role="tab" aria-selected={p.i === page.i} onClick={() => ui(s => { s.br = p.cols[0]; })}>
+              <button key={p.i} role="tab" aria-selected={p.i === page.i} tabIndex={p.i === page.i ? 0 : -1} onClick={() => ui(s => { s.br = p.cols[0]; })}>
                 {t((['tpMain', 'tpBack', 'tpQuantum'] as const)[p.i])}{n ? <span class="dot-in">{n}</span> : null}
               </button>
             );

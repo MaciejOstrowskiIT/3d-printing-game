@@ -12,7 +12,9 @@ import { SettingsDialog } from './SettingsDialog';
 import { Title } from './Title';
 import { End } from './End';
 import { Hud } from './Hud';
-import { Tabs, useBadges, useResearchUnlocked } from './hud/tabs';
+import { AlertDot, CountDot, Tabs, useBadges, useResearchUnlocked } from './hud/tabs';
+import { MAIN_PANEL_ID, tabId } from '../tablist';
+import { LogAnnouncer } from './side/logAnnouncer';
 import { Research } from './Research';
 import { AchievementsCard } from './Achievements';
 import { Side } from './Side';
@@ -24,28 +26,30 @@ const NavIcon = ({ d }: { d: string }) => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={d} /></svg>
 );
 
-/** Phone navigation: Production and Sales views of the Workshop, Print in the middle, Research. */
+/** Phone navigation: Production and Sales views of the Workshop, Print in the middle, Research. A navigation bar, not a
+ *  tablist (the Print button in the middle is an action): the current view is marked with `aria-current`. */
 function Dock() {
   const v = useS(s => ({ sp: s.ph === 2, tab: s.tab, sales: s.goal >= 1 }));
   const research = useResearchUnlocked();
   const b = useBadges();
-  if (v.sp) return <nav class="dock"><Tabs /></nav>;
+  if (v.sp) return <nav class="dock" aria-label={t('tabsNav')}><Tabs nav /></nav>;
   const go = (view: 'p' | 's') => { mobileView.value = view; ui(s => { s.tab = 'w'; }); window.scrollTo({ top: 0 }); };
   const on = (view: 'p' | 's') => v.tab === 'w' && (mobileView.value === view || (!v.sales && view === 'p'));
+  const current = (yes: boolean) => (yes ? ('page' as const) : undefined);
   return (
-    <nav class="dock nav4" role="tablist">
-      <button class="tab" role="tab" aria-selected={on('p')} onClick={() => go('p')}>
-        <NavIcon d="M4 4h16v16H4zM8 15h8M10 4v6h4V4" /><span>{t('navProd')}</span>{b.workshop && <span class="dot">!</span>}
+    <nav class="dock nav4" aria-label={t('tabsNav')}>
+      <button class="tab" aria-current={current(on('p'))} onClick={() => go('p')}>
+        <NavIcon d="M4 4h16v16H4zM8 15h8M10 4v6h4V4" /><span>{t('navProd')}</span>{b.workshop && <AlertDot />}
       </button>
-      <button class="tab" role="tab" aria-selected={on('s')} disabled={!v.sales} onClick={() => go('s')}>
+      <button class="tab" aria-current={current(on('s'))} disabled={!v.sales} onClick={() => go('s')}>
         <NavIcon d="M4 20V10M10 20V4M16 20v-7M22 20H2" /><span>{t('navSales')}</span>
       </button>
       <PrintButton short />
-      <button class="tab" role="tab" aria-selected={v.tab === 'r'} disabled={!research} onClick={() => { ui(s => { s.tab = 'r'; }); window.scrollTo({ top: 0 }); }}>
+      <button class="tab" aria-current={current(v.tab === 'r')} disabled={!research} onClick={() => { ui(s => { s.tab = 'r'; }); window.scrollTo({ top: 0 }); }}>
         <NavIcon d="M6 3.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 1 0 0-5M18 3.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 1 0 0-5M12 15.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 1 0 0-5M7.5 8l3.5 8M16.5 8 13 16" />
-        <span>{t('tabR')}</span>{b.research > 0 && <span class="dot" key={b.research}>{b.research}</span>}
+        <span>{t('tabR')}</span>{b.research > 0 && <CountDot n={b.research} />}
       </button>
-      <button class="tab" role="tab" aria-selected={v.tab === 'a'} onClick={() => { ui(s => { s.tab = 'a'; }); window.scrollTo({ top: 0 }); }}>
+      <button class="tab" aria-current={current(v.tab === 'a')} onClick={() => { ui(s => { s.tab = 'a'; }); window.scrollTo({ top: 0 }); }}>
         <NavIcon d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z" />
         <span>{t('tabA')}</span>
       </button>
@@ -77,7 +81,8 @@ export function App() {
   useEffect(() => { document.documentElement.lang = lang; document.title = t('title') + (lang === 'pl' ? ' — gra' : ' — game'); }, [lang]);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      const editing = document.activeElement?.matches('button:enabled, input, textarea, select, [contenteditable]:not([contenteditable="false"])');
+      // Space on a focused control activates that control instead (the HUD chips are role="button" elements).
+      const editing = document.activeElement?.matches('button:enabled, [role="button"], input, textarea, select, [contenteditable]:not([contenteditable="false"])');
       if (screen.value !== 'game' || dialog.value) return;
       if (e.code === 'Space' && !e.repeat && !editing && !e.altKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); act('print'); }
     };
@@ -93,14 +98,17 @@ export function App() {
         <Side />
         <div class="main">
           <Hud />
-          <div class="content">
+          <main class="content">
             <OnboardingHint />
-            {tab === 'r' ? <Research /> : tab === 'a' ? <AchievementsCard /> : <Workshop />}
+            <div id={MAIN_PANEL_ID} role="tabpanel" aria-labelledby={tabId(tab)}>
+              {tab === 'r' ? <Research /> : tab === 'a' ? <AchievementsCard /> : <Workshop />}
+            </div>
             <Settings class="mset" />
-          </div>
+          </main>
         </div>
       </div>
       <Dock />
+      <LogAnnouncer />
       <AwayDialog />
       <NotificationToasts />
       <Toasts />

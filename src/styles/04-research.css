@@ -35,7 +35,7 @@ button.rqchip{cursor:pointer}
 .node b{font-size:14.5px;font-weight:600}
 .node small{font-size:12.5px;color:var(--mute)}
 .node em{font-style:normal;font-size:12.5px;font-weight:600;margin-top:3px}
-.node .rq{color:var(--orD);margin-top:2px}.node .rq:empty{display:none}
+.node .rq{color:var(--orT);margin-top:2px}.node .rq:empty{display:none}
 .node:disabled{opacity:1;cursor:default}
 .node.need{border-style:dashed}
 .node.avail{border-color:color-mix(in srgb,var(--acc) 45%,var(--line))}

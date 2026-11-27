@@ -38,5 +38,9 @@ export const hudTexts = {
   tabW: 'Warsztat',
   tabR: 'Rozwój',
   tabA: 'Osiągnięcia',
+  tabsNav: 'Widoki gry',
+  hudNav: 'Stan warsztatu',
+  tabAlert: '(wymaga uwagi)',
+  tabReady: '(gotowe: {0})',
   computer: 'Komputer',
 };

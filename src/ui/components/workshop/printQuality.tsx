@@ -17,8 +17,8 @@ export function PrintQuality() {
         {v.dryer ? t('qualityInstalled') : <BuyButton action="dryer" cost={BAL.filamentDryerCost} have={v.money} label={money(BAL.filamentDryerCost)} />}
       </Item>
       <Item name={t('precisionTitle')} sub={t('precisionHint', Math.round((1 - BAL.precisionSpeed) * 100), Math.round(BAL.precisionPremium * 100))}>
-        <button aria-label={t('precisionTitle')} aria-pressed={v.precision} onClick={() => act('precision')}>
-          {t(v.precision ? 'qualityOn' : 'qualityOff')}
+        <button aria-pressed={v.precision} onClick={() => act('precision')}>
+          <span class="sr-only">{t('precisionTitle')}: </span>{t(v.precision ? 'qualityOn' : 'qualityOff')}
         </button>
       </Item>
     </section>

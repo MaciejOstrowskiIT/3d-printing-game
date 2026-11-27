@@ -16,3 +16,4 @@
 @import './14-settings.css'; /* Settings dialog and the reduced-motion switch (wins over everything above) */
 @import './15-notifications.css'; /* Notification centre: HUD button and panel, clickable toasts */
 @import './16-end.css'; /* End screen and run summary (stats, goals timeline, share text, patent preview) */
+@import './17-a11y.css'; /* Screen-reader-only text, focus rings for non-button controls, forced colours */

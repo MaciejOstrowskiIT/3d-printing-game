@@ -59,7 +59,7 @@ for (const { locale, sales, fast, growth } of [
       const advice = card.locator('.sales-flow');
       const load = async (save: typeof state) => {
         await page.evaluate(save => window.__drk!.load(save), save);
-        if (isMobile) await page.getByRole('tab', { name: sales, exact: true }).click();
+        if (isMobile) await page.locator('.dock').getByRole('button', { name: sales, exact: true }).click();
       };
 
       await load(state);

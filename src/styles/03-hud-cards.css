@@ -7,7 +7,7 @@
 .tabs{display:flex;gap:4px;background:var(--sub);border:1px solid var(--line);border-radius:12px;padding:3px}
 .tab{position:relative;border:0;background:none;min-height:36px;padding:4px 14px}
 .tab[aria-selected=true]{background:var(--card);box-shadow:var(--sh)}
-.dot{position:absolute;top:-5px;right:-5px;background:var(--or);color:#fff;font-size:12px;min-width:20px;height:20px;border-radius:10px;display:grid;place-items:center;padding:0 5px;line-height:1}
+.dot{position:absolute;top:-5px;right:-5px;background:var(--or);color:var(--onOr);font-size:12px;min-width:20px;height:20px;border-radius:10px;display:grid;place-items:center;padding:0 5px;line-height:1}
 
 .main{min-width:0}
 .content{padding:18px 20px 30px;max-width:1180px}
@@ -56,7 +56,7 @@ h2{font-size:21px;margin:0;line-height:1.1}
 .it{flex:1}.it b{display:block;font-weight:600;line-height:1.25}.it small{color:var(--mute);font-size:13px}
 .buy{min-width:118px;padding:6px 12px;font:700 16px "Barlow Condensed",sans-serif;font-variant-numeric:tabular-nums;white-space:nowrap;background:linear-gradient(90deg,var(--orS) var(--pp,0%),var(--card) var(--pp,0%))}
 .buy:disabled{opacity:1;color:var(--mute)}
-.buy.ok{background:var(--or);border-color:var(--or);color:#fff}
+.buy.ok{background:var(--or);border-color:var(--or);color:var(--onOr)}
 .buy.ok:hover{background:var(--orD);border-color:var(--orD)}
 .colors{margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--sub)}
 .crow{display:flex;justify-content:space-between;gap:8px;font-size:13.5px}

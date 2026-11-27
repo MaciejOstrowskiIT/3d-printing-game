@@ -2,12 +2,12 @@
 .tpages{display:flex;gap:6px;margin:4px 0 10px}
 .tpages button{display:flex;align-items:center;gap:6px}
 .tpages button[aria-selected="true"]{background:var(--ink);color:var(--card);border-color:var(--ink)}
-.tpages .dot-in{background:var(--or);color:#fff;border-radius:999px;font-size:12px;min-width:20px;padding:1px 6px;line-height:18px;text-align:center}
+.tpages .dot-in{background:var(--or);color:var(--onOr);border-radius:999px;font-size:12px;min-width:20px;padding:1px 6px;line-height:18px;text-align:center}
 /* Research preview in the Workshop: the next few nodes side by side, with progress and a direct unlock button. */
 .rprev{margin-bottom:14px}
 .rprev .rp-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
 .rprev .rp-head h2{display:flex;align-items:center;gap:8px;margin:0}
-.rprev .rp-badge{white-space:nowrap;font-variant-numeric:tabular-nums;font:600 12px Barlow,sans-serif;color:#fff;background:var(--or);border-radius:999px;padding:2px 9px}
+.rprev .rp-badge{white-space:nowrap;font-variant-numeric:tabular-nums;font:600 12px Barlow,sans-serif;color:var(--onOr);background:var(--or);border-radius:999px;padding:2px 9px}
 .rprev .rp-badge[aria-hidden=true]{visibility:hidden}
 .rprev .rp-all{min-height:32px;padding:4px 12px;background:transparent;font-size:14px}
 .rprev .rp-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
