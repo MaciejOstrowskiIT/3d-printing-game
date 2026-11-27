@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AUTOMATIONS, BRANCHES, NODE, prereqs, TREE, TREE_PAGES } from '../src/content/tree';
+import { AUTOMATIONS, BRANCHES, NODE, prereqs, QUANTUM_BRANCH, TREE, TREE_PAGES } from '../src/content/tree';
 import { mod } from '../src/core/mods';
 import { createState, type GameState } from '../src/core/state';
 import { validSave } from '../src/core/saveValidation';
@@ -53,7 +53,7 @@ describe('research tree registry', () => {
     expect(roots.length).toBeLessThanOrEqual(BRANCHES.length);
     // A gate beyond compute: a stage condition, money or figurines, or several prerequisites.
     for (const n of TREE.filter(n => prereqs(n).length)) {
-      const gated = !!n.need || !!n.zl || !!n.wyd || prereqs(n).length > 1;
+      const gated = !!n.need || !!n.qp || !!n.zl || !!n.wyd || prereqs(n).length > 1;
       expect(gated, `${n.id} opens as soon as its prerequisite is bought and compute allows`).toBe(true);
     }
   });
@@ -117,7 +117,7 @@ describe('research tree registry', () => {
 
   it.each(TREE.map(n => [n.id, n] as const))('%s has texts, a cost and an effect', (_, n) => {
     for (const pair of [n.n, n.d]) { expect(pair).toHaveLength(2); pair.forEach(x => expect(x.trim()).not.toBe('')); }
-    expect(n.ops).toBeGreaterThan(0);
+    expect(n.ops + (n.qp ?? 0)).toBeGreaterThan(0);
     expect(!!n.fx || Object.keys(n.mods ?? {}).length > 0, 'needs fx or mods').toBe(true);
     for (const [k, v] of Object.entries(n.mods ?? {})) {
       expect(MOD_KEYS).toContain(k);
@@ -131,7 +131,8 @@ describe('research tree registry', () => {
   it('every node gets researched in a full bot game', () => {
     let last: GameState | undefined;
     playthrough(1, 4, 0.25, undefined, s => { last = s; });
-    expect(TREE.filter(n => !last!.done.includes(n.id)).map(n => n.id)).toEqual([]);
+    // The bot never builds the quantum computer; its optional branch is covered in quantumBranch.test.ts.
+    expect(TREE.filter(n => n.col !== QUANTUM_BRANCH && !last!.done.includes(n.id)).map(n => n.id)).toEqual([]);
   });
 });
 

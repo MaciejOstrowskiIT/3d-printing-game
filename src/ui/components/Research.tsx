@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { BRANCHES, NODE, prereqs, TREE, TREE_PAGES, type TreeNode } from '../../content/tree';
 import { freePts, opsCap, opsRate, repNext, repPrev } from '../../core/formulas';
-import { nextResearch, nodeStatus, nodeZl } from '../../systems/research';
+import { nextResearch, nodeShown, nodeStatus, nodeZl } from '../../systems/research';
 import { has } from '../../core/state';
 import { fmt, li, money, prefs, t } from '../i18n';
 import { act, game, ui, useS } from '../store';
@@ -98,7 +98,8 @@ export function ResearchPreview() {
 }
 
 function costText(n: TreeNode) {
-  const c = [t('cOps', fmt(n.ops))];
+  const c = n.ops ? [t('cOps', fmt(n.ops))] : [];
+  if (n.qp) c.push(t('cQp', fmt(n.qp)));
   if (n.zl) c.push(money(nodeZl(game.s, n)));
   if (n.wyd) c.push(t('cFig', fmt(n.wyd)));
   return c.join(' · ');
@@ -190,7 +191,7 @@ function Tree() {
   const doneKey = useS(s => s.done.join(','));
   const ready = useS(s => BRANCHES.map((_, c) => TREE.filter(n => n.col === c && nodeStatus(s, n) === 'ready').length).join(','));
   const counts = ready.split(',').map(Number);
-  const allVisible = TREE.filter(n => nodeStatus(game.s, n) !== 'locked');
+  const allVisible = TREE.filter(n => nodeStatus(game.s, n) !== 'locked' && nodeShown(game.s, n));
   // Pages group branches (4 per page); a page shows up once one of its nodes is visible.
   const pages = TREE_PAGES.map((cols, i) => ({ i, cols: cols.filter(c => allVisible.some(n => n.col === c)) })).filter(p => p.cols.length);
   const page = pages.find(p => p.cols.includes(selectedBranch)) ?? pages[0];
@@ -233,7 +234,7 @@ function Tree() {
             const n = p.cols.reduce((a, c) => a + counts[c], 0);
             return (
               <button key={p.i} role="tab" aria-selected={p.i === page.i} onClick={() => ui(s => { s.br = p.cols[0]; })}>
-                {t(p.i === 0 ? 'tpMain' : 'tpBack')}{n ? <span class="dot-in">{n}</span> : null}
+                {t((['tpMain', 'tpBack', 'tpQuantum'] as const)[p.i])}{n ? <span class="dot-in">{n}</span> : null}
               </button>
             );
           })}

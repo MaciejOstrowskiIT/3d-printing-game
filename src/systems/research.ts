@@ -1,16 +1,20 @@
 import { bookCash } from './workshopStats';
 import { GOALS } from '../content/goals';
-import { NODE, TREE, type TreeNode } from '../content/tree';
+import { NODE, QUANTUM_BRANCH, TREE, type TreeNode } from '../content/tree';
 import { log, sfx, type Ctx } from '../core/ctx';
 import { freePts, opsCap, opsRate, repNext } from '../core/formulas';
 import { has, patLvl, type GameState } from '../core/state';
+import { quantumVisible } from './quantum';
 
 export type NodeStatus = 'done' | 'locked' | 'need' | 'ready' | 'avail';
 
 /** Money cost of a node, after patents (Investor discounts liftoff). */
 export const nodeZl = (s: GameState, n: TreeNode) => (n.zl ?? 0) * (n.liftoff ? 1 - 0.15 * patLvl(s, 'investor') : 1);
 
-export const canBuy = (s: GameState, n: TreeNode) => s.ops >= n.ops && s.zl >= nodeZl(s, n) && s.inv >= (n.wyd ?? 0);
+export const canBuy = (s: GameState, n: TreeNode) => s.ops >= n.ops && s.qp >= (n.qp ?? 0) && s.zl >= nodeZl(s, n) && s.inv >= (n.wyd ?? 0);
+
+/** Quantum nodes stay out of sight until the machine is bought or within reach of memory. */
+export const nodeShown = (s: GameState, n: TreeNode) => n.col !== QUANTUM_BRANCH || quantumVisible(s);
 
 export function nodeStatus(s: GameState, n: TreeNode): NodeStatus {
   if (has(s, n.id)) return 'done';
@@ -23,6 +27,7 @@ export function buyNode(s: GameState, ctx: Ctx, id: string, logKey = 'node'): bo
   const n = NODE[id];
   if (!n || nodeStatus(s, n) !== 'ready') return false;
   s.ops -= n.ops;
+  s.qp -= n.qp ?? 0;
   bookCash(s, 'other', nodeZl(s, n));
   s.inv -= n.wyd ?? 0;
   s.done.push(n.id);
@@ -95,7 +100,7 @@ export function nextResearch(s: GameState, limit = 3): ResearchPick[] {
       need: n.need ? Math.min(1, n.need.value(s) / n.need.target) : 1,
       memoryShort: n.ops > opsCap(s),
     };
-  }).filter(p => order[p.status] < 9 && (s.ph === 2 || p.node.col !== 3));
+  }).filter(p => order[p.status] < 9 && (s.ph === 2 || p.node.col !== 3) && nodeShown(s, p.node));
   const closeness = (p: ResearchPick) => (p.status === 'need' ? p.need : Math.min(p.ops, p.zl));
   return picks.sort((a, b) => order[a.status] - order[b.status] || closeness(b) - closeness(a)).slice(0, limit);
 }
