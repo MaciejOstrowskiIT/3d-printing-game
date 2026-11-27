@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { BRANCHES, NODE, prereqs, TREE, TREE_PAGES, type TreeNode } from '../../../content/tree';
 import { nodeShown, nodeStatus, nodeZl } from '../../../systems/research';
 import { has } from '../../../core/state';
-import { fmt, li, money, prefs, t } from '../../i18n';
+import { fmt, li, money, prefs, reducedMotion, t } from '../../i18n';
 import { act, game, ui, useS } from '../../store';
 import { CardHead } from '../common';
 
@@ -122,7 +122,7 @@ export function Tree() {
     if (!jump) return;
     const el = document.getElementById('n-' + jump) as HTMLButtonElement | null;
     if (!el?.offsetParent) return;
-    el.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    el.scrollIntoView({ block: 'center', behavior: reducedMotion() ? 'auto' : 'smooth' });
     (el.disabled ? el.parentElement : el)?.focus({ preventScroll: true });
     setJump(null);
   }, [jump, selectedBranch, doneKey]);

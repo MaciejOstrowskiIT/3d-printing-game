@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { MODELS } from '../../content/models';
 import { CASH_KINDS, expenses, income, newPeriod, PERIOD_COUNT, PERIOD_SECONDS, periodIndex, type CashPeriod } from '../../systems/workshopStats';
-import { fmt, li, money, t } from '../i18n';
+import { fmt, li, money, reducedMotion, t } from '../i18n';
 import { useS } from '../store';
 
 const signedMoney = (value: number) => value > 0 ? '+' + money(value) : money(value);
@@ -49,7 +49,7 @@ function useChartScroll(range: PlotRange) {
 
     cancelAnimationFrame(request.current);
     if (!from.live || !live || end !== from.end + 1 || start < from.start || start > from.end ||
-        start > from.start + 1 || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        start > from.start + 1 || reducedMotion()) {
       setFrame(undefined);
       return;
     }

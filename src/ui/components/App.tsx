@@ -1,12 +1,13 @@
 import { useEffect } from 'preact/hooks';
 import { HINTS } from '../../content/hints';
-import { fmt, li, playtime, prefs, t } from '../i18n';
+import { fmt, li, playtime, prefs, reducedMotion, t } from '../i18n';
 import { act, dialog, mobileView, resetGame, screen, ui, useS } from '../store';
 import { Toasts } from './Achievements';
 import { AlphaBadge } from './AlphaBadge';
 import { AwayDialog } from './AwayDialog';
 import { ReportDialog } from './ReportDialog';
 import { SaveDialog } from './SaveDialog';
+import { SettingsDialog } from './SettingsDialog';
 import { Title } from './Title';
 import { PrestigeButton } from './Prestige';
 import { Hud } from './Hud';
@@ -73,7 +74,7 @@ function End() {
 function OnboardingHint() {
   const active = useS(s => s.hints.active);
   const hint = HINTS.find(item => item.id === active);
-  if (!hint) return null;
+  if (!hint || prefs.value.hints === false) return null;
   return (
     <div class="onboarding-hint">
       <span role="status">{hint.text[li()]}</span>
@@ -86,6 +87,9 @@ export function App() {
   const tab = useS(s => s.tab);
   const sp = useS(s => s.ph === 2);
   const lang = prefs.value.lang;
+  const motionReduced = reducedMotion();
+  // Settings → Reduce motion (or the system setting) switches every animation off through one CSS hook.
+  useEffect(() => { document.documentElement.dataset.motion = motionReduced ? 'reduced' : 'full'; }, [motionReduced]);
 
   useEffect(() => { document.body.classList.toggle('space', sp); }, [sp]);
   useEffect(() => { document.documentElement.lang = lang; document.title = t('title') + (lang === 'pl' ? ' — gra' : ' — game'); }, [lang]);
@@ -99,7 +103,7 @@ export function App() {
     return () => document.removeEventListener('keydown', onKey);
   }, []);
 
-  if (screen.value === 'title') return (<><Title /><SaveDialog /><ReportDialog /></>);
+  if (screen.value === 'title') return (<><Title /><SaveDialog /><SettingsDialog /><ReportDialog /></>);
 
   return (
     <>
@@ -119,6 +123,7 @@ export function App() {
       <Toasts />
       <End />
       <SaveDialog />
+      <SettingsDialog />
       <ReportDialog />
       <AlphaBadge />
     </>

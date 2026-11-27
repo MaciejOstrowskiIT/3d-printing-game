@@ -29,7 +29,7 @@ export function play(k: Sfx) {
       o.type = 'triangle';
       o.frequency.value = f;
       g.gain.setValueAtTime(0.0001, t0);
-      g.gain.exponentialRampToValueAtTime(v, t0 + 0.01);
+      g.gain.exponentialRampToValueAtTime(Math.max(0.0002, v * (prefs.value.volume ?? 1)), t0 + 0.01);
       g.gain.exponentialRampToValueAtTime(0.0001, t0 + d);
       o.connect(g).connect(ac.destination);
       o.start(t0);

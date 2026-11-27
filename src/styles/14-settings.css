@@ -1,0 +1,15 @@
+.gear{min-width:40px;padding-left:10px;padding-right:10px;font-size:16px;line-height:1}
+.settings-dialog .modal-box{display:grid;gap:14px}
+.set-row{display:grid;gap:6px;padding-top:10px;border-top:1px solid var(--line)}
+.set-row:first-of-type{border-top:0;padding-top:0}
+.set-check{display:flex;align-items:center;gap:10px;font-weight:600}
+.set-check input{width:20px;height:20px;accent-color:var(--acc)}
+.set-range{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;color:var(--mute)}
+.set-range output{font-variant-numeric:tabular-nums;min-width:3.2ch;text-align:right;color:var(--ink)}
+.set-choice{display:flex;flex-wrap:wrap;gap:6px}
+.set-choice button{display:grid;gap:0;text-align:left}
+.set-choice button small{color:var(--mute);font-weight:500}
+.set-choice button[aria-pressed=true]{border-color:var(--acc);background:var(--accS)}
+.set-row .hint{margin:0}
+/* Settings → Reduce motion (or the system setting): one switch for every animation and transition. */
+:root[data-motion=reduced] *,:root[data-motion=reduced] *::before,:root[data-motion=reduced] *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
