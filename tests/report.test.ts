@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { REPORT_COOLDOWN_MS, createReporter } from '../src/platform/report';
+import { REPORT_COOLDOWN_MS, createReporter, filterReportText } from '../src/platform/report';
 import { createUmami, noAnalytics, type PageContext } from '../src/platform/analytics';
 
 const page = (): PageContext => ({ hostname: 'h', url: '/', title: 't', referrer: '', language: 'pl', screen: '1x1' });
@@ -14,11 +14,22 @@ function setup(endpoint?: string) {
 }
 
 describe('bug reporter', () => {
+  it('masks common Polish and English profanity without matching parts of normal words', () => {
+    expect(filterReportText('Kurwa, the button is broken, you idiot!')).toBe('*****, the button is broken, you *****!');
+    expect(filterReportText('The button prints a class assignment.')).toBe('The button prints a class assignment.');
+  });
+
   it('posts the description and context to the endpoint', () => {
     const { r, posts } = setup('https://x.example.com/report');
     expect(r.send('  the counter shows NaN after printing  ', { build: '1.0', min: 4 })).toEqual({ ok: true });
     expect(posts[0].url).toBe('https://x.example.com/report');
     expect(posts[0].body).toMatchObject({ type: 'bug_report', description: 'the counter shows NaN after printing', build: '1.0', min: 4 });
+  });
+
+  it('masks offensive words before sending a report', () => {
+    const { r, posts } = setup('https://x.example.com/report');
+    r.send('Kurwa, the broken button needs fixing.');
+    expect(posts[0].body.description).toBe('*****, the broken button needs fixing.');
   });
 
   it('falls back to an Umami event, splitting long text into 200-char parts', () => {

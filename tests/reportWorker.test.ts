@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fence, handle, issueFrom, originAllowed, parseReport, type Env } from '../infra/report-worker/src/index';
+import { fence, filterReportText, handle, issueFrom, originAllowed, parseReport, type Env } from '../infra/report-worker/src/index';
 
 const env: Env = { GITHUB_TOKEN: 't0ken', GITHUB_REPO: 'me/game', ALLOWED_ORIGINS: 'https://me.github.io,*.crazygames.com' };
 const post = (body: unknown, origin = 'https://me.github.io') =>
@@ -8,6 +8,11 @@ const ghOk = (calls: { url: string; init: RequestInit }[]) =>
   (async (url: unknown, init?: RequestInit) => { calls.push({ url: String(url), init: init! }); return new Response('{}', { status: 201 }); }) as typeof fetch;
 
 describe('report worker', () => {
+  it('masks offensive words on the server while preserving the technical report', () => {
+    expect(filterReportText('Kurwa, button is broken, idiot!')).toBe('*****, button is broken, *****!');
+    expect(parseReport({ description: 'Fuck, counter shows NaN after print' })?.description).toBe('****, counter shows NaN after print');
+  });
+
   it('opens a labelled issue for a valid report', async () => {
     const calls: { url: string; init: RequestInit }[] = [];
     const res = await handle(post({ description: 'Counter shows NaN after printing', build: '0.5.0+abc', min: 12, evil: 'x' }), env, ghOk(calls));

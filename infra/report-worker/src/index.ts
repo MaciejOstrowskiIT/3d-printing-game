@@ -15,6 +15,21 @@ const MAX_BODY = 4096;
 const MAX_TEXT = 600;
 const MIN_TEXT = 10;
 const CONTEXT_KEYS = ['lang', 'build', 'min', 'line', 'goal', 'phase', 'view', 'at'] as const;
+const BLOCKED_WORDS = [
+  'kurwa', 'kurwy', 'kurwą', 'kurwo', 'kurwie', 'kurw', 'chuj', 'chujowy', 'chuje', 'chujem',
+  'pizda', 'pizdy', 'pizdę', 'pizdo', 'pizdzie', 'pierdol', 'pierdolić', 'pierdoli', 'pierdolisz',
+  'jebac', 'jebać', 'jebany', 'jebana', 'jebane', 'jebie', 'skurwysyn', 'sukinsyn', 'dupek',
+  'fuck', 'fucking', 'fucked', 'fucker', 'shit', 'bullshit', 'bitch', 'bitchy', 'asshole',
+  'bastard', 'dickhead', 'motherfucker', 'cunt', 'retard', 'idiot', 'moron',
+];
+
+/** Masks common Polish and English profanity and insults while preserving report context. */
+export function filterReportText(text: string): string {
+  return BLOCKED_WORDS.reduce((filtered, word) => {
+    const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return filtered.replace(new RegExp(`(^|[^\\p{L}\\p{N}_])${escaped}(?=$|[^\\p{L}\\p{N}_])`, 'giu'), (_match, prefix: string) => prefix + '*'.repeat(word.length));
+  }, text);
+}
 
 export function originAllowed(origin: string | null, list?: string): boolean {
   const rules = (list ?? '').split(',').map(s => s.trim()).filter(Boolean);
@@ -43,7 +58,7 @@ export function parseReport(raw: unknown): Report | null {
   if (!raw || typeof raw !== 'object') return null;
   const o = raw as Record<string, unknown>;
   if (typeof o.description !== 'string') return null;
-  const description = o.description.replace(/\r\n?/g, '\n').trim().slice(0, MAX_TEXT);
+  const description = filterReportText(o.description.replace(/\r\n?/g, '\n').trim().slice(0, MAX_TEXT));
   if (description.length < MIN_TEXT) return null;
   const context: Report['context'] = {};
   for (const k of CONTEXT_KEYS) {

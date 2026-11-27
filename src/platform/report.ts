@@ -6,6 +6,21 @@ import type { Analytics, EventData } from './analytics';
 export const REPORT_COOLDOWN_MS = 15_000;
 export const REPORT_MIN = 10;
 export const REPORT_MAX = 600;
+const BLOCKED_WORDS = [
+  'kurwa', 'kurwy', 'kurwą', 'kurwo', 'kurwie', 'kurw', 'chuj', 'chujowy', 'chuje', 'chujem',
+  'pizda', 'pizdy', 'pizdę', 'pizdo', 'pizdzie', 'pierdol', 'pierdolić', 'pierdoli', 'pierdolisz',
+  'jebac', 'jebać', 'jebany', 'jebana', 'jebane', 'jebie', 'skurwysyn', 'sukinsyn', 'dupek',
+  'fuck', 'fucking', 'fucked', 'fucker', 'shit', 'bullshit', 'bitch', 'bitchy', 'asshole',
+  'bastard', 'dickhead', 'motherfucker', 'cunt', 'retard', 'idiot', 'moron',
+];
+
+/** Masks common Polish and English profanity and insults while keeping the report readable. */
+export function filterReportText(text: string): string {
+  return BLOCKED_WORDS.reduce((filtered, word) => {
+    const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return filtered.replace(new RegExp(`(^|[^\\p{L}\\p{N}_])${escaped}(?=$|[^\\p{L}\\p{N}_])`, 'giu'), (_match, prefix: string) => prefix + '*'.repeat(word.length));
+  }, text);
+}
 const KEY = 'drukarnia-report-at';
 
 export type ReportResult = { ok: true } | { ok: false; reason: 'short' | 'cooldown' | 'unavailable'; waitMs?: number };
@@ -42,7 +57,7 @@ export function createReporter(d: ReporterDeps): Reporter {
     enabled,
     wait,
     send(description, context = {}) {
-      const text = description.trim().slice(0, REPORT_MAX);
+      const text = filterReportText(description.trim().slice(0, REPORT_MAX));
       if (!enabled) return { ok: false, reason: 'unavailable' };
       if (text.length < REPORT_MIN) return { ok: false, reason: 'short' };
       const w = wait();
