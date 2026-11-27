@@ -3,7 +3,8 @@
 More than one agent works on this repo in parallel (Claude, Codex). Read this before you start, and check
 what is in flight on GitHub (see "In flight" below).
 
-Planned work and its order: `ROADMAP.md` (task board). Pick cards from "Next up" and move them as you go.
+Planned work: GitHub Issues (see `ROADMAP.md` for the labels and direction). Pick an unassigned `next-up` issue,
+assign yourself, and open the PR with `Closes #<issue>`.
 
 ## Rules
 - Code, comments, commits, PR titles and descriptions: **English**. Player-facing text: PL + EN.
