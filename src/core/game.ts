@@ -168,9 +168,11 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
     },
     load(next) { s = next; },
     reset(logKey = 'fresh') {
-      const priorPlay = s.priorPlay + s.play;
-      s = createState();
-      s.priorPlay = priorPlay;
+      const next = createState();
+      next.priorPlay = s.priorPlay + s.play;
+      next.priorCompletions = s.priorCompletions + Number(s.end);
+      if (s.ach.includes('threeCrowns')) next.ach.push('threeCrowns');
+      s = next;
       log(s, ctx, logKey);
     },
     on(fn) { listeners.add(fn); return () => listeners.delete(fn); },

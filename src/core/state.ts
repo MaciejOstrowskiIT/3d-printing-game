@@ -91,6 +91,8 @@ export interface GameState {
   priorPlay: number;
   /** Whether Self-replication has built a mining drone on this line. */
   autoDroneBuilt: boolean;
+  /** Finished games before the current production line. */
+  priorCompletions: number;
 }
 
 export const SAVE_VERSION = 7;
@@ -134,6 +136,7 @@ export const createState = (): GameState => ({
   manualWork: 0,
   priorPlay: 0,
   autoDroneBuilt: false,
+  priorCompletions: 0,
 });
 
 export const has = (s: GameState, id: string) => s.done.includes(id);

@@ -40,6 +40,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'half', n: ['Połowa pasa', 'Half the belt'], d: ['Przetwórz połowę pasa asteroid.', 'Process half of the asteroid belt.'], check: s => s.ph === 2 && s.mat <= s.mat0 / 2 },
   { id: 'sisyphus', n: ['Syzyf', 'Sisyphus'], d: ['Ukończ grę bez budowania dronów wydobywczych przez Samoreplikację.', 'Finish the game without Self-replication building any mining drones.'], check: s => s.end && !s.autoDroneBuilt },
   { id: 'line2', n: ['Druga linia', 'Second line'], d: ['Zacznij nową linię produkcyjną.', 'Start a new production line.'], check: s => s.meta.runs >= 1 },
+  { id: 'threeCrowns', n: ['Trzy Korony', 'Three Crowns'], d: ['Ukończ grę trzy razy.', 'Finish the game three times.'], check: s => s.priorCompletions + Number(s.end) >= 3 },
   { id: 'patents20', n: ['Kancelaria patentowa', 'Patent office'], d: ['Zdobądź łącznie 20 patentów.', 'Earn 20 patents in total.'], check: s => s.meta.earned >= 20 },
   { id: 'qspent', n: ['Kwantowy inwestor', 'Quantum investor'], d: ['Wydaj punkty kwantowe na pierwszy węzeł badań.', 'Spend quantum points on your first research node.'], check: s => s.done.some(id => !!NODE[id]?.qp) },
   { id: 'skywalker', n: ['SkyWalker', 'SkyWalker'], d: ['Ukończ grę w mniej niż 30 minut aktywnej gry.', 'Finish the game in under 30 minutes of active play.'], check: s => s.end && s.play > 0 && s.play < 30 * 60 },
