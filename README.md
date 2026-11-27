@@ -161,3 +161,5 @@ To add a print model, append an entry to `MODELS`: print time (`seconds`), `valu
 ## Balance
 
 The bot in `tests/bot.ts` finishes the game in about 78–89 minutes (liftoff after 42–52 min). A human plays slower, roughly 2–3 hours. `balance.sim.test.ts` keeps these times within the agreed range.
+
+**Game length knob:** `BAL.pace` in `content/balance.ts` stretches the whole game (1 = the numbers above, 50 = shipped, ~50× longer; the bot then needs ~70 h, a realistic line another 10× on top). It divides every flow rate: printers, clicks, demand, compute and space. Costs and goals stay put, so they feel proportionally higher. Real-time timers (events, offers, spool drift, boost) are untouched. Unit tests run at pace 1 (`tests/setup.ts`); the balance sim runs at `BAL.pace` and scales its thresholds.

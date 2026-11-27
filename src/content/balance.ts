@@ -1,6 +1,10 @@
 /** All balance numbers in one place. Change them here and the bot test in tests/balance.sim.test.ts
  *  shows right away how pacing is affected. */
 export const BAL = {
+  /** Global game length knob. 1 = the original pacing (bot finishes in ~1.5 h), 50 = a game 50× longer.
+   *  It divides every flow rate (printers, clicks, demand, compute, space), so money, research and the
+   *  goals that depend on them stretch together. Real-time timers (events, offers, spool drift) are untouched. */
+  pace: 50,
   startPrice: 5,
   startFilament: 1000,
   filamentPerFigurine: 20,
@@ -140,3 +144,8 @@ export const BAL = {
   quantumQpPerSecond: 0.02,        // per level, at full power (level 5 = 0.1/s = 360 QP per hour)
   quantumDraw: 10,                 // power per level, shared with the farms (garage 40, panel 25)
 } as const;
+
+/** Multiplier applied to flow rates: 1 / pace. A live binding, so setPace() takes effect everywhere. */
+export let SPEED = 1 / BAL.pace;
+/** Override the pace at runtime (tests and dev tools). The shipped value is BAL.pace. */
+export const setPace = (pace: number = BAL.pace) => { SPEED = 1 / pace; };

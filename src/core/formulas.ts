@@ -1,5 +1,5 @@
 import { premiumFor, stockPrice } from '../systems/inventory';
-import { BAL } from '../content/balance';
+import { BAL, SPEED } from '../content/balance';
 import { mod } from './mods';
 import { DEFAULT_MATERIAL, MATERIAL, materialDemand } from '../content/materials';
 import { MARKET_EVENT } from '../content/events';
@@ -46,7 +46,7 @@ export const modelDemand = (m: PrintModel) => m.value ** BAL.demandElasticity * 
 /** Figurines of work added by one click. */
 export const precisionSpeed = (s: GameState) => s.precision ? BAL.precisionSpeed : 1;
 export const realizedPrice = (s: GameState, id = s.mdl) => stockPrice(s, id) * (1 + premiumFor(s, id));
-export const clickPower = (s: GameState) => BAL.clickWork * (1 + BAL.clickStep * s.clk) * precisionSpeed(s) * mod(s, 'click') / (s.slow || 1);
+export const clickPower = (s: GameState) => BAL.clickWork * (1 + BAL.clickStep * s.clk) * precisionSpeed(s) * mod(s, 'click') * SPEED / (s.slow || 1);
 /** Print time of one piece of a model in seconds, as the player sees it (longer on a realistic line or in precision mode). */
 export const printSeconds = (s: GameState, m: PrintModel) => m.seconds * (s.slow || 1) / precisionSpeed(s);
 export const isRealistic = (s: GameState) => (s.slow || 1) > 1;
@@ -78,10 +78,10 @@ export const demand = (s: GameState, m = model(s), price = s.price) =>
   (1 + 0.15 * patLvl(s, 'brand')) *
   marketMul(s, 'demand', m.id) *
   modelDemand(m) * materialDemand(material(s), m.id) *
-  mod(s, 'demand') * hard(s, BAL.realisticDemandMul);
+  mod(s, 'demand') * hard(s, BAL.realisticDemandMul) * SPEED;
 
 export const boostMul = (s: GameState) => (s.boostT > 0 ? BAL.boostMultiplier : 1);
-export const rateBase = (s: GameState) => (s.auto + s.farm * BAL.farmPrinters * eff(s)) * s.spd * boostMul(s) * (1 + 0.15 * patLvl(s, 'speed')) * precisionSpeed(s) * hard(s, BAL.realisticSpeedMul) / (s.slow || 1) * mod(s, 'speed');
+export const rateBase = (s: GameState) => (s.auto + s.farm * BAL.farmPrinters * eff(s)) * s.spd * boostMul(s) * (1 + 0.15 * patLvl(s, 'speed')) * precisionSpeed(s) * hard(s, BAL.realisticSpeedMul) * SPEED / (s.slow || 1) * mod(s, 'speed');
 export const rate1 = (s: GameState) => rateBase(s) * (1 - s.brk);
 
 const repBase = (s: GameState) => BAL.repThreshold * 0.9 ** patLvl(s, 'fame') * mod(s, 'rep');
@@ -89,9 +89,9 @@ export const repNext = (s: GameState) => repBase(s) * (s.rep + 1) ** 2;
 export const repPrev = (s: GameState) => (s.rep ? repBase(s) * s.rep ** 2 : 0);
 export const freePts = (s: GameState) => s.rep - (s.proc + s.mem - 2);
 export const opsCap = (s: GameState) => s.mem * BAL.opsPerMemory * mod(s, 'opsCap');
-export const opsRate = (s: GameState) => s.proc * BAL.opsPerProcessor * (1 + 0.25 * patLvl(s, 'compute')) * mod(s, 'ops');
+export const opsRate = (s: GameState) => s.proc * BAL.opsPerProcessor * (1 + 0.25 * patLvl(s, 'compute')) * mod(s, 'ops') * SPEED;
 
 const patSpeed = (s: GameState) => 1 + 0.15 * patLvl(s, 'speed');
-export const mining = (s: GameState) => s.drones * BAL.droneMining * s.dMul * boostMul(s) * patSpeed(s) * mod(s, 'mining');
-export const fabCap = (s: GameState) => s.fabs * BAL.fabThroughput * s.fMul * boostMul(s) * patSpeed(s) * mod(s, 'fab');
+export const mining = (s: GameState) => s.drones * BAL.droneMining * s.dMul * boostMul(s) * patSpeed(s) * mod(s, 'mining') * SPEED;
+export const fabCap = (s: GameState) => s.fabs * BAL.fabThroughput * s.fMul * boostMul(s) * patSpeed(s) * mod(s, 'fab') * SPEED;
 export const spaceRate = (s: GameState) => Math.min(mining(s), fabCap(s)) * BAL.figurinesPerTon;
