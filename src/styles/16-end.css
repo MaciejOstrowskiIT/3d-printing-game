@@ -1,0 +1,34 @@
+/* End screen and run summary (ui/components/End.tsx, RunSummary.tsx); the stats also appear in the prestige card.
+   Surfaces mix currentColor so the same blocks read on the dark end overlay and on light or dark cards. */
+.end{display:flex;place-items:initial;overflow-y:auto;overscroll-behavior:contain;padding:24px 16px;background:#0d0c1ff7;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.end-box{margin:auto;width:100%;max-width:760px}
+.end-box>p{margin:6px auto 0;max-width:560px}
+.end .hint{color:color-mix(in srgb,currentColor 72%,transparent)}
+.end .end-actions{margin-top:12px}
+.end .end-actions button{margin:0}
+.run-block{margin-top:22px;text-align:left}
+.run-block h3{margin:0 0 8px;font-size:15px;letter-spacing:.02em}
+.run-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,132px),1fr));gap:8px;margin-top:10px}
+.run-stat{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:10px;text-align:left;
+  background:color-mix(in srgb,currentColor 7%,transparent);border:1px solid color-mix(in srgb,currentColor 14%,transparent);min-width:0}
+.run-stat span,.run-stat small{font-size:12.5px;opacity:.72}
+.run-stat b{font-size:18px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.run-cta{padding:14px;border-radius:12px;border:1.5px solid #e0a82e;background:color-mix(in srgb,#e0a82e 12%,transparent)}
+.run-cta .hint{margin-top:0}
+.run-next{margin-top:10px}
+.run-picks{list-style:none;margin:8px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:8px}
+.run-picks li{display:grid;grid-template-columns:1fr auto;gap:2px 8px;padding:8px 10px;border-radius:10px;background:color-mix(in srgb,currentColor 7%,transparent)}
+.run-picks small{grid-column:1;font-size:12.5px;opacity:.78}
+.run-picks em{grid-column:2;grid-row:1/span 2;align-self:center;font-style:normal;font-weight:700;color:light-dark(#8a5d00,#e0a82e);white-space:nowrap}
+.end .run-picks em{color:#f0b43c}
+.run-picks .lvl{color:inherit;opacity:.7;white-space:nowrap}
+.run-more{margin-top:6px}
+.run-timeline{list-style:none;margin:0;padding:0;columns:2 260px;column-gap:20px}
+.run-timeline li{display:flex;gap:10px;padding:5px 0;break-inside:avoid;border-bottom:1px solid color-mix(in srgb,currentColor 12%,transparent);font-size:14px}
+.run-timeline time{flex:0 0 auto;min-width:62px;font-variant-numeric:tabular-nums;opacity:.72}
+.run-share pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;user-select:text;font:13.5px/1.5 ui-monospace,Consolas,monospace;padding:10px 12px;border-radius:10px;
+  color:inherit;background:color-mix(in srgb,currentColor 7%,transparent);border:1px solid color-mix(in srgb,currentColor 18%,transparent)}
+.run-share-row{display:flex;align-items:center;gap:12px;margin-top:8px}
+.run-share-row button{margin:0}
+.run-share-row .hint{margin:0}
+.card.prestige .run-stats{margin-top:12px}

@@ -8,6 +8,7 @@ import { qualityTexts } from './en/quality';
 import { researchTexts } from './en/research';
 import { sideTexts } from './en/side';
 import { statsTexts } from './en/stats';
+import { summaryTexts } from './en/summary';
 import { workshopTexts } from './en/workshop';
 import { clients, causes } from './en/lists';
 import { logTexts } from './en/log';
@@ -23,6 +24,7 @@ export const en: Dict = {
   ...researchTexts,
   ...sideTexts,
   ...statsTexts,
+  ...summaryTexts,
   ...workshopTexts,
   L: logTexts,
   clients,

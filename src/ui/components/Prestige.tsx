@@ -3,9 +3,11 @@ import { BAL } from '../../content/balance';
 import { PATENTS } from '../../content/patents';
 import { canPrestige, nextPatentAt, patentsFor } from '../../core/prestige';
 import { patLvl } from '../../core/state';
-import { fmt, li, money, t } from '../i18n';
+import { runSummary } from '../../systems/runSummary';
+import { fmt, li, t } from '../i18n';
 import { act, useS } from '../store';
-import { CardHead } from './common';
+import { CardHead, showValue } from './common';
+import { PatentPreview, RunStats } from './RunSummary';
 
 /** Two-click confirmation for the reset button. */
 function usePrestigeButton(action: 'prestige' | 'prestigeR') {
@@ -24,12 +26,14 @@ export function PrestigeButton({ class: cls = 'btn-main', realistic = false }: {
 
 /** Offered in the space phase: start over with permanent patents. */
 export function PrestigeCard() {
-  const v = useS(s => ({ gain: patentsFor(s), next: nextPatentAt(s), real: (s.slow || 1) > 1 }));
+  const v = useS(s => ({ gain: patentsFor(s), next: nextPatentAt(s), real: (s.slow || 1) > 1, run: runSummary(s) }));
   return (
     <section class="card wide prestige">
       <CardHead title={t('prTitle')} aside={v.real ? t('prRealNow', BAL.realisticPatentMult) : undefined} />
       <p class="hint" style={{ marginTop: 0 }}>{t('prDesc', fmt(v.gain))} {t('prKeep')}</p>
       <p class="hint">{t('prMore', fmt(v.next))}</p>
+      <RunStats r={v.run} />
+      <PatentPreview />
       <div class="ctl"><PrestigeButton /></div>
       <div class="real-offer">
         <b>{t('prReal')}</b>
@@ -40,7 +44,6 @@ export function PrestigeCard() {
   );
 }
 
-const showValue = (v: string | { money: number }) => (typeof v === 'string' ? v : money(v.money));
 
 /** Permanent upgrades bought with patents. */
 export function PatentsCard() {

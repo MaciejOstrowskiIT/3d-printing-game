@@ -55,3 +55,6 @@ export const Meter = ({ pct, tone, style }: { pct: number; tone?: 'or' | 'bad'; 
 export const CardHead = ({ title, aside }: { title: string; aside?: string }) => (
   <div class="ch"><h2>{title}</h2>{aside !== undefined && <span>{aside}</span>}</div>
 );
+
+/** A patent's shown value: plain text or an amount of money. */
+export const showValue = (v: string | { money: number }) => (typeof v === 'string' ? v : money(v.money));
