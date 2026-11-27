@@ -438,7 +438,7 @@ function Materials() {
   if (rows.length < 2) return null;
 
   return (
-    <section class="card wide v-p">
+    <section class="card wide v-p materials">
       <CardHead title={t('materialsTitle')} />
       <AutoMaterialToggle />
       {rows.map(({ material: m, selected, stock, price, bonus }) => (

@@ -390,10 +390,12 @@ body.space .title-screen{background:#14122b}
 }
 
 /* Workshop columns flow independently so a tall card doesn't reserve a row across the dashboard. */
-.app:has(.workshop-layout){max-inline-size:2280px;margin-inline:auto}
-.main:has(.workshop-layout) > :is(.content,.hud){max-width:none}
-.main:has(.workshop-layout) .hud .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin}
-.main:has(.workshop-layout) .hud .chip{flex:none}
+/* Same frame on every tab (Workshop, Research): width, HUD height and tab buttons must not change when switching. */
+html{scrollbar-gutter:stable}
+.app{max-inline-size:2280px;margin-inline:auto}
+.main > :is(.content,.hud){max-width:none}
+.hud .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin}
+.hud .chip{flex:none}
 .workshop-board,.workshop-core,.workshop-tools,.workshop-stack{display:grid;gap:14px;align-items:start;align-content:start}
 .workshop-core,.workshop-tools,.workshop-stack{grid-template-columns:minmax(0,1fr)}
 .workshop-board .rprev{margin:0}
@@ -530,7 +532,7 @@ body.space .side{background-color:var(--bg);color:var(--ink)}
   .workshop-layout[data-view=p] .v-s,.workshop-layout[data-view=s] .v-p{display:none}
   .mtiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
   .mtile{padding:10px}
-  .main:has(.workshop-layout) .hud .chips,.hud .chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;overflow:visible}
+  .hud .chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;overflow:visible}
   .hud .chip{padding:3px 8px}
   .hud .chip b{font-size:15px}.hud .chip.big b{font-size:18px}
   .hud .chip small{font-size:11px}
@@ -545,3 +547,7 @@ body.space .side{background-color:var(--bg);color:var(--ink)}
 
 /* alpha badge: translucent, never blocks clicks */
 .alpha-badge{position:fixed;top:4px;right:6px;z-index:30;pointer-events:none;user-select:none;font:700 10px/1 'Barlow Condensed',system-ui,sans-serif;letter-spacing:.14em;color:var(--mute);opacity:.55;border:1px solid currentColor;border-radius:4px;padding:2px 5px}
+
+/* Materials: a fixed button width keeps the row text from re-wrapping when the selected material changes. */
+.materials .item>button{flex:0 0 112px}
+.materials .it small{display:block;min-block-size:2lh}
