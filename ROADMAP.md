@@ -12,6 +12,7 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 
 | Card | PR | Notes |
 |---|---|---|
+| **Clicker achievement** | #64 | Unlocks at 1,000 figurines of manual work (#59) |
 | **Explain when the next daily order is available** | #62 | Clarifies the calendar-day limit and streak in PL/EN (#58) |
 | **Keep the live finance line continuous** | #51 | Smooth transition into a new empty interval |
 | **QA4: Repeatable layout stability tests** | #56 | Run with `npm run e2e:layout` |
