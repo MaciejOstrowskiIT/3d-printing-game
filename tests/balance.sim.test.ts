@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { GOALS } from '../src/content/goals';
+import { NODE } from '../src/content/tree';
+import type { GameState } from '../src/core/state';
 import { playthrough } from './bot';
 
 const LIFTOFF = GOALS.findIndex(g => g.t[1] === 'Leave Earth');
@@ -26,6 +28,26 @@ describe('balance: bot finishes the game', () => {
       expect(r.goalMinutes[LIFTOFF]).toBeGreaterThan(25);
       expect(r.goalMinutes[LIFTOFF]).toBeLessThan(75);
       expect(r.ordersDone).toBeGreaterThan(5);
+    }, 60_000);
+  }
+});
+
+/** The quantum branch is optional and strong: a bot that uses it must stay in the same range and may only be a little faster. */
+describe('balance: bot that uses the quantum computer', () => {
+  for (const seed of [1, 7]) {
+    it(`seed ${seed}: same range, not far ahead of the plain bot, spends QP`, () => {
+      const plain = playthrough(seed);
+      let last: GameState | undefined;
+      const r = playthrough(seed, undefined, undefined, undefined, s => { last = s; }, undefined, { quantum: true });
+      expect(r.ended).toBe(true);
+      expect(r.minutes).toBeGreaterThan(50);
+      expect(r.minutes).toBeLessThan(150);
+      expect(r.goalMinutes[LIFTOFF]).toBeGreaterThan(25);
+      expect(r.goalMinutes[LIFTOFF]).toBeLessThan(75);
+      expect(r.minutes).toBeGreaterThan(plain.minutes * 0.85);
+      expect(r.minutes).toBeLessThanOrEqual(plain.minutes * 1.02);
+      expect(last!.qOn).toBe(true);
+      expect(last!.done.some(id => NODE[id]?.qp)).toBe(true);
     }, 60_000);
   }
 });
