@@ -8,11 +8,13 @@ import { initAnalytics } from './ui/analytics';
 import { reloadPrefs } from './ui/i18n';
 import { installDebugHook } from './ui/debug';
 import { loadSavedGame, startLoop } from './ui/store';
+import { installGoalUnlocks } from './ui/goalUnlocks';
 
 async function boot() {
   await platform.init();
   // Saves and preferences are read only now: on CrazyGames they come from the SDK's data module.
   reloadPrefs();
+  installGoalUnlocks();
   loadSavedGame();
   render(<App />, document.getElementById('app')!);
   const splash = document.getElementById('boot');

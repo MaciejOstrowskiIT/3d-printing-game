@@ -42,3 +42,7 @@ body.space .side .pbtn,body.space .dock .pbtn{display:none}
 .settings button{min-height:36px;padding:4px 10px;font-size:13.5px;background:#ffffff14;border-color:transparent;color:inherit}
 .settings button:hover:not(:disabled){background:#ffffff26;border-color:transparent}
 
+/* What the last goal opened (#141), shown in the goal card for a while. */
+.goal-unlock{margin:8px 0 0;padding:6px 9px;border-radius:9px;background:var(--accS);color:var(--ink);font-size:13.5px;line-height:1.3;animation:goal-unlock-in .35s ease-out}
+.goal-unlock b{color:var(--acc)}
+@keyframes goal-unlock-in{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
