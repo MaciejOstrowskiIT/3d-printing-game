@@ -347,7 +347,7 @@ body.space .title-screen{background:#14122b}
 .stats-legend{display:flex;flex-wrap:wrap;gap:14px;color:var(--mute);margin-bottom:5px;font-size:13px}
 .stats-legend span::before{content:"";display:inline-block;width:15px;margin:0 5px 3px 0;border-top:2px solid var(--acc)}
 .stats-legend .stats-out-key::before{border-top:2px dashed var(--or)}
-.stats-chart{position:relative;height:128px;background:var(--sub);border:1px solid var(--line);border-radius:10px}
+.stats-chart{position:relative;overflow:hidden;height:128px;background:var(--sub);border:1px solid var(--line);border-radius:10px}
 .stats-chart svg,.stats-points{position:absolute;inset:0;width:100%;height:100%}
 .stats-chart line,.stats-chart path{vector-effect:non-scaling-stroke}
 .stats-gridline{stroke:var(--line)}
@@ -357,8 +357,7 @@ body.space .title-screen{background:#14122b}
 .stats-out{color:var(--or)}
 .stats-line.stats-in,.stats-line.stats-out{stroke:currentColor}
 .stats-line.stats-out{stroke-dasharray:5 4}
-.stats-points{display:grid}
-.stats-points button{position:relative;min-width:0;padding:0;border:0;border-radius:6px;background:transparent}
+.stats-points button{position:absolute;inset-block:0;min-width:0;padding:0;border:0;border-radius:6px;background:transparent}
 .stats-points button:hover,.stats-points button:focus-visible{background:color-mix(in srgb,var(--acc) 8%,transparent)}
 .stats-points button:focus-visible{z-index:1;outline-offset:-3px}
 .stats-points button:active:not(:disabled){transform:none}
