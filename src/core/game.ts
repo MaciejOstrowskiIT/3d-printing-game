@@ -21,7 +21,7 @@ import { claimOfflineBonus, grantOfflineBonus, offlineBonusSystem } from '../sys
 import { buildAwaySummary, type AwaySummary } from '../systems/awaySummary';
 import { buyClickTool, buyDesign, printManual, selectModel } from '../systems/models';
 import { assignPoint, buyNode, computeSystem, goalsSystem, reputationSystem } from '../systems/research';
-import { changePrice, salesSystem } from '../systems/sales';
+import { changePrice, editPiecePrice, salesSystem, type PriceEdit } from '../systems/sales';
 import { buyDrone, buyFab, spaceSystem } from '../systems/space';
 import { log, sfx, type Ctx, type GameEvent } from './ctx';
 import { autoCost, farmCost, mktCost, panelCost } from './formulas';
@@ -58,7 +58,7 @@ export const SYSTEMS: System[] = [
 export type Action =
   | 'calibrate' | 'dryer' | 'precision' | 'automat' | 'hint-dismiss'
   | 'print' | 'spool' | 'auto' | 'farm' | 'panel' | 'mkt' | 'drone' | 'fab'
-  | 'pminus' | 'pplus' | 'oacc' | 'odec' | 'fix' | 'mevyes' | 'mevno' | 'tool'
+  | 'pminus' | 'pplus' | `price:${string}:${PriceEdit}:${number}` | 'oacc' | 'odec' | 'fix' | 'mevyes' | 'mevno' | 'tool'
   | 'proc1' | 'procmax' | 'mem1' | 'memmax' | 'boost' | 'adfail' | 'prestige' | 'prestigeR' | 'offx2' | 'daily' | 'msgok' | 'qbuy' | 'qup'
   | `t:${string}` | `col:${number}` | `material:${string}` | `price-up:${string}` | `price-down:${string}` | `fleet:${string}:${number}` | `mdl:${string}` | `stl:${string}` | `day:${number}` | `am:${string}:${0 | 1}` | `pat:${string}`;
 
@@ -109,6 +109,10 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
       if (a === 'fab') { const ok = buyFab(s); if (ok) sfx(ctx, 'buy'); return ok; }
       if (a === 'pminus') return changePrice(s, -0.1);
       if (a === 'pplus') return changePrice(s, 0.1);
+      if (a.startsWith('price:')) {
+        const [, id, mode, amount] = a.split(':');
+        return editPiecePrice(s, id, mode, Number(amount));
+      }
       if (a.startsWith('price-up:')) return changePrice(s, 0.1, a.slice('price-up:'.length));
       if (a.startsWith('price-down:')) return changePrice(s, -0.1, a.slice('price-down:'.length));
       if (a === 'oacc') { acceptOrder(s); sfx(ctx, 'buy'); return true; }

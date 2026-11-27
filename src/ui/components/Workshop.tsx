@@ -25,7 +25,8 @@ import { designCost, designVisible } from '../../systems/models';
 import { platform } from '../platform';
 import { act, game, adPending, mobileView, useS, watchAdForBoost } from '../store';
 import { clock, colorName, dict, dur, fmt, li, mass, money, nf, t } from '../i18n';
-import { BuyButton, CardHead, Item, Meter, Tile, useHold } from './common';
+import { BuyButton, CardHead, Item, Meter, Tile } from './common';
+import { PriceEditor } from './PriceEditor';
 import { WorkshopStats } from './WorkshopStats';
 import { PrestigeCard } from './Prestige';
 
@@ -260,18 +261,6 @@ function ColorPicker() {
   );
 }
 
-function PriceStepper({ id }: { id: string }) {
-  const price = useS(s => stockPrice(s, id) * MODEL[id].seconds);
-  const minus = useHold(`price-down:${id}`), plus = useHold(`price-up:${id}`);
-  return (
-    <div class="stepper">
-      <button aria-label="−" {...minus}>−</button>
-      <div class="pv"><small>{t('price')}</small><b>{money(price)}</b></div>
-      <button aria-label="+" {...plus}>+</button>
-    </div>
-  );
-}
-
 function PrintQuality() {
   const v = useS(s => ({ unlocked: qualityUnlocked(s), precision: s.precision, bed: s.bedCalibrated, dryer: s.dryerInstalled, money: s.zl }));
   if (!v.unlocked) return null;
@@ -330,7 +319,7 @@ function Sales() {
       <ColorPicker />
       {v.auto
         ? <p class="hint sales-auto-price">{t('salesCurrentPrice', money(v.price))}</p>
-        : <PriceStepper id={id} key={id} />}
+        : <PriceEditor id={id} key={id} />}
       <div class="sales-notes">
         <div class="sales-flow">
           {v.growth
