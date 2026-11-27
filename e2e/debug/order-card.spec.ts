@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
 import { BAL } from '../../src/content/balance';
 import { createState } from '../../src/core/state';
-import { test } from '../helpers';
+import { openNotifications, test } from '../helpers';
 
 for (const { locale, accept, hint } of [
   { locale: 'pl-PL', accept: 'Przyjmij', hint: 'Nowe figurki trafiają najpierw do zamówienia' },
@@ -20,6 +20,7 @@ for (const { locale, accept, hint } of [
       await page.waitForFunction(() => Boolean(window.__drk));
       await page.evaluate(save => window.__drk!.load(save), state);
 
+      await openNotifications(page);
       const card = page.locator('.order-card');
       const acceptButton = card.getByRole('button', { name: accept, exact: true });
       await expect(acceptButton).toBeVisible();

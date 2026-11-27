@@ -10,7 +10,6 @@ import { mobileView, useS } from '../store';
 import { PrestigeCard } from './Prestige';
 import { Automation } from './workshop/automation';
 import { Energy } from './workshop/energy';
-import { Events } from './workshop/events';
 import { Investments } from './workshop/investments';
 import { Materials } from './workshop/materials';
 import { PrintQuality } from './workshop/printQuality';
@@ -42,7 +41,6 @@ export function Workshop() {
 
   if (v.sp) return (
     <div>
-      <Events />
       <div class="grid">
         {research && <ResearchPreview />}
         <Space />
@@ -55,7 +53,6 @@ export function Workshop() {
   const support = research || v.support;
   return (
     <div class="workshop-layout" data-view={mobileView.value}>
-      <Events />
       <div class="workshop-board">
         <div class="workshop-core">
           <ProductionLine />

@@ -111,7 +111,8 @@ export function filamentNotice(s: GameState) {
   return { out, runway, mat: material(s).name[li()], alt, altG: alt ? materialStock(s, alt) : 0 };
 }
 
-export function Events() {
+/** Every open notification as a card. Lives in the HUD notification panel (`panel`), so the Workshop page never moves. */
+export function Events({ panel = false }: { panel?: boolean }) {
   const maintenance = useS(s => s.ph === 1 && s.farmOn);
   const o = useS(s => (s.ph === 1 && s.ord ? { ...s.ord } : null));
   const brk = useS(s => (s.ph === 1 && s.brk > 0 ? { brk: s.brk, c: s.brkC, fixT: s.fixT, cam: has(s, 'kamera') && !!s.amOn.kamera } : null));
@@ -119,7 +120,7 @@ export function Events() {
   const daily = useS(s => s.ph === 1 && !!s.dord && s.dord.day === s.dday);
   const msg = useS(s => !!s.msg);
   const filament = useS(s => !!filamentNotice(s));
-  if (!o && !brk && !maintenance && !market && !daily && !msg && !filament) return null;
+  if (!o && !brk && !maintenance && !market && !daily && !msg && !filament) return panel ? <p class="hint">{t('workshopNoNotices')}</p> : null;
   return (
     <div class="events" aria-label={t('workshopNotices')} role="region">
       <FilamentAlert />

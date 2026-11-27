@@ -5,6 +5,7 @@ import { act, dialog, mobileView, resetGame, screen, ui, useS } from '../store';
 import { Toasts } from './Achievements';
 import { AlphaBadge } from './AlphaBadge';
 import { AwayDialog } from './AwayDialog';
+import { NotificationToasts } from './hud/notifications';
 import { ReportDialog } from './ReportDialog';
 import { SaveDialog } from './SaveDialog';
 import { SettingsDialog } from './SettingsDialog';
@@ -120,6 +121,7 @@ export function App() {
       </div>
       <Dock />
       <AwayDialog />
+      <NotificationToasts />
       <Toasts />
       <End />
       <SaveDialog />

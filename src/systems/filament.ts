@@ -56,6 +56,13 @@ export function filamentSystem(s: GameState, dt: number, ctx: Ctx) {
 }
 
 /** For the offline summary: are printers standing still for lack of filament right now? */
+/** Filament warning for the notification centre and the filament alert: out, running low, or fine (null). */
+export function filamentWarning(s: GameState): 'out' | 'low' | null {
+  if (s.ph !== 1 || s.total === 0) return null;
+  if (s.fil < gpu(s)) return 'out';
+  return filamentRunway(s) < BAL.filamentWarnSeconds && !autobuyOn(s) ? 'low' : null;
+}
+
 export const idleForFilament = (s: GameState) => s.ph === 1 && rate1(s) > 0 && s.fil < gpu(s);
 
 export const materialName = (id: string, lang: 0 | 1) => MATERIAL[id]?.name[lang] ?? id;

@@ -1,10 +1,10 @@
 import { expect } from '@playwright/test';
 import { createState } from '../../src/core/state';
 import { bookCash, PERIOD_SECONDS } from '../../src/systems/workshopStats';
-import { expectHealthy, test } from '../helpers';
+import { expectHealthy, openFundsPanel, test } from '../helpers';
 
 for (const reducedMotion of ['no-preference', 'reduce'] as const) {
-  test(`rolls the live finance chart with motion set to ${reducedMotion}`, async ({ page, isMobile }) => {
+  test(`rolls the live finance chart with motion set to ${reducedMotion}`, async ({ page }) => {
     const state = { ...createState(), total: 50, goal: 2 };
     bookCash(state, 'sales', 100);
     state.financeTime = 8 * PERIOD_SECONDS;
@@ -16,10 +16,7 @@ for (const reducedMotion of ['no-preference', 'reduce'] as const) {
     await page.goto('/#debug');
     await page.waitForFunction(() => Boolean(window.__drk));
     await page.evaluate(save => window.__drk!.load(save), state);
-    if (isMobile) {
-      await page.getByRole('tab', { name: 'Sales', exact: true }).tap();
-      await page.getByRole('button', { name: /^Workshop results/ }).tap();
-    }
+    await openFundsPanel(page);
 
     const chart = page.getByRole('group', { name: 'Income and spending in 30-second intervals' });
     const sample = chart.getByRole('button', { name: /^About 30s ago/ });
@@ -53,7 +50,7 @@ for (const reducedMotion of ['no-preference', 'reduce'] as const) {
   });
 }
 
-test('continues the live line when a new period starts empty', async ({ page, isMobile }) => {
+test('continues the live line when a new period starts empty', async ({ page }) => {
   const state = { ...createState(), total: 50, goal: 2, financeTime: 8 * PERIOD_SECONDS };
   bookCash(state, 'sales', 80);
   bookCash(state, 'equipment', 20);
@@ -66,10 +63,7 @@ test('continues the live line when a new period starts empty', async ({ page, is
   await page.goto('/#debug');
   await page.waitForFunction(() => Boolean(window.__drk));
   await page.evaluate(save => window.__drk!.load(save), state);
-  if (isMobile) {
-    await page.getByRole('tab', { name: 'Sales', exact: true }).tap();
-    await page.getByRole('button', { name: /^Workshop results/ }).tap();
-  }
+  await openFundsPanel(page);
 
   const chart = page.getByRole('group', { name: 'Income and spending in 30-second intervals' });
   const live = chart.getByRole('button', { name: /^Now\./ });

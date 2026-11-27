@@ -15,6 +15,18 @@ export const test = base.extend({
   },
 });
 
+/** Opens the HUD notification panel (hover on desktop, tap on a phone). Orders, messages and breakdowns live there. */
+export async function openNotifications(page: Page) {
+  await page.locator('.chip.notif:visible').click();
+  await expect(page.locator('.hud-pop.pop-notif')).toBeVisible();
+}
+
+/** Opens the HUD funds panel (hover on desktop, tap on a phone): the finance chart lives there. */
+export async function openFundsPanel(page: Page) {
+  await page.locator('.chips .chip.has-pop').first().click();
+  await expect(page.locator('.hud-pop.pop-funds')).toBeVisible();
+}
+
 export async function expectHealthy(page: Page) {
   const errors = errorsByPage.get(page);
   if (!errors) throw new Error('Use the test fixture from e2e/helpers to capture browser errors.');

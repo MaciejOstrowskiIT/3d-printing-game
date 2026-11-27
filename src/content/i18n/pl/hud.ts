@@ -1,5 +1,15 @@
 /** UI texts: hud. One key per line, so parallel PRs rarely collide. */
 export const hudTexts = {
+  notifTitle: 'Powiadomienia',
+  notifOpen: 'Otwórz powiadomienia',
+  toastStory: 'Nowa wiadomość',
+  toastOrder: 'Nowe zamówienie',
+  toastDaily: 'Zamówienie dnia',
+  toastMarket: 'Oferta rynkowa',
+  toastBreakdown: 'Awaria drukarek',
+  toastFilament: 'Filament',
+  toastFilLow: 'Kończy się',
+  toastFilOut: 'Skończył się',
   dismissHint: 'Zamknij wskazówkę',
   popClose: 'Zamknij okno',
   popStock: 'Na stanie według projektów',
