@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { containsProfanity } from '../infra/report-worker/src/profanity';
 import { MODERATION_MODEL, fence, handle, moderationOk, issueFrom, originAllowed, parseReport, type Env } from '../infra/report-worker/src/index';
 
 const env: Env = { GITHUB_TOKEN: 't0ken', GITHUB_REPO: 'me/game', ALLOWED_ORIGINS: 'https://me.github.io,*.crazygames.com' };
@@ -86,7 +87,7 @@ describe('report worker', () => {
     it('sends the text to the free model as a user message', async () => {
       let seen: unknown[] = [];
       await moderationOk('hello there', { run: async (m, i) => { seen = [m, i]; return { response: { safe: true } }; } });
-      expect(seen).toEqual([MODERATION_MODEL, { messages: [{ role: 'user', content: 'hello there' }] }]);
+      expect(seen).toEqual([MODERATION_MODEL, { messages: [{ role: 'user', content: 'hello there' }], temperature: 0 }]);
     });
 
     it('fails open without a binding, on errors, on timeouts and on odd answers', async () => {
@@ -94,6 +95,27 @@ describe('report worker', () => {
       expect(await moderationOk('x', { run: async () => { throw new Error('down'); } })).toBe(true);
       expect(await moderationOk('x', ai(undefined))).toBe(true);
       expect(await moderationOk('x', { run: async () => null })).toBe(true);
+    });
+  });
+
+  describe('profanity filter', () => {
+    it('holds back vulgar reports that Llama Guard calls safe', async () => {
+      const calls: { url: string; init: RequestInit }[] = [];
+      const res = await handle(post({ description: 'chuj nie lubi cie' }), { ...env, AI: { run: async () => ({ response: { safe: true } }) } }, ghOk(calls));
+      expect(res.status).toBe(422);
+      expect(calls).toHaveLength(0);
+    });
+
+    it('catches diacritics, leetspeak, repeated letters and English', () => {
+      for (const t of ['CHUJ', 'kuuurwa mać', 'wypierdalaj', 'zjebana gra', 'pi3rdolę', 'chuju', 'fucking game', 'piece of shit', 'you bitch']) {
+        expect(containsProfanity(t), t).toBe(true);
+      }
+    });
+
+    it('lets normal bug reports through', () => {
+      for (const t of ['Licznik pokazuje NaN po wydruku', 'dodaj achievement "klikacz" po 1k figurek', 'Ukończ grę trzykrotnie', 'Shift click does not work', 'recipe, principal, cockpit, Dickens', 'ciotka, fiolet, Scunthorpe']) {
+        expect(containsProfanity(t), t).toBe(false);
+      }
     });
   });
 });
