@@ -4,6 +4,38 @@ import { createGame } from '../src/core/game';
 import { migrate, serialize } from '../src/core/save';
 import { createState } from '../src/core/state';
 
+describe('SkyWalker and play time', () => {
+  it.each([[1799.75, true], [1800, false], [1800.25, false]])(
+    'finishing at %s active seconds unlocks SkyWalker: %s',
+    (finishTime, unlocked) => {
+      const g = createGame({ state: { ...createState(), ph: 2, mat: 0, ft: 0.001, fabs: 1, play: finishTime - 0.25 } });
+      expect(g.s.ach).not.toContain('skywalker');
+      g.tick(0.25);
+      expect(g.s.end).toBe(true);
+      expect(g.s.ach.includes('skywalker')).toBe(unlocked);
+      g.tick(10);
+      expect(g.s.play).toBe(finishTime);
+    },
+  );
+
+  it('retains active seconds across prestige, restart and a save round trip', () => {
+    const g = createGame({ state: { ...createState(), ph: 2, total: 1e9 } });
+    g.tick(20);
+    g.catchUp(60);
+    expect(g.s.play).toBe(20);
+    expect(g.act('prestige')).toBe(true);
+    expect(g.s).toMatchObject({ play: 0, priorPlay: 20 });
+    g.tick(10);
+    g.reset('again');
+    expect(migrate(JSON.parse(serialize(g.s)))).toMatchObject({ play: 0, priorPlay: 30 });
+  });
+
+  it('uses the recorded current line time for saves without prior play time', () => {
+    const { priorPlay, ...oldSave } = createState();
+    expect(migrate({ ...oldSave, play: 120 })).toMatchObject({ play: 120, priorPlay: 0 });
+  });
+});
+
 describe('Clicker achievement', () => {
   it('unlocks once at 1,000 figurines of manual work, excluding fleet production', () => {
     const g = createGame({ state: { ...createState(), auto: 10, fil: 1e6 }, rng: () => 0.5 });

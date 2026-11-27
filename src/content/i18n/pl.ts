@@ -1,5 +1,6 @@
 /* UI strings. Keys must match across languages (enforced by the Dict type). */
 export const pl = {
+linePlaytime:'Czas linii',totalPlaytime:'Łączny czas gry',
 qualityTitle:'Jakość druku',calibrateBed:'Kalibracja stołu',calibrateHint:'Zapobiega odklejaniu wydruków i spaghetti.',filamentDryer:'Suszarka do filamentu',dryerHint:'Zapobiega problemom z wilgotnym filamentem.',precisionTitle:'Druk dokładny',precisionHint:'Tempo −{0}% · cena nowych wydruków +{1}% w zwykłej sprzedaży.',qualityOn:'Włączony',qualityOff:'Wyłączony',qualityInstalled:'Gotowe',qualityPrice:'Średnia cena sprzedaży z premią: {0}.',
 materialUse:'Użyj',materialsTitle:'Materiały',materialStock:'{0} g w zapasie',materialPrice:'{0}/kg',materialDurability:'Trwałość {0}/5',materialMatch:'Popyt na bieżący model +{0}%',
 modelPrinted:'{0} szt. wydrukowano',modelPieces:'{0} szt. na stanie',modelPiecePrice:'{0}/szt.',
