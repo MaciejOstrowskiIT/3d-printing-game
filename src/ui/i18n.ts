@@ -46,8 +46,15 @@ type Key = { [K in keyof Dict]: Dict[K] extends string ? K : never }[keyof Dict]
 const fill = (s: string, a: (string | number)[]) => a.reduce<string>((r, v, i) => r.replace('{' + i + '}', String(v)), s);
 export const t = (k: Key, ...a: (string | number)[]) => fill(dict()[k], a);
 
-export const nf = (n: number, d = 0) =>
-  n.toLocaleString(prefs.value.lang === 'pl' ? 'pl-PL' : 'en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+/** Number formatters by locale and digits. Creating one is slow (toLocaleString makes a new one on every call), and the
+ *  UI formats hundreds of numbers a second. */
+const FORMATS = new Map<string, Intl.NumberFormat>();
+export const nf = (n: number, d = 0) => {
+  const locale = prefs.value.lang === 'pl' ? 'pl-PL' : 'en-US', key = locale + d;
+  let f = FORMATS.get(key);
+  if (!f) FORMATS.set(key, f = new Intl.NumberFormat(locale, { minimumFractionDigits: d, maximumFractionDigits: d }));
+  return f.format(n);
+};
 
 const UNITS = {
   pl: [[1e18, ' trln'], [1e15, ' bld'], [1e12, ' bln'], [1e9, ' mld'], [1e6, ' mln'], [1e3, ' tys.']],
@@ -69,8 +76,15 @@ export function fmtAs(n: number, notation: Notation, d = 0): string {
 export const fmt = (n: number, d = 0): string => fmtAs(n, prefs.value.notation ?? 'short', d);
 
 /** Reduced motion: the player's choice, or the system setting until they choose. */
-export const reducedMotion = (): boolean =>
-  prefs.value.motion ?? (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches);
+export const reducedMotion = (): boolean => prefs.value.motion ?? systemReducedMotion();
+
+// The media query list is live, so it is created once (per matchMedia implementation) and read on every call.
+let motionQuery: { fn: typeof matchMedia; list: MediaQueryList } | undefined;
+function systemReducedMotion() {
+  if (typeof matchMedia !== 'function') return false;
+  if (motionQuery?.fn !== matchMedia) motionQuery = { fn: matchMedia, list: matchMedia('(prefers-reduced-motion: reduce)') };
+  return motionQuery.list.matches;
+}
 
 /** Mass from grams in the largest sensible unit (850 g, 10 kg, 1.5 t). */
 export const mass = (g: number) => massText(g, prefs.value.lang, fmt);

@@ -28,6 +28,6 @@ describe('Production line tiles', () => {
     const c = renderHealthyApp(split({ keychain: 2 }), 'en');
     const tile = [...c.querySelectorAll('.mtile')].find(t => t.textContent?.includes('Keychain'))!;
     const bar = tile.querySelector<HTMLElement>('.meter i')!;
-    expect(parseFloat(bar.style.width)).toBeGreaterThan(0);
+    expect(parseFloat(bar.style.transform.replace('scaleX(', ''))).toBeGreaterThan(0);
   });
 });
