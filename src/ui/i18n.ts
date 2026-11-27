@@ -63,6 +63,14 @@ export const dur = (s: number) =>
 /** Countdown as m:ss. */
 export const clock = (s: number) => { const t = Math.max(0, Math.ceil(s)); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); };
 
+/** Elapsed play time as m:ss, or h:mm:ss after the first hour. */
+export function playtime(seconds: number): string {
+  const elapsed = Math.floor(seconds);
+  const hours = Math.floor(elapsed / 3600);
+  const remainder = clock(elapsed % 3600);
+  return hours ? hours + ':' + remainder.padStart(5, '0') : remainder;
+}
+
 export const nodeName = (id: string) => NODE[id]?.n[li()] ?? id;
 export const colorName = (i: number) => COLORS[i]?.n[li()] ?? '';
 
