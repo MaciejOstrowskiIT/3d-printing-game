@@ -62,10 +62,12 @@
 .workshop-production .tile b,.workshop-sales .tile b,.stats-summary .stats-money{white-space:nowrap}
 .workshop-production .item>.buy,.workshop-sales .item>.buy{flex:0 0 118px}
 .spool-row .it small{display:block;min-block-size:3lh}
-.workshop-sales .crow{display:grid;grid-template-columns:1fr 1.15fr;min-block-size:2.9em}
-.workshop-sales .colors .hint{min-block-size:2.9em}
+.workshop-sales .colors{padding:8px 10px}
+.workshop-sales .colors .sw{gap:6px}
+.workshop-sales .colors .sw button{width:32px;height:32px;min-height:32px}
+.workshop-sales .colors .hint{min-block-size:2lh}
 .sales-notes{margin-top:8px}
-.sales-flow{min-block-size:3.25rem}
+.sales-flow:has(*){min-block-size:2.4rem}
 .sales-notes p{margin:0}
 .sales-notes>.hint{min-block-size:2lh}
 @media(max-width:420px){
