@@ -349,9 +349,7 @@ body.space .title-screen{background:#14122b}
 .rprev .rp-points{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px 10px;margin-bottom:10px;padding:8px 10px;border-radius:10px;background:var(--accS);font-weight:600}
 .rprev .rp-points .pts{display:flex;gap:6px}
 .space-belt .item .buy{min-block-size:47px}
-/* Finished tree nodes collapse to their name, so what you can still buy is easy to find. */
-.tree .node.done{padding-top:6px;padding-bottom:6px;min-height:0}
-.tree .node.done small,.tree .node.done .rq,.tree .node.done .cs{display:none}
+/* Finished tree nodes keep their full text (description and effect stay readable); the tick marks them. */
 .tree .node.done b::before{content:'✓ ';color:var(--acc)}
 /* The research count on the tab pulses briefly when it changes (the element is re-keyed). */
 .tab .dot{animation:dotPulse .9s ease-out 3}
