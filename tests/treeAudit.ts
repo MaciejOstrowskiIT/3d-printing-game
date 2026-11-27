@@ -1,10 +1,10 @@
 /** Research tree audit: structure of the `req` graph plus how soon the balance bot can buy each node after its last
  *  prerequisite. `npm run treeaudit` (scripts/treeaudit.ts) writes the result to docs/tree-audit.md. Findings only,
  *  it never changes the tree. Kept free of Node imports so `tsc` can check it with the rest of tests/. */
-import { BRANCHES, NODE, TREE, type TreeNode } from '../src/content/tree';
+import { BRANCHES, NODE, prereqs, TREE, type TreeNode } from '../src/content/tree';
 import { playthrough } from './bot';
 
-type Graph = Pick<TreeNode, 'id' | 'col' | 'row' | 'req'>[];
+type Graph = Pick<TreeNode, 'id' | 'col' | 'row' | 'req' | 'reqAny'>[];
 
 /** Depth of every node in the `req` graph: roots are 1. Returns the ids that sit on a cycle or hang off a missing id. */
 export function depths(tree: Graph): { depth: Record<string, number>; broken: string[] } {
@@ -17,7 +17,7 @@ export function depths(tree: Graph): { depth: Record<string, number>; broken: st
     const n = byId.get(id);
     if (!n || state.get(id) === 'open') { broken.add(id); return Infinity; }
     state.set(id, 'open');
-    const d = 1 + Math.max(0, ...(n.req ?? []).map(visit));
+    const d = 1 + Math.max(0, ...prereqs(n).map(visit));
     state.set(id, 'done');
     if (Number.isFinite(d)) depth[id] = d; else broken.add(id);
     return d;
@@ -34,11 +34,11 @@ export function branchShapes(tree: Graph, depth: Record<string, number>): Branch
   const cols = [...new Set(tree.map(n => n.col))].sort((a, b) => a - b);
   return cols.map(col => {
     const mine = tree.filter(n => n.col === col);
-    const kids = (id: string) => mine.filter(n => (n.req ?? []).includes(id)).length;
-    const joins = mine.filter(n => (n.req ?? []).length > 1).length;
+    const kids = (id: string) => mine.filter(n => prereqs(n).includes(id)).length;
+    const joins = mine.filter(n => (n.req ?? []).length > 1 || !!n.reqAny?.length).length;
     const forks = mine.filter(n => kids(n.id) > 1).length;
-    const crossIn = mine.reduce((a, n) => a + (n.req ?? []).filter(r => tree.find(x => x.id === r)?.col !== col).length, 0);
-    const crossOut = tree.filter(n => n.col !== col).reduce((a, n) => a + (n.req ?? []).filter(r => mine.some(m => m.id === r)).length, 0);
+    const crossIn = mine.reduce((a, n) => a + prereqs(n).filter(r => tree.find(x => x.id === r)?.col !== col).length, 0);
+    const crossOut = tree.filter(n => n.col !== col).reduce((a, n) => a + prereqs(n).filter(r => mine.some(m => m.id === r)).length, 0);
     return { col, nodes: mine.length, maxDepth: Math.max(...mine.map(n => depth[n.id] ?? 0)), joins, forks, crossIn, crossOut, chain: joins === 0 && forks === 0 };
   });
 }
@@ -65,7 +65,7 @@ export function buildReport(): string {
   const { depth, broken } = depths(TREE);
   const at = (id: string) => median(bought[id] ?? []);
   /** Minutes between the last prerequisite and the node itself; roots count from the start of the game. */
-  const gap = (n: TreeNode) => at(n.id) - Math.max(0, ...(n.req ?? []).map(at));
+  const gap = (n: TreeNode) => at(n.id) - Math.max(0, ...(n.reqAny?.length ? [Math.min(...n.reqAny.map(at))] : []), ...(n.req ?? []).map(at));
   const rows = TREE.map(n => ({ n, d: depth[n.id] ?? NaN, gap: gap(n), at: at(n.id), seen: (bought[n.id] ?? []).length }));
   const name = (n: TreeNode) => `\`${n.id}\` (${BRANCHES[n.col][1][0]})`;
 
@@ -76,10 +76,10 @@ export function buildReport(): string {
     '**gap** = minutes between the bot buying the last prerequisite and buying the node (roots: from game start).', '');
 
   out.push('## Summary', '',
-    `- ${TREE.length} nodes, ${BRANCHES.length} branches, ${TREE.filter(n => !(n.req ?? []).length).length} roots.`,
+    `- ${TREE.length} nodes, ${BRANCHES.length} branches, ${TREE.filter(n => !prereqs(n).length).length} roots.`,
     `- ${rows.filter(r => r.gap < 1).length} nodes bought less than 1 min after their last prerequisite.`,
-    `- ${TREE.filter(n => (n.req ?? []).length === 1 && !n.need).length} nodes have exactly one prerequisite and no \`need\`.`,
-    `- ${TREE.filter(n => (n.req ?? []).length > 1).length} nodes have 2+ prerequisites; ${TREE.filter(n => (n.req ?? []).some(r => NODE[r].col !== n.col)).length} link to another branch.`,
+    `- ${TREE.filter(n => prereqs(n).length === 1 && !n.need).length} nodes have exactly one prerequisite and no \`need\`.`,
+    `- ${TREE.filter(n => prereqs(n).length > 1).length} nodes have 2+ prerequisites (${TREE.filter(n => n.reqAny?.length).length} with an alternative route); ${TREE.filter(n => prereqs(n).some(r => NODE[r].col !== n.col)).length} link to another branch.`,
     `- ${TREE.filter(n => depth[n.id] !== undefined && n.row < depth[n.id]).length} nodes whose \`row\` is above their depth (must be 0: rows only grow downwards).`,
     `- Cycles or missing ids: ${broken.length ? broken.map(i => `\`${i}\``).join(', ') : 'none'}.`, '');
 
@@ -89,18 +89,18 @@ export function buildReport(): string {
     '| Node | Depth | Gap (min) | Cost | `need` |', '|---|---|---|---|---|',
     ...quick.map(r => `| ${name(r.n)} | ${r.d} | ${fmtMin(r.gap)} | ${costText(r.n)} | ${needText(r.n) || '-'} |`), '');
 
-  const single = TREE.filter(n => (n.req ?? []).length === 1 && !n.need);
+  const single = TREE.filter(n => prereqs(n).length === 1 && !n.need);
   out.push('## 2. One prerequisite and no `need`', '',
     'Gated only by compute (and money when listed). Compare with section 1: these are the first candidates for a stage-matched `need`.', '',
     '| Node | Requires | Gap (min) | Cost |', '|---|---|---|---|',
-    ...single.map(n => `| ${name(n)} | \`${n.req![0]}\` | ${fmtMin(gap(n))} | ${costText(n)} |`), '');
+    ...single.map(n => `| ${name(n)} | \`${prereqs(n)[0]}\` | ${fmtMin(gap(n))} | ${costText(n)} |`), '');
 
   const shapes = branchShapes(TREE, depth);
   out.push('## 3. Branch shape', '',
     '| Branch | Nodes | Max depth | Joins (2+ req) | Forks | Links in | Links out | Pure chain |', '|---|---|---|---|---|---|---|---|',
     ...shapes.map(b => `| ${BRANCHES[b.col][1][0]} | ${b.nodes} | ${b.maxDepth} | ${b.joins} | ${b.forks} | ${b.crossIn} | ${b.crossOut} | ${b.chain ? 'yes' : 'no'} |`), '');
 
-  const cross = TREE.flatMap(n => (n.req ?? []).filter(r => NODE[r].col !== n.col).map(r => ({ from: NODE[r], to: n })));
+  const cross = TREE.flatMap(n => prereqs(n).filter(r => NODE[r].col !== n.col).map(r => ({ from: NODE[r], to: n })));
   out.push('## 4. Cross-branch links', '',
     '| From | To |', '|---|---|', ...cross.map(c => `| ${name(c.from)} | ${name(c.to)} |`), '');
 
@@ -114,7 +114,7 @@ export function buildReport(): string {
   out.push('## All nodes', '',
     '| Node | Depth | Row | Requires | `need` | Cost | Bought at (min) | Gap (min) |', '|---|---|---|---|---|---|---|---|',
     ...rows.sort((a, b) => a.n.col - b.n.col || a.d - b.d || a.n.row - b.n.row).map(r =>
-      `| ${name(r.n)} | ${r.d} | ${r.n.row} | ${(r.n.req ?? []).map(x => `\`${x}\``).join(', ') || '-'} | ${needText(r.n) || '-'} | ${costText(r.n)} | ${fmtMin(r.at)} | ${fmtMin(r.gap)} |`), '');
+      `| ${name(r.n)} | ${r.d} | ${r.n.row} | ${[...(r.n.req ?? []).map(x => `\`${x}\``), ...(r.n.reqAny?.length ? [`any of ${r.n.reqAny.map(x => `\`${x}\``).join(' / ')}`] : [])].join(', ') || '-'} | ${needText(r.n) || '-'} | ${costText(r.n)} | ${fmtMin(r.at)} | ${fmtMin(r.gap)} |`), '');
 
   return out.join('\n') + '\n';
 }

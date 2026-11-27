@@ -14,7 +14,12 @@ export interface TreeNode {
   zl?: number;
   /** Cost in figurines (space phase). */
   wyd?: number;
+  /** All of these must be researched first. */
   req?: string[];
+  /** Alternative route: at least one of these must be researched (in addition to `req`). */
+  reqAny?: string[];
+  /** Entries of `req` added after saves existed (R3 joins). Old saves with the node already bought stay valid without them. */
+  reqNew?: string[];
   need?: { label: L; value: (s: GameState) => number; target: number };
   /** Automation node: unlocking it enables the toggle with this id. */
   automation?: boolean;
@@ -56,7 +61,7 @@ export const TREE: TreeNode[] = [
   { id: 'sklep', col: 1, row: 4, n: ['Własny sklep internetowy', 'Own online store'], d: ['Popyt rośnie 2×.', 'Demand 2×.'], ops: 3500, zl: 2500, req: ['tiktok'], need: { label: ['10 tys. figurek', '10K figurines'], value: s => s.total, target: 1e4 }, fx: s => { s.dem *= 2; } },
   { id: 'pudelka', col: 1, row: 5, n: ['Ładne opakowania', 'Nice packaging'], d: ['Figurka w pudełku: popyt +60%.', 'Boxed figurines: demand +60%.'], ops: 5000, zl: 8000, req: ['sklep'], fx: s => { s.dem *= 1.6; } },
   { id: 'marka', col: 1, row: 7, n: ['Rozpoznawalna marka', 'Known brand'], d: ['Popyt rośnie 3×.', 'Demand 3×.'], ops: 12000, zl: 50000, req: ['pudelka'], need: { label: ['2 farmy', '2 farms'], value: s => s.farm, target: 2 }, fx: s => { s.dem *= 3; } },
-  { id: 'eksport', col: 1, row: 8, n: ['Eksport za granicę', 'Export abroad'], d: ['Nowe rynki: popyt 2×.', 'New markets: demand 2×.'], ops: 20000, zl: 150000, req: ['marka'], fx: s => { s.dem *= 2; } },
+  { id: 'eksport', col: 1, row: 8, n: ['Eksport za granicę', 'Export abroad'], d: ['Nowe rynki: popyt 2×.', 'New markets: demand 2×.'], ops: 20000, zl: 150000, req: ['marka', 'kurier'], reqNew: ['kurier'], fx: s => { s.dem *= 2; } },
   { id: 'b2b', col: 1, row: 10, automation: true, n: ['Dział B2B', 'B2B team'], d: ['Sam przyjmuje zamówienia, płacą 50% więcej.', 'Accepts orders itself, they pay 50% more.'], ops: 15000, req: ['eksport'], need: { label: ['20 zamówień', '20 orders'], value: s => s.ordDone, target: 20 }, fx: auto('b2b') },
 
   { id: 'kamera', col: 2, row: 1, automation: true, n: ['Kamera nad drukarkami', 'Printer camera'], d: ['Awarie naprawiają się same po 5 s.', 'Breakdowns fix themselves in 5 s.'], ops: 800, need: { label: ['1 awaria', '1 breakdown'], value: s => s.fails, target: 1 }, fx: auto('kamera') },
@@ -77,24 +82,24 @@ export const TREE: TreeNode[] = [
   // ---- More Production (col 0) ----
   { id: 'leasing', col: 0, row: 5, n: ['Leasing drukarek', 'Printer leasing'], d: ['Drukarki automatyczne 15% taniej.', 'Auto printers 15% cheaper.'], ops: 1300, req: ['hurt'], need: { label: ['8 drukarek', '8 printers'], value: s => s.auto, target: 8 }, mods: { printerCost: 0.85 } },
   { id: 'hotend', col: 0, row: 7, n: ['Hotend wysokoprzepływowy', 'High-flow hotend'], d: ['Druk +20% szybciej.', 'Printing +20% faster.'], ops: 3900, zl: 15000, req: ['shaping'], mods: { speed: 1.2 } },
-  { id: 'prefab', col: 0, row: 9, n: ['Hale prefabrykowane', 'Prefab halls'], d: ['Farmy 15% taniej.', 'Farms 15% cheaper.'], ops: 5800, req: ['farma'], need: { label: ['2 farmy', '2 farms'], value: s => s.farm, target: 2 }, mods: { farmCost: 0.85 } },
-  { id: 'corexy', col: 0, row: 10, n: ['Kinematyka CoreXY', 'CoreXY motion'], d: ['Druk +25% szybciej.', 'Printing +25% faster.'], ops: 9100, zl: 80000, req: ['hotend'], need: { label: ['40 drukarek', '40 printers'], value: s => s.auto, target: 40 }, mods: { speed: 1.25 } },
-  { id: 'nocna', col: 0, row: 12, n: ['Nocna zmiana', 'Night shift'], d: ['Farmy pracują całą dobę: druk +15%.', 'Farms run around the clock: printing +15%.'], ops: 14300, req: ['prefab'], need: { label: ['8 farm', '8 farms'], value: s => s.farm, target: 8 }, mods: { speed: 1.15 } },
+  { id: 'prefab', col: 0, row: 9, n: ['Hale prefabrykowane', 'Prefab halls'], d: ['Farmy 15% taniej.', 'Farms 15% cheaper.'], ops: 5800, req: ['farma', 'taryfa'], reqNew: ['taryfa'], need: { label: ['2 farmy', '2 farms'], value: s => s.farm, target: 2 }, mods: { farmCost: 0.85 } },
+  { id: 'corexy', col: 0, row: 10, n: ['Kinematyka CoreXY', 'CoreXY motion'], d: ['Druk +25% szybciej.', 'Printing +25% faster.'], ops: 9100, zl: 80000, req: ['hotend', 'baterie'], reqNew: ['baterie'], need: { label: ['40 drukarek', '40 printers'], value: s => s.auto, target: 40 }, mods: { speed: 1.25 } },
+  { id: 'nocna', col: 0, row: 12, n: ['Nocna zmiana', 'Night shift'], d: ['Farmy pracują całą dobę: druk +15%.', 'Farms run around the clock: printing +15%.'], ops: 14300, req: ['prefab', 'kamera'], reqNew: ['kamera'], need: { label: ['8 farm', '8 farms'], value: s => s.farm, target: 8 }, mods: { speed: 1.15 } },
 
   // ---- More Sales (col 1) ----
   { id: 'agencja', col: 1, row: 3, n: ['Stała agencja reklamowa', 'Retained ad agency'], d: ['Kampanie 20% taniej.', 'Campaigns 20% cheaper.'], ops: 1300, req: ['profil'], need: { label: ['3 kampanie', '3 campaigns'], value: s => s.mkt - 1, target: 3 }, mods: { marketingCost: 0.8 } },
-  { id: 'marketplace', col: 1, row: 6, n: ['Platformy sprzedażowe', 'Online marketplaces'], d: ['Popyt +25%.', 'Demand +25%.'], ops: 2900, zl: 5000, req: ['sklep'], mods: { demand: 1.25 } },
-  { id: 'kolekcja', col: 1, row: 9, n: ['Klub kolekcjonera', 'Collectors’ club'], d: ['Popyt +15%, zamówienie dnia płaci +25%.', 'Demand +15%, order of the day pays +25%.'], ops: 9100, req: ['marka'], need: { label: ['15 zamówień', '15 orders'], value: s => s.ordDone, target: 15 }, mods: { demand: 1.15, dailyPay: 1.25 } },
+  { id: 'marketplace', col: 1, row: 6, n: ['Platformy sprzedażowe', 'Online marketplaces'], d: ['Popyt +25%.', 'Demand +25%.'], ops: 2900, zl: 5000, req: ['sklep', 'chmura'], reqNew: ['chmura'], mods: { demand: 1.25 } },
+  { id: 'kolekcja', col: 1, row: 9, n: ['Klub kolekcjonera', 'Collectors’ club'], d: ['Popyt +15%, zamówienie dnia płaci +25%.', 'Demand +15%, order of the day pays +25%.'], ops: 9100, reqAny: ['marka', 'studio'], need: { label: ['15 zamówień', '15 orders'], value: s => s.ordDone, target: 15 }, mods: { demand: 1.15, dailyPay: 1.25 } },
   { id: 'franczyza', col: 1, row: 11, n: ['Franczyza', 'Franchise'], d: ['Sklepy partnerskie w całym kraju: popyt +35%.', 'Partner shops across the country: demand +35%.'], ops: 19500, zl: 400000, req: ['eksport'], need: { label: ['4 farmy', '4 farms'], value: s => s.farm, target: 4 }, mods: { demand: 1.35 } },
 
   // ---- More Automation (col 2) ----
-  { id: 'autooffer', col: 2, row: 8, automation: true, n: ['Agent rynkowy', 'Market agent'], d: ['Sam przyjmuje oferty rynkowe tańsze niż 1/3 środków.', 'Takes market offers that cost under a third of your funds.'], ops: 3900, req: ['automkt'], need: { label: ['8 kampanii', '8 campaigns'], value: s => s.mkt - 1, target: 8 }, fx: auto('autooffer') },
+  { id: 'autooffer', col: 2, row: 8, automation: true, n: ['Agent rynkowy', 'Market agent'], d: ['Sam przyjmuje oferty rynkowe tańsze niż 1/3 środków.', 'Takes market offers that cost under a third of your funds.'], ops: 3900, reqAny: ['automkt', 'negocjator'], need: { label: ['8 kampanii', '8 campaigns'], value: s => s.mkt - 1, target: 8 }, fx: auto('autooffer') },
   { id: 'autodaily', col: 2, row: 10, automation: true, n: ['Spedytor', 'Dispatcher'], d: ['Sam wysyła zamówienie dnia, gdy starczy towaru.', 'Ships the order of the day once there is enough stock.'], ops: 4600, req: ['autooffer'], need: { label: ['12 zamówień', '12 orders'], value: s => s.ordDone, target: 12 }, fx: auto('autodaily') },
-  { id: 'automodel', col: 2, row: 11, automation: true, n: ['Planista produkcji', 'Production planner'], d: ['Co 30 s wybiera najbardziej opłacalny model.', 'Every 30 s picks the most profitable model.'], ops: 7800, req: ['autodruk'], need: { label: ['3 modele', '3 models'], value: s => s.mdls.length, target: 3 }, fx: auto('automodel') },
+  { id: 'automodel', col: 2, row: 11, automation: true, n: ['Planista produkcji', 'Production planner'], d: ['Co 30 s wybiera najbardziej opłacalny model.', 'Every 30 s picks the most profitable model.'], ops: 7800, req: ['autodruk', 'parametr'], reqNew: ['parametr'], need: { label: ['3 modele', '3 models'], value: s => s.mdls.length, target: 3 }, fx: auto('automodel') },
 
   // ---- More Space (col 3) ----
   { id: 'stocznia', col: 3, row: 17, n: ['Stocznia orbitalna', 'Orbital shipyard'], d: ['Fabryki przerabiają 50% więcej.', 'Factories process 50% more.'], ops: 120000, wyd: 5e8, req: ['nano'], need: { label: ['8 fabryk', '8 factories'], value: s => s.fabs, target: 8 }, mods: { fab: 1.5 } },
-  { id: 'rojai', col: 3, row: 19, n: ['Rój sterowany AI', 'AI-driven swarm'], d: ['Drony wydobywają 50% więcej.', 'Drones mine 50% more.'], ops: 200000, req: ['sondy'], need: { label: ['100 dronów', '100 drones'], value: s => s.drones, target: 100 }, mods: { mining: 1.5 } },
+  { id: 'rojai', col: 3, row: 19, n: ['Rój sterowany AI', 'AI-driven swarm'], d: ['Drony wydobywają 50% więcej.', 'Drones mine 50% more.'], ops: 200000, req: ['sondy', 'chmura'], reqNew: ['chmura'], need: { label: ['100 dronów', '100 drones'], value: s => s.drones, target: 100 }, mods: { mining: 1.5 } },
   { id: 'lustra', col: 3, row: 20, n: ['Lustra słoneczne', 'Solar mirrors'], d: ['Drony i fabryki 30% wydajniejsze.', 'Drones and factories 30% better.'], ops: 400000, req: ['grawi', 'stocznia'], mods: { mining: 1.3, fab: 1.3 } },
 
   // ---- Materials & quality (col 4) ----
@@ -104,24 +109,24 @@ export const TREE: TreeNode[] = [
   { id: 'czesci', col: 4, row: 4, n: ['Magazyn części zamiennych', 'Spare parts store'], d: ['Kamera naprawia awarie 2× szybciej.', 'The camera fixes breakdowns 2× faster.'], ops: 3200, req: ['serwis', 'kamera'], mods: { repair: 0.5 } },
   { id: 'kontrakt', col: 4, row: 5, n: ['Kontrakt z producentem', 'Manufacturer contract'], d: ['Filament 15% taniej.', 'Filament 15% cheaper.'], ops: 3900, zl: 20000, req: ['mieszanki'], need: { label: ['50 tys. figurek', '50K figurines'], value: s => s.total, target: 5e4 }, mods: { spool: 0.85 } },
   { id: 'chemia', col: 4, row: 6, n: ['Laboratorium materiałowe', 'Materials lab'], d: ['Figurka zużywa 15% mniej filamentu.', 'Figurines use 15% less filament.'], ops: 7800, req: ['kontrakt'], need: { label: ['200 tys. figurek', '200K figurines'], value: s => s.total, target: 2e5 }, mods: { filament: 0.85 } },
-  { id: 'granulat', col: 4, row: 7, n: ['Druk z granulatu', 'Pellet printing'], d: ['Prosto z granulatu, bez szpul: filament 30% taniej.', 'Straight from pellets, no spools: filament 30% cheaper.'], ops: 16200, zl: 250000, req: ['chemia'], need: { label: ['6 farm', '6 farms'], value: s => s.farm, target: 6 }, mods: { spool: 0.7 } },
+  { id: 'granulat', col: 4, row: 7, n: ['Druk z granulatu', 'Pellet printing'], d: ['Prosto z granulatu, bez szpul: filament 30% taniej.', 'Straight from pellets, no spools: filament 30% cheaper.'], ops: 16200, zl: 250000, req: ['chemia', 'baterie'], reqNew: ['baterie'], need: { label: ['6 farm', '6 farms'], value: s => s.farm, target: 6 }, mods: { spool: 0.7 } },
 
   // ---- Design (col 5) ----
   { id: 'skaner', col: 5, row: 1, n: ['Skaner 3D', '3D scanner'], d: ['Projekty modeli 20% taniej.', 'Model designs 20% cheaper.'], ops: 600, need: { label: ['500 figurek', '500 figurines'], value: s => s.total, target: 500 }, mods: { design: 0.8 } },
   { id: 'parametr', col: 5, row: 2, n: ['Projekty parametryczne', 'Parametric designs'], d: ['Figurki na życzenie: popyt +10%.', 'Made-to-order figurines: demand +10%.'], ops: 1600, req: ['skaner'], need: { label: ['2 modele', '2 models'], value: s => s.mdls.length, target: 2 }, mods: { demand: 1.1 } },
   { id: 'podpory', col: 5, row: 3, n: ['Projekty bez podpór', 'Support-free designs'], d: ['Druk +10% szybciej, filamentu 10% mniej.', 'Printing +10% faster, 10% less filament.'], ops: 3200, req: ['parametr'], need: { label: ['20 tys. figurek', '20K figurines'], value: s => s.total, target: 2e4 }, mods: { speed: 1.1, filament: 0.9 } },
   { id: 'licencje', col: 5, row: 4, n: ['Licencje od twórców', 'Creator licences'], d: ['Popyt +15%, projekty modeli 30% taniej.', 'Demand +15%, model designs 30% cheaper.'], ops: 4600, req: ['parametr'], need: { label: ['3 modele', '3 models'], value: s => s.mdls.length, target: 3 }, mods: { demand: 1.15, design: 0.7 } },
-  { id: 'studio', col: 5, row: 5, n: ['Własne studio projektowe', 'In-house design studio'], d: ['Popyt +20%.', 'Demand +20%.'], ops: 10400, zl: 100000, req: ['licencje'], mods: { demand: 1.2 } },
+  { id: 'studio', col: 5, row: 5, n: ['Własne studio projektowe', 'In-house design studio'], d: ['Popyt +20%.', 'Demand +20%.'], ops: 10400, zl: 100000, req: ['licencje', 'agencja'], reqNew: ['agencja'], mods: { demand: 1.2 } },
   { id: 'genai', col: 5, row: 6, n: ['Projektowanie generatywne', 'Generative design'], d: ['AI projektuje z klientem: popyt +25%, druk +10%.', 'AI designs with the customer: demand +25%, printing +10%.'], ops: 19500, req: ['studio', 'podpory'], need: { label: ['1 mln figurek', '1M figurines'], value: s => s.total, target: 1e6 }, mods: { demand: 1.25, speed: 1.1 } },
 
   // ---- Orders & logistics (col 6) ----
   { id: 'kurier', col: 6, row: 1, n: ['Umowa z kurierem', 'Courier contract'], d: ['Zamówienia mają 30% więcej czasu.', 'Orders get 30% more time.'], ops: 400, need: { label: ['1 zamówienie', '1 order'], value: s => s.ordDone, target: 1 }, mods: { orderTime: 1.3 } },
   { id: 'magazyn', col: 6, row: 2, n: ['Mały magazyn', 'Small warehouse'], d: ['Zamówienia płacą +20%.', 'Orders pay +20%.'], ops: 1000, req: ['kurier'], need: { label: ['3 zamówienia', '3 orders'], value: s => s.ordDone, target: 3 }, mods: { orderPay: 1.2 } },
   { id: 'crm', col: 6, row: 3, n: ['System CRM', 'CRM system'], d: ['Zamówienia płacą +25%, kara za spóźnienie trwa o połowę krócej.', 'Orders pay +25%; late-order penalties last half as long.'], ops: 2600, req: ['magazyn'], need: { label: ['5 zamówień', '5 orders'], value: s => s.ordDone, target: 5 }, mods: { orderPay: 1.25, penalty: 0.5 } },
-  { id: 'paczkomaty', col: 6, row: 4, n: ['Sieć paczkomatów', 'Parcel lockers'], d: ['Zamówienie dnia płaci +30%.', 'Order of the day pays +30%.'], ops: 3900, req: ['crm'], need: { label: ['10 zamówień', '10 orders'], value: s => s.ordDone, target: 10 }, mods: { dailyPay: 1.3 } },
+  { id: 'paczkomaty', col: 6, row: 4, n: ['Sieć paczkomatów', 'Parcel lockers'], d: ['Zamówienie dnia płaci +30%.', 'Order of the day pays +30%.'], ops: 3900, req: ['crm', 'agencja'], reqNew: ['agencja'], need: { label: ['10 zamówień', '10 orders'], value: s => s.ordDone, target: 10 }, mods: { dailyPay: 1.3 } },
   { id: 'negocjator', col: 6, row: 5, n: ['Negocjator', 'Negotiator'], d: ['Oferty rynkowe 25% taniej.', 'Market offers 25% cheaper.'], ops: 5200, req: ['crm'], need: { label: ['3 farmy', '3 farms'], value: s => s.farm, target: 3 }, mods: { offer: 0.75 } },
   { id: 'hub', col: 6, row: 6, n: ['Centrum logistyczne', 'Logistics hub'], d: ['Zamówienia płacą +40% i mają 30% więcej czasu.', 'Orders pay +40% and get 30% more time.'], ops: 9800, zl: 80000, req: ['paczkomaty'], need: { label: ['20 zamówień', '20 orders'], value: s => s.ordDone, target: 20 }, mods: { orderPay: 1.4, orderTime: 1.3 } },
-  { id: 'dronydost', col: 6, row: 7, n: ['Dostawy dronami', 'Drone deliveries'], d: ['Szybka dostawa: popyt +15%.', 'Fast delivery: demand +15%.'], ops: 18200, req: ['hub'], need: { label: ['2 mln figurek', '2M figurines'], value: s => s.total, target: 2e6 }, mods: { demand: 1.15 } },
+  { id: 'dronydost', col: 6, row: 11, n: ['Dostawy dronami', 'Drone deliveries'], d: ['Szybka dostawa: popyt +15%.', 'Fast delivery: demand +15%.'], ops: 18200, req: ['hub', 'autodaily'], reqNew: ['autodaily'], need: { label: ['2 mln figurek', '2M figurines'], value: s => s.total, target: 2e6 }, mods: { demand: 1.15 } },
 
   // ---- Energy & computing (col 7) ----
   { id: 'chlodzenie', col: 7, row: 1, n: ['Chłodzenie procesorów', 'CPU cooling'], d: ['Moc obliczeniowa rośnie o 25% szybciej.', 'Compute grows 25% faster.'], ops: 500, mods: { ops: 1.25 } },
@@ -130,8 +135,11 @@ export const TREE: TreeNode[] = [
   { id: 'baterie', col: 7, row: 5, n: ['Magazyn energii', 'Battery storage'], d: ['Prąd +30%.', 'Power +30%.'], ops: 5800, req: ['taryfa'], need: { label: ['2 farmy', '2 farms'], value: s => s.farm, target: 2 }, mods: { power: 1.3 } },
   { id: 'chmura', col: 7, row: 4, n: ['Moc w chmurze', 'Cloud compute'], d: ['Moc rośnie +50% szybciej, pamięć +50%.', 'Compute +50% faster, memory +50%.'], ops: 7800, req: ['serwer'], need: { label: ['20 tys. figurek', '20K figurines'], value: s => s.total, target: 2e4 }, mods: { ops: 1.5, opsCap: 1.5 } },
   { id: 'neuro', col: 7, row: 6, n: ['Sieci neuronowe', 'Neural networks'], d: ['Punkty reputacji przychodzą 15% szybciej.', 'Reputation points come 15% sooner.'], ops: 13000, req: ['chmura'], need: { label: ['100 tys. figurek', '100K figurines'], value: s => s.total, target: 1e5 }, mods: { rep: 0.85 } },
-  { id: 'offline', col: 7, row: 7, n: ['Zdalny nadzór', 'Remote monitoring'], d: ['Postęp offline trwa 50% dłużej.', 'Offline progress lasts 50% longer.'], ops: 6500, req: ['chmura'], need: { label: ['50 tys. figurek', '50K figurines'], value: s => s.total, target: 5e4 }, mods: { offline: 1.5 } },
+  { id: 'offline', col: 7, row: 7, n: ['Zdalny nadzór', 'Remote monitoring'], d: ['Postęp offline trwa 50% dłużej.', 'Offline progress lasts 50% longer.'], ops: 6500, reqAny: ['chmura', 'kamera'], need: { label: ['50 tys. figurek', '50K figurines'], value: s => s.total, target: 5e4 }, mods: { offline: 1.5 } },
 ];
+
+/** Every node this one depends on, from `req` and `reqAny`. */
+export const prereqs = (n: Pick<TreeNode, 'req' | 'reqAny'>) => [...(n.req ?? []), ...(n.reqAny ?? [])];
 
 export const NODE: Record<string, TreeNode> = Object.fromEntries(TREE.map(n => [n.id, n]));
 
