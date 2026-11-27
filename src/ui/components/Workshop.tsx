@@ -78,6 +78,17 @@ function MarketEffects() {
   );
 }
 
+/** Stopwatch badge: m:ss left, turns from orange to red as time runs out and pulses in the last seconds. */
+function Countdown({ left, total }: { left: number; total: number }) {
+  const sec = Math.max(0, Math.ceil(left));
+  const frac = total > 0 ? Math.min(1, Math.max(0, left / total)) : 0;
+  return (
+    <div class={'countdown' + (sec <= 15 ? ' urgent' : '')} role="timer" aria-label={`${t('timeLeft')}: ${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`} style={{ '--t': frac.toFixed(3) }}>
+      <span aria-hidden="true">⏱</span> <b>{Math.floor(sec / 60)}:{String(sec % 60).padStart(2, '0')}</b>
+    </div>
+  );
+}
+
 /** Order of the day: ship from stock any time today; days in a row raise the pay. */
 function DailyOrderCard() {
   const d = useS(s => (s.ph === 1 && s.dord && s.dord.day === s.dday ? { ...s.dord, inv: s.inv, streak: s.dstreak } : null));
@@ -145,10 +156,11 @@ function Events() {
         <div class="ev">
           <div class="evt">
             <b>{t('oFrom', dict().clients[o.c])}</b>
-            <p>{o.acc ? t('oProg', fmt(o.got), fmt(o.n), fmt(Math.ceil(o.left)), money(o.pay)) : t('oOffer', fmt(o.n), fmt(o.time), money(o.pay), fmt(Math.ceil(o.offer)))}</p>
+            <p>{o.acc ? t('oProg', fmt(o.got), fmt(o.n), money(o.pay)) : t('oOffer', fmt(o.n), fmt(o.time), money(o.pay))}</p>
             <Meter tone="or" pct={o.acc ? (100 * o.got) / o.n : (100 * o.offer) / BAL.orderOffer} />
             {o.acc && <p class="hint">{t('oHint')}</p>}
           </div>
+          <Countdown left={o.acc ? o.left : o.offer} total={o.acc ? o.time : BAL.orderOffer} />
           {!o.acc && (
             <div class="evb">
               <button class="btn-main" onClick={() => act('oacc')}>{t('accept')}</button>
