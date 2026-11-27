@@ -12,12 +12,12 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 
 | Card | PR | Notes |
 |---|---|---|
+| **QA2: Debug hook and stage fixtures** | #43 | Five promo stages and time stepping |
 
 ## In progress
 
 | Card | Branch | Owner |
 |---|---|---|
-| **QA2: Debug hook and stage fixtures** | `test/qa2-debug-hook` | Codex |
 
 ## 🚦 Next up
 
@@ -29,7 +29,7 @@ Lanes are independent: QA cards depend only on earlier QA cards, Gameplay cards 
 Every prompt below implicitly starts with: *"Read `AGENTS.md` and `README.md` first. Follow the rules there. Run
 `npm test` and `npm run typecheck` before opening the PR. Update the 'In flight' table in `AGENTS.md`."*
 
-### 🧪 Lane QA: test the whole flow (do in order; QA1 is done, QA2 is in progress)
+### 🧪 Lane QA: test the whole flow (do in order; QA1 is done, QA2 is in review)
 
 | # | Card | Effort | Prompt |
 |---|---|---|---|
