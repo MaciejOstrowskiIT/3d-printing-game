@@ -18,6 +18,7 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 
 | Card | Branch | Owner |
 |---|---|---|
+| **QA2: Debug hook and stage fixtures** | `test/qa2-debug-hook` | Codex |
 | **Workshop redesign** (mockup approved by Maciej): production line with printers allocated per model (replaces the two-group fleet split), model tiles with bars instead of multipliers, event cards always visible, money/s and filament runway in the HUD, dark buy buttons (orange only for Print), mobile bottom nav Production / Sales / Print / Research | `feat/workshop-redesign` | Claude |
 
 ## 🚦 Next up
