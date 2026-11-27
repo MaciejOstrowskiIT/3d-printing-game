@@ -1,7 +1,8 @@
-import { useEffect, useLayoutEffect, useRef } from 'preact/hooks';
-import { BRANCHES, TREE, TREE_PAGES, type TreeNode } from '../../content/tree';
+import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { BRANCHES, NODE, prereqs, TREE, TREE_PAGES, type TreeNode } from '../../content/tree';
 import { freePts, opsCap, opsRate, repNext, repPrev } from '../../core/formulas';
 import { nextResearch, nodeStatus, nodeZl } from '../../systems/research';
+import { has } from '../../core/state';
 import { fmt, li, money, prefs, t } from '../i18n';
 import { act, game, ui, useS } from '../store';
 import { AchievementsCard } from './Achievements';
@@ -94,24 +95,62 @@ function costText(n: TreeNode) {
   return c.join(' · ');
 }
 
-function Node({ n, hidden, col, row }: { n: TreeNode; hidden: boolean; col: number; row: number }) {
+/** Everything a node depends on, transitively (alternatives included), plus the node itself. */
+function pathOf(id: string): Set<string> {
+  const out = new Set<string>();
+  const walk = (x: string) => { if (out.has(x)) return; out.add(x); prereqs(NODE[x]).forEach(walk); };
+  walk(id);
+  return out;
+}
+
+interface NodeProps {
+  n: TreeNode; hidden: boolean; col: number; row: number;
+  /** Highlight state: this node is the focus, is on its prerequisite path, or something else is focused. */
+  mark: 'focus' | 'path' | 'dim' | '';
+  onFocusNode: (id: string | null) => void;
+  onPin: (id: string) => void;
+  onJump: (id: string) => void;
+}
+
+function Node({ n, hidden, col, row, mark, onFocusNode, onPin, onJump }: NodeProps) {
   const st = useS(s => nodeStatus(s, n));
   const needVal = useS(s => (n.need ? Math.floor(n.need.value(s)) : 0));
   const requirement = st === 'need' && n.need
     ? t('needs', n.need.label[li()], fmt(needVal), fmt(n.need.target))
     : '';
+  // Prerequisites that live in another branch are not always on screen (other page, narrow layout): name them here.
+  const links = st === 'done' ? [] : [...(n.req ?? []).map(id => ({ id, alt: false })), ...(n.reqAny ?? []).map(id => ({ id, alt: true }))]
+    .filter(l => NODE[l.id].col !== n.col);
+  const disabled = st !== 'ready' && st !== 'done';
   return (
-    <button id={'n-' + n.id} class={'node ' + st + (hidden ? ' off' : '')} style={{ gridColumn: col + 1, gridRow: row }}
-      disabled={st !== 'ready' && st !== 'done'} onClick={() => act(`t:${n.id}`)}>
-      <b>{n.n[li()]}</b><small>{n.d[li()]}</small>
-      <em class="rq">{requirement}</em>
-      <em class="cs">{st === 'done' ? t('done') : costText(n)}</em>
-    </button>
+    <div class={'ncell' + (hidden ? ' off' : '') + (mark ? ' ' + mark : '')} style={{ gridColumn: col + 1, gridRow: row }}
+      tabIndex={disabled ? 0 : undefined} aria-label={disabled ? n.n[li()] : undefined}
+      onPointerEnter={e => { if (e.pointerType === 'mouse') onFocusNode(n.id); }} onPointerLeave={e => { if (e.pointerType === 'mouse') onFocusNode(null); }}
+      onFocusIn={() => onFocusNode(n.id)} onFocusOut={() => onFocusNode(null)} onClick={e => { if ((e as unknown as PointerEvent).pointerType !== 'mouse') onPin(n.id); }}>
+      <button id={'n-' + n.id} class={'node ' + st} disabled={disabled} onClick={() => act(`t:${n.id}`)}>
+        <b>{n.n[li()]}</b><small>{n.d[li()]}</small>
+        <em class="rq">{requirement}</em>
+        <em class="cs">{st === 'done' ? t('done') : costText(n)}</em>
+      </button>
+      {links.length > 0 && (
+        <div class="rqlinks">
+          {links.map(l => {
+            const p = NODE[l.id];
+            const text = t(l.alt ? 'rqAlt' : 'rqChip', p.n[li()], BRANCHES[p.col][li()][0]);
+            const known = has(game.s, p.id) || nodeStatus(game.s, p) !== 'locked';
+            return known
+              ? <button key={l.id} type="button" class={'rqchip' + (l.alt ? ' alt' : '') + (has(game.s, p.id) ? ' met' : '')} aria-label={t('rqGo', p.n[li()])}
+                  onClick={e => { e.stopPropagation(); onJump(p.id); }}>{text}</button>
+              : <span key={l.id} class={'rqchip' + (l.alt ? ' alt' : '')}>{text}</span>;
+          })}
+        </div>
+      )}
+    </div>
   );
 }
 
 /** Connector lines between nodes, computed from DOM positions after every layout change. */
-function useTreeLines(treeRef: { current: HTMLDivElement | null }, svgRef: { current: SVGSVGElement | null }, key: string) {
+function useTreeLines(treeRef: { current: HTMLDivElement | null }, svgRef: { current: SVGSVGElement | null }, key: string, path: Set<string> | null) {
   const draw = () => {
     const tree = treeRef.current, svg = svgRef.current;
     if (!tree || !svg || !tree.offsetParent) return;
@@ -125,7 +164,7 @@ function useTreeLines(treeRef: { current: HTMLDivElement | null }, svgRef: { cur
       if (!A?.offsetParent || !B?.offsetParent) continue;
       const a = A.getBoundingClientRect(), b = B.getBoundingClientRect();
       const x1 = a.left + a.width / 2 - tr.left, y1 = a.bottom - tr.top, x2 = b.left + b.width / 2 - tr.left, y2 = b.top - tr.top, m = (y1 + y2) / 2;
-      h += `<path class="${(A.classList.contains('done') ? 'on' : '') + (n.reqAny?.includes(r) ? ' alt' : '')}" d="M${x1} ${y1} C${x1} ${m} ${x2} ${m} ${x2} ${y2}"/>`;
+      h += `<path class="${(A.classList.contains('done') ? 'on' : '') + (n.reqAny?.includes(r) ? ' alt' : '') + (path?.has(n.id) && path.has(r) ? ' hl' : '')}" d="M${x1} ${y1} C${x1} ${m} ${x2} ${m} ${x2} ${y2}"/>`;
     }
     svg.innerHTML = h;
   };
@@ -152,7 +191,22 @@ function Tree() {
   // Rows with nothing visible yet collapse, so the tree has no empty gaps (row 1 holds the branch headers).
   const rows = [...new Set(visibleNodes.map(n => n.row))].sort((a, b) => a - b);
   const treeRef = useRef<HTMLDivElement>(null), svgRef = useRef<SVGSVGElement>(null);
-  useTreeLines(treeRef, svgRef, doneKey + '|' + br + '|' + (page?.i ?? 0) + '|' + prefs.value.lang);
+  // Highlight: hover or keyboard focus shows a node's whole prerequisite path; a tap pins it (touch has no hover).
+  const [hover, setHover] = useState<string | null>(null);
+  const [pin, setPin] = useState<string | null>(null);
+  const [jump, setJump] = useState<string | null>(null);
+  const active = pin ?? hover;
+  const path = active ? pathOf(active) : null;
+  useTreeLines(treeRef, svgRef, doneKey + '|' + br + '|' + (page?.i ?? 0) + '|' + prefs.value.lang + '|' + (active ?? ''), path);
+  const jumpTo = (id: string) => { ui(s => { s.br = NODE[id].col; }); setPin(id); setJump(id); };
+  useEffect(() => {
+    if (!jump) return;
+    const el = document.getElementById('n-' + jump) as HTMLButtonElement | null;
+    if (!el?.offsetParent) return;
+    el.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    (el.disabled ? el.parentElement : el)?.focus({ preventScroll: true });
+    setJump(null);
+  }, [jump, selectedBranch, doneKey]);
   return (
     <section class="card" style={{ marginTop: '14px' }}>
       <CardHead title={t('tree')} />
@@ -161,7 +215,9 @@ function Tree() {
         <span><i style={{ borderColor: 'var(--acc)' }} />{t('lgAvail')}</span>
         <span><i style={{ borderColor: 'var(--line)', borderStyle: 'dashed' }} />{t('lgNeed')}</span>
         <span><i style={{ borderColor: 'var(--acc)', background: 'var(--accS)' }} />{t('lgDone')}</span>
+        <span><i class="lg-alt" />{t('lgAlt')}</span>
       </div>
+      <p class="hint tree-hint">{t('tHint')}</p>
       {pages.length > 1 && (
         <div class="tpages" role="tablist">
           {pages.map(p => {
@@ -180,14 +236,16 @@ function Tree() {
         ))}
       </div>
       <div class="tscroll">
-        <div class="tree" ref={treeRef} style={{ '--branch-count': branches.length }}>
+        <div class="tree" ref={treeRef} style={{ '--branch-count': branches.length }} onKeyDown={e => { if (e.key === 'Escape') setPin(null); }}>
           <svg ref={svgRef} />
           {branches.map(i => (
             <div key={'h' + i} class={'bh' + (i !== br ? ' off' : '')} style={{ gridColumn: branches.indexOf(i) + 1, gridRow: 1 }}>
               {BRANCHES[i][li()][0]}<small>{BRANCHES[i][li()][1]}</small>
             </div>
           ))}
-          {visibleNodes.map(n => <Node key={n.id} n={n} hidden={n.col !== br} col={branches.indexOf(n.col)} row={rows.indexOf(n.row) + 2} />)}
+          {visibleNodes.map(n => <Node key={n.id} n={n} hidden={n.col !== br} col={branches.indexOf(n.col)} row={rows.indexOf(n.row) + 2}
+            mark={!path ? '' : n.id === active ? 'focus' : path.has(n.id) ? 'path' : 'dim'}
+            onFocusNode={setHover} onPin={id => setPin(p => (p === id ? null : id))} onJump={jumpTo} />)}
         </div>
       </div>
     </section>
