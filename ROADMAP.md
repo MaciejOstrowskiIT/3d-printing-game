@@ -12,7 +12,7 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 
 | Card | PR | Notes |
 |---|---|---|
-| **Workshop finance line chart** | #44 | Selectable samples and a From / To range |
+| **Smooth workshop finance chart scrolling** | #47 | Live rollover and scale animation |
 | **QA2: Debug hook and stage fixtures** | #43 | Five promo stages and time stepping |
 
 ## In progress
@@ -92,6 +92,7 @@ Every prompt below implicitly starts with: *"Read `AGENTS.md` and `README.md` fi
 
 | Card | PR |
 |---|---|
+| Workshop finance line chart | #44 |
 | Preact + Vite architecture, tests, balance bot | #1 |
 | GitHub Pages deploy | #2 |
 | Portal adapters (CrazyGames, Poki) + rewarded boost | #3, #5 |
