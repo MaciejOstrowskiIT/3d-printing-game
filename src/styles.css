@@ -339,17 +339,33 @@ body.space .title-screen{background:#14122b}
 .stats-totals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}
 .stats-totals > div{display:grid;gap:2px;padding:8px 10px;background:var(--sub);border:1px solid var(--line);border-radius:10px}
 .stats-empty{margin:10px 0 0;color:var(--mute)}
+.stats-range{display:flex;align-items:end;flex-wrap:wrap;gap:6px 10px;margin-bottom:10px}
+.stats-range label{display:grid;gap:3px;flex:0 1 auto;min-width:0;color:var(--mute);font-size:13px}
+.stats-range select,.stats-range button{min-height:36px;font:600 14px Barlow,sans-serif}
+.stats-range select{max-width:100%;padding:4px 6px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+.stats-range select:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
 .stats-legend{display:flex;flex-wrap:wrap;gap:14px;color:var(--mute);margin-bottom:5px;font-size:13px}
-.stats-legend span::before{content:"";display:inline-block;width:10px;height:10px;margin-right:5px;border-radius:2px}
-.stats-in-key::before,.stats-in{background:var(--acc)}
-.stats-out-key::before,.stats-out{background:repeating-linear-gradient(135deg,var(--or) 0 3px,var(--orS) 3px 5px)}
-.stats-chart{display:flex;justify-content:flex-end;gap:3px;padding:4px;background:var(--sub);border:1px solid var(--line);border-radius:10px}
-.stats-column{flex:1;max-width:10%;display:grid;grid-template-rows:1fr 1fr;padding:0 3px;height:100px;background:transparent;border:1px solid transparent;border-radius:6px}
-.stats-column[aria-pressed=true]{border-color:var(--acc);background:var(--card)}
-.stats-bar-slot{display:flex;align-items:end;justify-content:center}
-.stats-bar-slot + .stats-bar-slot{align-items:start;border-top:1px solid var(--line)}
-.stats-bar-slot i{display:block;width:min(100%,24px);border-radius:3px 3px 0 0}
-.stats-bar-slot .stats-out{border-radius:0 0 3px 3px}
+.stats-legend span::before{content:"";display:inline-block;width:15px;margin:0 5px 3px 0;border-top:2px solid var(--acc)}
+.stats-legend .stats-out-key::before{border-top:2px dashed var(--or)}
+.stats-chart{position:relative;height:128px;background:var(--sub);border:1px solid var(--line);border-radius:10px}
+.stats-chart svg,.stats-points{position:absolute;inset:0;width:100%;height:100%}
+.stats-chart line,.stats-chart path{vector-effect:non-scaling-stroke}
+.stats-gridline{stroke:var(--line)}
+.stats-crosshair{stroke:var(--mute);stroke-dasharray:2 4;opacity:.75}
+.stats-line{fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.stats-in{color:var(--acc)}
+.stats-out{color:var(--or)}
+.stats-line.stats-in,.stats-line.stats-out{stroke:currentColor}
+.stats-line.stats-out{stroke-dasharray:5 4}
+.stats-points{display:grid}
+.stats-points button{position:relative;min-width:0;padding:0;border:0;border-radius:6px;background:transparent}
+.stats-points button:hover,.stats-points button:focus-visible{background:color-mix(in srgb,var(--acc) 8%,transparent)}
+.stats-points button:focus-visible{z-index:1;outline-offset:-3px}
+.stats-points button:active:not(:disabled){transform:none}
+.stats-marker{position:absolute;left:50%;width:4px;height:4px;transform:translate(-50%,-50%);background:currentColor;border-radius:50%;pointer-events:none}
+.stats-marker.stats-out{border-radius:1px}
+.stats-points button[aria-pressed=true] .stats-marker{width:9px;height:9px;border:2px solid currentColor;background:var(--sub)}
+.stats-points button[aria-pressed=true] .stats-marker.stats-out{width:7px;height:7px}
 .stats-axis{display:flex;justify-content:space-between;margin-top:3px;font-size:12px;color:var(--mute)}
 .stats-detail{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:6px;font-size:13px;color:var(--mute)}
 .stats-models{width:100%;border-collapse:collapse;margin-top:12px;font-variant-numeric:tabular-nums}
@@ -364,7 +380,7 @@ body.space .title-screen{background:#14122b}
   .stats-summary .stats-money{grid-column:1;grid-row:2;font-size:18px}
   .stats-summary i{grid-column:2;grid-row:1/3}
   .stats-totals .stats-money{font-size:19px}
-  .stats-column{height:80px;padding:0 2px}
+  .stats-chart{height:100px}
 }
 
 .stats-margins small{display:block;color:var(--mute);font-size:12px;font-weight:500}
