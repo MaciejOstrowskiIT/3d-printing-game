@@ -83,6 +83,8 @@ export interface GameState {
   planT: number;
   /** Auto printers dedicated to models other than the main one (model id → printers). */
   fleet: Record<string, number>;
+  /** Quantum computer: bought, qubit level (0 when not bought) and quantum points. */
+  qOn: boolean; qLvl: number; qp: number;
 }
 
 export const SAVE_VERSION = 7;
@@ -122,6 +124,7 @@ export const createState = (): GameState => ({
   financeTime: 0, finance: [],
   planT: 0,
   fleet: {},
+  qOn: false, qLvl: 0, qp: 0,
 });
 
 export const has = (s: GameState, id: string) => s.done.includes(id);
