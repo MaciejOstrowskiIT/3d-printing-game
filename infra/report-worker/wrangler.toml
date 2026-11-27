@@ -1,0 +1,17 @@
+name = "drukarnia-report"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+[vars]
+GITHUB_REPO = "MaciejOstrowskiIT/3d-printing-game"
+# Browsers only: any non-browser client can fake the Origin header, the rate limit below is the real guard.
+ALLOWED_ORIGINS = "https://maciejostrowskiit.github.io,*.crazygames.com,*.poki.com,*.poki-gdn.com"
+
+# Workers Rate Limiting: 3 reports per minute per IP (the game itself allows one per 15 s).
+[[unsafe.bindings]]
+name = "LIMITER"
+type = "ratelimit"
+namespace_id = "1001"
+simple = { limit = 3, period = 60 }
+
+# Secret, set once with: npx wrangler secret put GITHUB_TOKEN

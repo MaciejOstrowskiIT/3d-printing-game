@@ -51,6 +51,12 @@ The GitHub Pages build can send anonymous events to a self-hosted [Umami](https:
 
 In code, call `track(name, data)` from `src/ui/analytics.ts`; it forwards to the portal SDK and to Umami and adds context (minutes played, line, goal, build). The build id (`version+sha`) is shown on the title screen.
 
+## Alpha badge and bug reports
+
+A faint `ALPHA` badge sits in the top-right corner (`ui/components/AlphaBadge.tsx`; delete it when leaving alpha). The **Report a bug** button (Settings and title screen) opens a dialog with one free-text field. No contact details are asked for; only build, play time, line, goal, language and viewport are attached. One report per 15 s, remembered across reloads (`platform/report.ts`).
+
+Where reports go: if `VITE_REPORT_ENDPOINT` is set, a JSON `POST` (`{type:'bug_report', description, ...context, at}`) goes there; otherwise they are sent as an Umami `bug_report` event (text split into `d1..d3`), so with analytics on no extra backend is needed. With neither, the button is hidden. The endpoint is the Cloudflare Worker in [`infra/report-worker`](infra/report-worker/README.md), which opens a GitHub issue (set the `REPORT_ENDPOINT` repository variable). Never put a GitHub token or a Discord/Slack webhook straight into the client build, it would be public.
+
 ## Architecture
 
 Three layers. The core knows nothing about the browser, the UI only reads state and dispatches actions, and everything that depends on where the game runs sits behind the platform interface.

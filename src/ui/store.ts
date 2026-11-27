@@ -126,7 +126,7 @@ setTrackContext(() => ({
 /** Title screen first; the simulation only runs on the game screen. */
 export const screen = signal<'title' | 'game'>('title');
 /** Open modal dialog, if any. */
-export const dialog = signal<null | 'save'>(null);
+export const dialog = signal<null | 'save' | 'report'>(null);
 
 /** Local calendar day number, for the order of the day. The core only accepts days moving forward. */
 export const localDay = (now = new Date()) => Math.floor((now.getTime() - now.getTimezoneOffset() * 60_000) / 86_400_000);
