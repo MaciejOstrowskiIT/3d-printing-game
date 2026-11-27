@@ -2,13 +2,15 @@ import { describe, expect, it } from 'vitest';
 import { createGame } from '../src/core/game';
 import { autoCost, spoolPrice, unitCost } from '../src/core/formulas';
 import { exportSave, importSave } from '../src/core/save';
+import { createState } from '../src/core/state';
 import { putPieces } from '../src/systems/inventory';
 import { salesSystem } from '../src/systems/sales';
 import { bookCash, currentSecondIncome, expenses, income, PERIOD_COUNT, PERIOD_SECONDS, stockGrowth } from '../src/systems/workshopStats';
 
 describe('workshop cash flow', () => {
   it('counts actual receipts in the current second without subtracting purchases', () => {
-    const g = createGame();
+    // No filament, so the garage printer stays idle and only the booked cash counts.
+    const g = createGame({ state: { ...createState(), fil: 0 } });
     g.tick(0.25);
     bookCash(g.s, 'sales', 8);
     g.tick(0.25);

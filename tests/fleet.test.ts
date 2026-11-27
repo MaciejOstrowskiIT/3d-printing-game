@@ -19,13 +19,14 @@ describe('split automatic printers', () => {
   it('produces each model separately and consumes the right filament', () => {
     const game = workshop();
     expect(game.act('fleet:keychain:2')).toBe(true);
-    const grams = 2 * gpu(game.s) + 2 * gpu(game.s, MODEL.keychain);
+    // The garage printer always runs on the main model, next to the extra printers left over from the split.
+    const grams = (BAL.basePrinters + 2) * gpu(game.s) + 2 * gpu(game.s, MODEL.keychain);
     expect(fleetFilamentPerSecond(game.s)).toBeCloseTo(grams);
     productionSystem(game.s, 1, ctx);
-    expect(piecesInStock(game.s, 'fig')).toBe(2);
+    expect(piecesInStock(game.s, 'fig')).toBe(BAL.basePrinters + 2);
     expect(piecesInStock(game.s, 'keychain')).toBe(4);
     expect(game.s.fil).toBeCloseTo(1000 - grams);
-    expect(game.s.total).toBe(4);
+    expect(game.s.total).toBe(BAL.basePrinters + 2 + 2);
   });
 
   it('keeps farms and manual printing on the main model', () => {
@@ -35,10 +36,10 @@ describe('split automatic printers', () => {
     game.s.fil = 10000;
     game.act('fleet:keychain:2');
     productionSystem(game.s, 1, ctx);
-    expect(piecesInStock(game.s, 'fig')).toBe(2 + BAL.farmPrinters);
+    expect(piecesInStock(game.s, 'fig')).toBe(BAL.basePrinters + 2 + BAL.farmPrinters);
     expect(piecesInStock(game.s, 'keychain')).toBe(4);
     game.act('print');
-    expect(piecesInStock(game.s, 'fig')).toBe(3 + BAL.farmPrinters);
+    expect(piecesInStock(game.s, 'fig')).toBe(BAL.basePrinters + 3 + BAL.farmPrinters);
     expect(piecesInStock(game.s, 'keychain')).toBe(4);
   });
 
@@ -49,7 +50,7 @@ describe('split automatic printers', () => {
     expect(game.act('fleet:unknown:1')).toBe(false);
     expect(game.act('fleet:fig:1')).toBe(false);
     game.act('mdl:keychain');
-    expect(printersOn(game.s, 'keychain')).toBe(1);
+    expect(printersOn(game.s, 'keychain')).toBe(BAL.basePrinters + 1);
     expect(printersOn(game.s, 'fig')).toBe(3);
     const saved = importSave(exportSave(game.s))!;
     expect(saved.mdl).toBe('keychain');
@@ -65,9 +66,9 @@ describe('split automatic printers', () => {
     expect(game.act('fleet:keychain:1')).toBe(true);
     expect(game.act('fleet:bust:2')).toBe(true);
     expect(game.act('fleet:bust:4')).toBe(false);
-    expect(printersOn(game.s, 'fig')).toBe(1);
+    expect(printersOn(game.s, 'fig')).toBe(BAL.basePrinters + 1);
     productionSystem(game.s, 10, ctx);
-    expect(game.s.modelStock.fig.printed).toBe(10);
+    expect(game.s.modelStock.fig.printed).toBe(10 * (BAL.basePrinters + 1));
     expect(game.s.modelStock.keychain.printed).toBe(20);
     expect(game.s.modelStock.bust.printed).toBe(4);
     expect(game.act('fleet:keychain:0')).toBe(true);
@@ -79,7 +80,7 @@ describe('split automatic printers', () => {
     game.s.mdls.push('bust');
     game.act('fleet:keychain:1');
     game.act('mdl:bust');
-    expect(printersOn(game.s, 'bust')).toBe(3);
+    expect(printersOn(game.s, 'bust')).toBe(BAL.basePrinters + 3);
     expect(printersOn(game.s, 'fig')).toBe(0);
     expect(game.s.fleet).toEqual({ keychain: 1 });
   });

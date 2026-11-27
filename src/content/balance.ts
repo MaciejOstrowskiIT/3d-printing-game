@@ -6,6 +6,7 @@ export const BAL = {
    *  goals that depend on them stretch together. Real-time timers (events, offers, spool drift) are untouched. */
   pace: 5,
   onboardingSeconds: 5 * 60, // at the baseline game pace
+  basePrinters: 1,          // the garage printer: always on, no click needed (clicks only speed it up)
   startPrice: 5,
   startFilament: 1000,
   filamentPerFigurine: 20,

@@ -81,7 +81,7 @@ export const demand = (s: GameState, m = model(s), price = s.price) =>
   mod(s, 'demand') * hard(s, BAL.realisticDemandMul) * SPEED;
 
 export const boostMul = (s: GameState) => (s.boostT > 0 ? BAL.boostMultiplier : 1);
-export const rateBase = (s: GameState) => (s.auto + s.farm * BAL.farmPrinters * eff(s)) * s.spd * boostMul(s) * (1 + 0.15 * patLvl(s, 'speed')) * precisionSpeed(s) * hard(s, BAL.realisticSpeedMul) * SPEED / (s.slow || 1) * mod(s, 'speed');
+export const rateBase = (s: GameState) => (BAL.basePrinters + s.auto + s.farm * BAL.farmPrinters * eff(s)) * s.spd * boostMul(s) * (1 + 0.15 * patLvl(s, 'speed')) * precisionSpeed(s) * hard(s, BAL.realisticSpeedMul) * SPEED / (s.slow || 1) * mod(s, 'speed');
 export const rate1 = (s: GameState) => rateBase(s) * (1 - s.brk);
 
 const repBase = (s: GameState) => BAL.repThreshold * 0.9 ** patLvl(s, 'fame') * mod(s, 'rep');

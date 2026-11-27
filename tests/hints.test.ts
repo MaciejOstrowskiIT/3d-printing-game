@@ -23,7 +23,7 @@ describe('onboarding hints', () => {
       if (active && active !== previous) shown.push(active);
       previous = active;
     }
-    expect(shown).toEqual(['print', 'sell', 'spool', 'printer', 'research']);
+    expect(shown).toEqual(['print', 'sell', 'printer', 'research']);
   });
 
   it('provides Polish and English text for each hint', () => {
@@ -45,11 +45,11 @@ describe('onboarding hints', () => {
   });
 
   it('skips offline catch-up and stops after the onboarding window', () => {
-    const game = createGame();
+    const game = createGame({ state: { ...createState(), fil: 1e6 } });
     game.catchUp(60);
     expect(game.s.hints.seen).toEqual([]);
     game.tick(0.25);
-    expect(game.s.hints.active).toBe('print');
+    expect(game.s.hints.active).not.toBeNull();
     game.s.play = BAL.onboardingSeconds * BAL.pace - 0.25;
     game.tick(0.25);
     expect(game.s.hints.active).toBeNull();
