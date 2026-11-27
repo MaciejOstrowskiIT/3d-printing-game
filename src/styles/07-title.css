@@ -13,4 +13,4 @@ body.space .title-screen{background:#14122b}
 .title-actions .pbtn{min-height:54px;font-size:19px}
 .ghost{background:#ffffff14;border-color:transparent;color:inherit}
 .ghost:hover:not(:disabled){background:#ffffff26;border-color:transparent}
-.title-settings{justify-content:center;margin-top:6px}
+.title-settings{width:100%;margin-top:6px}

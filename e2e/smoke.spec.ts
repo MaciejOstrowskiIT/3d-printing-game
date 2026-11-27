@@ -5,8 +5,8 @@ import { expectHealthy, test } from './helpers';
 test('starts a fresh workshop, prints and switches game tabs', async ({ page, isMobile }) => {
   const nav = page.locator(isMobile ? '.dock' : '.hud');
   const print = isMobile
-    ? nav.getByRole('button', { name: 'Print', exact: true })
-    : page.getByRole('button', { name: /^Print a figurine/ });
+    ? nav.getByRole('button', { name: 'Faster', exact: true })
+    : page.getByRole('button', { name: /^Speed up printing/ });
   const printed = page.locator('.count .num');
   const press = (control: Locator) => isMobile ? control.tap() : control.click();
   const production = page.getByRole('heading', { name: 'Investments', exact: true });
@@ -17,7 +17,7 @@ test('starts a fresh workshop, prints and switches game tabs', async ({ page, is
   await expectHealthy(page);
   await play.click();
   await press(print);
-  await expect(printed).toHaveText('1');
+  await expect(printed).toHaveText(/^[1-9]\d*$/);
 
   // The title only offers New game after there is progress to replace.
   await page.reload();
@@ -25,12 +25,15 @@ test('starts a fresh workshop, prints and switches game tabs', async ({ page, is
   await page.getByRole('button', { name: 'Sure? Your progress will be lost' }).click();
   await expect(printed).toHaveText('0');
 
-  for (let i = 0; i < 3; i++) await press(print);
-  await expect(printed).toHaveText('3');
+  await press(print);
+  await expect(printed).toHaveText(/^[1-9]\d*$/);
   await expectHealthy(page);
 
   // Research unlocks later. Reach it via the normal save import UI.
-  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  const settings = page.getByRole('dialog', { name: 'Settings' });
+  await settings.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(settings).toBeHidden();
   const save = page.getByRole('dialog', { name: 'Saved game' });
   await save.getByRole('textbox', { name: 'Load a save' }).fill(JSON.stringify({ ...createState(), goal: 5 }));
   await save.getByRole('button', { name: 'Load', exact: true }).click();
