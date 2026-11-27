@@ -34,7 +34,7 @@
   .dock .pbtn{width:132px;min-height:58px;border-radius:16px;margin-top:-22px;box-shadow:0 6px 18px #0004;font-size:16px;background:var(--or);border-color:var(--or)}
   .dock .pbtn:hover:not(:disabled){background:var(--orD);border-color:var(--orD)}
   .dock .pbtn:disabled{background:#8a8a93;border-color:#8a8a93;opacity:1}
-  .mset{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:20px}
+  .mset{display:grid;margin-top:20px}
   .mset button{min-height:36px;font-size:13.5px}
 }
 @media(max-width:420px){.tiles{grid-template-columns:repeat(3,minmax(0,1fr))}.tile{padding:6px 8px}.tile b{font-size:17px}.buy{min-width:104px}}

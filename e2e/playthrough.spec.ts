@@ -26,7 +26,10 @@ for (const { lang, locale, dict, textIndex } of languages) {
       const advanceBot = (seconds: number) => page.evaluate(s => window.__drk!.advanceBot!(s), seconds);
       let checkpoint = await advanceBot(0);
       await expect(page.locator('html')).toHaveAttribute('lang', lang);
-      await page.getByRole('button', { name: dict.mOn, exact: true }).click();
+      await page.getByRole('button', { name: dict.setOpen, exact: true }).click();
+      const settings = page.getByRole('dialog', { name: dict.setTitle });
+      await settings.getByRole('checkbox', { name: dict.setSound, exact: true }).uncheck();
+      await settings.getByRole('button', { name: dict.sClose, exact: true }).click();
       await page.getByRole('button', { name: dict.tPlay, exact: true }).click();
 
       const endScreen = page.locator('.end');

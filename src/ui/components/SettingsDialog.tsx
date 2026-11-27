@@ -1,25 +1,39 @@
-import { useLayoutEffect, useRef } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { fmtAs, prefs, reducedMotion, setPrefs, t, type Notation } from '../i18n';
-import { dialog } from '../store';
+import { dialog, resetGame } from '../store';
 
 const NOTATIONS: [Notation, 'setNotationShort' | 'setNotationScientific' | 'setNotationFull'][] =
   [['short', 'setNotationShort'], ['scientific', 'setNotationScientific'], ['full', 'setNotationFull']];
 
-/** Player preferences: sound, language, number notation, reduced motion and hints. Saved through the platform
- *  preferences (setPrefs), never in the game save. */
+/** Player preferences and access to save and reset actions. */
 export function SettingsDialog() {
   const open = dialog.value === 'settings';
   const ref = useRef<HTMLDialogElement>(null);
+  const [sure, setSure] = useState(false);
   useLayoutEffect(() => {
     const modal = ref.current;
     if (!open || !modal) return;
+    setSure(false);
     modal.showModal();
     return () => modal.close();
   }, [open]);
+  useEffect(() => {
+    if (!open || !sure) return;
+    const timeout = setTimeout(() => setSure(false), 4000);
+    return () => clearTimeout(timeout);
+  }, [open, sure]);
   const p = prefs.value;
   const close = () => { dialog.value = null; };
   const volume = Math.round((p.volume ?? 1) * 100);
   const notation = p.notation ?? 'short';
+  const restart = () => {
+    if (!sure) {
+      setSure(true);
+      return;
+    }
+    resetGame('fresh');
+    close();
+  };
   return (
     <dialog ref={ref} class="modal settings-dialog" aria-labelledby="settings-title" onCancel={e => { e.preventDefault(); close(); }} onClick={e => { if (e.target === e.currentTarget) close(); }}>
       <div class="modal-box">
@@ -60,6 +74,11 @@ export function SettingsDialog() {
 
         <div class="set-row">
           <label class="set-check"><input type="checkbox" checked={p.hints !== false} onChange={e => setPrefs({ hints: e.currentTarget.checked })} />{t('setHints')}</label>
+        </div>
+
+        <div class="set-row set-actions">
+          <button onClick={() => { dialog.value = 'save'; }}>{t('sOpen')}</button>
+          <button onClick={restart}>{sure ? t('sure') : t('reset')}</button>
         </div>
       </div>
     </dialog>

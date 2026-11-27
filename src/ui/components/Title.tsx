@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { createState } from '../../core/state';
 import { AlphaBadge } from './AlphaBadge';
-import { fmt, prefs, setPrefs, t } from '../i18n';
+import { fmt, t } from '../i18n';
 import { mountPrinter } from '../scene/printer';
-import { reporter } from '../report';
 import { dialog, game, startGame, useS } from '../store';
+import { Settings } from './side/settings';
 
-/** Title screen: animated printer, continue / new game / load save, language and sound. */
+/** Title screen: animated printer, continue / new game / load save, settings and bug reporting. */
 export function Title() {
   const svgRef = useRef<SVGSVGElement>(null);
   const [sure, setSure] = useState(false);
@@ -37,12 +37,7 @@ export function Title() {
           )}
           <button class="ghost" onClick={() => { dialog.value = 'save'; }}>{t('tLoad')}</button>
         </div>
-        <div class="settings title-settings">
-          <button onClick={() => setPrefs({ lang: prefs.value.lang === 'pl' ? 'en' : 'pl' })}>{t('langBtn')}</button>
-          {reporter.enabled && <button class="report-btn" onClick={() => { dialog.value = 'report'; }}><span aria-hidden="true">🐞</span> {t('rOpen')}</button>}
-          <button onClick={() => setPrefs({ mute: !prefs.value.mute })}>{prefs.value.mute ? t('mOff') : t('mOn')}</button>
-          <button class="gear" aria-label={t('setOpen')} title={t('setOpen')} onClick={() => { dialog.value = 'settings'; }}><span aria-hidden="true">⚙</span></button>
-        </div>
+        <Settings class="settings title-settings" />
       </div>
       <AlphaBadge />
       <p class="build-id">v{__BUILD__}</p>

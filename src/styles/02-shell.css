@@ -37,7 +37,8 @@ body.space .side .pbtn,body.space .dock .pbtn{display:none}
 .log{margin:0;padding:10px 12px;list-style:none;background:#2a2e37;color:#e9e7f0;border-radius:12px;font-size:13.5px;flex:1 1 auto;min-height:84px;overflow:hidden;cursor:pointer}
 .log li{opacity:.5;padding:1px 0}.log li:first-child{opacity:1}
 .log li::before{content:"› ";color:#ff9a62}
-.settings{display:flex;gap:6px;flex-wrap:wrap}
-.settings button{min-height:32px;padding:4px 10px;font-size:13px;background:#ffffff14;border-color:transparent;color:inherit}
+.settings,.mset{grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:6px}
+.settings{display:grid}
+.settings button{min-height:36px;padding:4px 10px;font-size:13.5px;background:#ffffff14;border-color:transparent;color:inherit}
 .settings button:hover:not(:disabled){background:#ffffff26;border-color:transparent}
 

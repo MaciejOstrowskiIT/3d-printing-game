@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
-import { fireEvent, waitFor } from '@testing-library/preact';
+import { fireEvent, waitFor, within } from '@testing-library/preact';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createState } from '../src/core/state';
 import { fmt, fmtAs, prefs, reducedMotion, setPrefs } from '../src/ui/i18n';
-import { dialog } from '../src/ui/store';
+import { dialog, game as currentGame } from '../src/ui/store';
 import { renderHealthyApp, setupAppRenderTests } from './uiHarness';
 
 setupAppRenderTests();
@@ -37,9 +37,10 @@ describe('reduced motion', () => {
 describe('Settings dialog', () => {
   const game = () => ({ ...createState(), goal: 1 });
 
-  it('opens from the gear button and changes the preferences', () => {
+  it('opens from the labeled Settings button and changes the preferences', () => {
     const c = renderHealthyApp(game(), 'en');
-    fireEvent.click(c.querySelector<HTMLElement>('button.gear')!);
+    const actions = within(c.querySelector('.side .settings')!);
+    fireEvent.click(actions.getByRole('button', { name: 'Settings' }));
     expect(dialog.value).toBe('settings');
     const box = c.querySelector('.settings-dialog')!;
     fireEvent.change(box.querySelector('input[type=range]')!, { target: { value: '40' } });
@@ -50,6 +51,24 @@ describe('Settings dialog', () => {
     expect(prefs.value.notation).toBe('full');
     fireEvent.click([...box.querySelectorAll('.set-choice button')].find(b => b.textContent === 'Polski')!);
     expect(prefs.value.lang).toBe('pl');
+  });
+
+  it('requires confirmation each time Settings opens before resetting the workshop', async () => {
+    const c = renderHealthyApp({ ...game(), total: 42 }, 'en');
+    const open = within(c.querySelector('.side .settings')!).getByRole('button', { name: 'Settings' });
+    fireEvent.click(open);
+    const settings = within(c.querySelector('.settings-dialog')!);
+    fireEvent.click(settings.getByRole('button', { name: 'Start over' }));
+    expect(currentGame.s.total).toBe(42);
+    fireEvent.click(settings.getByRole('button', { name: 'Close' }));
+    await waitFor(() => expect(c.querySelector('.settings-dialog[open]')).toBeNull());
+
+    fireEvent.click(open);
+    fireEvent.click(await settings.findByRole('button', { name: 'Start over' }));
+    expect(currentGame.s.total).toBe(42);
+    fireEvent.click(settings.getByRole('button', { name: 'Sure? Click again' }));
+    expect(currentGame.s.total).toBe(0);
+    expect(dialog.value).toBeNull();
   });
 
   it('turns the onboarding hints off and the motion switch on', async () => {
