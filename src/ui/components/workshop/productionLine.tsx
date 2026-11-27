@@ -34,7 +34,7 @@ export function ProductionLine() {
     stock: Object.fromEntries(s.mdls.map(id => [id, piecesInStock(s, id)])),
     rate: Object.fromEntries(s.mdls.map(id => [id, rateOn(s, id)])),
     printers: Object.fromEntries(s.mdls.map(id => [id, printersOn(s, id)])),
-    progress: s.modelStock[s.mdl]?.progress ?? 0,
+    progress: Object.fromEntries(s.mdls.map(id => [id, s.modelStock[id]?.progress ?? 0])),
     cur: s.mdl, owned: s.mdls.join(','), zl: s.zl, slow: s.slow || 1, auto: s.auto, farm: s.farm,
     split: splitUnlocked(s), free: s.auto - dedicated(s) > 0 ? 1 : 0, total: s.total, sales: s.goal >= 1,
     visible: MODELS.filter(m => designVisible(s, m)).map(m => m.id).join(','),
@@ -83,10 +83,10 @@ export function ProductionLine() {
                             <button aria-label={t('lineMore', m.name[li()])} disabled={!v.free} onClick={() => act(`fleet:${m.id}:${n + 1}`)}>+</button>
                           </div>}
                       {!main && <button class="mt-mk" onClick={() => act(`mdl:${m.id}`)}>{t('lineMakeMain')}</button>}
-                      {(main || n > 0) && <small class="mt-rate">{t('fleetRate', nf(60 * v.rate[m.id] / m.seconds, 1))}</small>}
+                      <small class="mt-rate">{main || n > 0 ? t('fleetRate', nf(60 * v.rate[m.id] / m.seconds, 1)) : '\u00a0'}</small>
                     </div>
                   : <button class={main ? 'on' : ''} disabled={main} onClick={e => { if (act(`mdl:${m.id}`) && e.detail > 0) e.currentTarget.blur(); }}>{main ? t('mdlOn') : t('mdlUse')}</button>}
-              {main && <Meter pct={100 * v.progress / m.seconds} />}
+              {have && (v.split || main) && <Meter pct={100 * (v.progress[m.id] ?? 0) / m.seconds} style={!main && n === 0 ? { opacity: '.35' } : undefined} />}
             </div>
           );
         })}

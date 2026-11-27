@@ -49,7 +49,7 @@
 .mt-main b{font-size:24px}
 .mt-main small{color:var(--mute);font-size:12px}
 .mt-mk{min-height:36px;font-size:13px;padding:4px 8px;background:transparent}
-.mt-rate{color:var(--mute);font-size:12px;text-align:center}
+.mt-rate{color:var(--mute);font-size:12px;text-align:center;min-height:1.3em}
 .mtile>button:not(.mt-head),.mtile .buy{width:100%;margin-top:auto}
 .mtile.next{border:1.5px dashed var(--line);background:transparent;justify-content:center;gap:6px;color:var(--mute);font-size:13px}
 .mtile.next b{color:var(--ink);font-size:15px}
