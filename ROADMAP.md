@@ -13,14 +13,13 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 | Card | PR | Notes |
 |---|---|---|
 | **Keep the live finance line continuous** | #51 | Smooth transition into a new empty interval |
-| **QA2: Debug hook and stage fixtures** | #43 | Five promo stages and time stepping |
+| **QA3: Full-game bot playthrough in Chromium** | #52 | Polish and English runs through ending and prestige |
 | **Bug report preview mode** | #46 | Form visible in dev and QA `#debug` without a transport |
 
 ## In progress
 
 | Card | Branch | Owner |
 |---|---|---|
-| **QA3: Full-game bot playthrough in Chromium** | `test/qa3-browser-playthrough` | Codex |
 
 ## 🚦 Next up
 
@@ -32,7 +31,7 @@ Lanes are independent: QA cards depend only on earlier QA cards, Gameplay cards 
 Every prompt below implicitly starts with: *"Read `AGENTS.md` and `README.md` first. Follow the rules there. Run
 `npm test` and `npm run typecheck` before opening the PR. Update the 'In flight' table in `AGENTS.md`."*
 
-### 🧪 Lane QA: test the whole flow (do in order; QA1 is done, QA2 is in review)
+### 🧪 Lane QA: test the whole flow (do in order; QA1 and QA2 are done, QA3 is in review)
 
 | # | Card | Effort | Prompt |
 |---|---|---|---|
@@ -126,6 +125,7 @@ Every prompt below implicitly starts with: *"Read `AGENTS.md` and `README.md` fi
 | Split the fleet between two models | #35 |
 | Workshop redesign: production line, investments, mobile nav | #39 |
 | QA1: Browser smoke test harness (Codex) | #40 |
+| QA2: Debug hook and stage fixtures (Codex) | #43 |
 | ALPHA badge, bug report form, GitHub issue worker | #41 |
 | Tab width and Materials layout shifts | #45 |
 | Bug report worker deployed, `REPORT_ENDPOINT` set (Maciej) | #41 |
