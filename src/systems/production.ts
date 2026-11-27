@@ -59,6 +59,7 @@ export function printWork(s: GameState, ctx: Ctx, requested: number, m = model(s
   const work = Math.min(requested, s.fil / g);
   if (work <= 0) return 0;
   s.fil = Math.max(0, s.fil - work * g);
+  if (ctx.tally) ctx.tally.filament += work * g;
   const lot = modelStock(s, m.id);
   const premium = s.precision ? BAL.precisionPremium : 0;
   const previous = lot.progress;
