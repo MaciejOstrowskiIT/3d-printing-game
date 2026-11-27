@@ -44,7 +44,7 @@ export function Investments() {
   const spoolSub = !v.spoolD ? t('spoolSub') : t(v.spoolD > 0 ? 'spoolUp' : 'spoolDn', Math.abs(Math.round(v.spoolD * 100)));
   return (
     <section class="card workshop-production v-p">
-      <CardHead title={t(v.goal >= 2 ? 'investTitle' : 'production')} aside={v.goal >= 2 ? t('investAside') : undefined} />
+      <CardHead title={t(v.goal >= 2 ? 'investTitle' : 'production')} />
       <BoostRow />
       <RewardedRows />
       <Item className="spool-row" name={t(v.bulk ? 'spool5Item' : 'spoolItem')} sub={v.showFeedstock ? v.feedstock + ' · ' + spoolSub : spoolSub}>
