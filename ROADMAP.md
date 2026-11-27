@@ -12,6 +12,7 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 
 | Card | PR | Notes |
 |---|---|---|
+| **Workshop finance line chart** | #44 | Selectable samples and a From / To range |
 | **QA2: Debug hook and stage fixtures** | #43 | Five promo stages and time stepping |
 
 ## In progress
