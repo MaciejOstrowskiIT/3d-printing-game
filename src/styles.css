@@ -88,6 +88,14 @@ body.space .side .pbtn,body.space .dock .pbtn{display:none}
 .ev .evt{flex:1 1 240px}
 .ev b{font:700 18px "Barlow Condensed",sans-serif}
 .ev p{margin:0;font-size:14px}
+/* Digits of equal width, so counters inside a sentence (602 of 2070, 107 s left) do not push the rest of the text around. */
+.ev p,.ev small{font-variant-numeric:tabular-nums}
+/* Time left on an order: fixed width so the digits never move the card; --t is the share of time left (1 = full). */
+.countdown{--t:1;flex:0 0 auto;min-width:84px;box-sizing:border-box;text-align:center;white-space:nowrap;padding:6px 10px;border-radius:999px;border:1.5px solid color-mix(in srgb,var(--bad) calc((1 - var(--t)) * 100%),var(--or));background:color-mix(in srgb,var(--bad) calc((1 - var(--t)) * 22%),var(--orS));font-variant-numeric:tabular-nums}
+.countdown b{font:700 18px "Barlow Condensed",sans-serif}
+.countdown.urgent{animation:cdpulse 1s ease-in-out infinite}
+@keyframes cdpulse{50%{transform:scale(1.07)}}
+@media(prefers-reduced-motion:reduce){.countdown.urgent{animation:none}}
 .ev .meter{margin:6px 0 0}
 .mfx{display:flex;flex-wrap:wrap;gap:6px}
 .mfx .mchip{font-size:13px;font-weight:600;border-radius:999px;padding:3px 10px;background:var(--accS);color:var(--acc);border:1px solid color-mix(in srgb,var(--acc) 40%,transparent)}
