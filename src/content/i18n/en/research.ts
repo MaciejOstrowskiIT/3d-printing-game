@@ -26,6 +26,8 @@ export const researchTexts = {
   goalN: 'Goal {0} of {1}',
   goalEnd: 'End of the road',
   goalEndT: 'Everything processed',
+  goalUnlockNote: 'Goal done: {0}',
+  goalUnlocked: 'Just unlocked',
   repNext: 'Next point at {0} figurines',
   opsRate: '+{0} compute per second',
   done: 'Done',

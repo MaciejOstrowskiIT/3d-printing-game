@@ -26,6 +26,8 @@ export const researchTexts = {
   goalN: 'Cel {0} z {1}',
   goalEnd: 'Koniec ścieżki',
   goalEndT: 'Wszystko przetworzone',
+  goalUnlockNote: 'Cel ukończony: {0}',
+  goalUnlocked: 'Właśnie odblokowane',
   repNext: 'Następny punkt przy {0} figurkach',
   opsRate: '+{0} mocy na sekundę',
   done: 'Ukończone',
