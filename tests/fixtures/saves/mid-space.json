@@ -1,0 +1,490 @@
+{
+  "v": 7,
+  "ph": 2,
+  "total": 804834731335,
+  "sold": 44044,
+  "inv": 13671029228.834084,
+  "zl": 2444065.447360567,
+  "price": 8.697,
+  "fil": 50684.52326399705,
+  "g": 15,
+  "spool": 67.98643456192632,
+  "spoolG": 5000,
+  "spoolT": 9.709412102801451,
+  "spoolD": 0.046890727158466206,
+  "auto": 46,
+  "farm": 14,
+  "farmOn": true,
+  "spd": 3.75,
+  "dem": 37.440000000000005,
+  "mkt": 17,
+  "rep": 43516,
+  "proc": 43206,
+  "mem": 300,
+  "ops": 675000,
+  "done": [
+    "profil",
+    "dysza",
+    "kurier",
+    "chlodzenie",
+    "skaner",
+    "kamera",
+    "autobuy",
+    "magazyn",
+    "fw",
+    "agencja",
+    "serwer",
+    "tiktok",
+    "recykling",
+    "mieszanki",
+    "parametr",
+    "hurt",
+    "leasing",
+    "crm",
+    "serwis",
+    "czesci",
+    "podpory",
+    "sklep",
+    "autocena",
+    "paczkomaty",
+    "automkt",
+    "autooffer",
+    "kontrakt",
+    "autodaily",
+    "licencje",
+    "shaping",
+    "hotend",
+    "pudelka",
+    "offline",
+    "chmura",
+    "marketplace",
+    "farma",
+    "taryfa",
+    "negocjator",
+    "prefab",
+    "baterie",
+    "chemia",
+    "autodruk",
+    "automodel",
+    "hub",
+    "autopkt",
+    "studio",
+    "corexy",
+    "kolekcja",
+    "marka",
+    "neuro",
+    "nocna",
+    "slicer",
+    "replik",
+    "zarzad",
+    "autobud",
+    "granulat",
+    "dronydost",
+    "genai",
+    "eksport",
+    "b2b",
+    "franczyza",
+    "roje",
+    "regolit",
+    "nano",
+    "stocznia",
+    "sondy",
+    "grawi",
+    "lustra",
+    "rojai"
+  ],
+  "log": [
+    {
+      "k": "msgNew",
+      "a": [
+        "=question"
+      ]
+    },
+    {
+      "k": "ach",
+      "a": [
+        "!half"
+      ]
+    },
+    {
+      "k": "repN",
+      "a": [
+        12
+      ]
+    },
+    {
+      "k": "repN",
+      "a": [
+        13
+      ]
+    },
+    {
+      "k": "repN",
+      "a": [
+        13
+      ]
+    }
+  ],
+  "acc": 0,
+  "sacc": 0.5191319558590177,
+  "mat": 19998288.400000498,
+  "mat0": 40000000,
+  "drones": 229,
+  "fabs": 39,
+  "ft": 3905046.25,
+  "dMul": 500,
+  "fMul": 500,
+  "end": false,
+  "amOn": {
+    "kamera": true,
+    "autobuy": true,
+    "autocena": true,
+    "automkt": true,
+    "autooffer": true,
+    "autodaily": true,
+    "autodruk": true,
+    "automodel": true,
+    "autopkt": true,
+    "zarzad": true,
+    "autobud": true,
+    "b2b": true
+  },
+  "amT": 0,
+  "goal": 16,
+  "tab": "w",
+  "br": 0,
+  "warn": false,
+  "ord": null,
+  "ordT": 7.391185919470701,
+  "ordDone": 29,
+  "ordFail": 0,
+  "pen": 0,
+  "brk": 0,
+  "brkC": 5,
+  "brkT": 196.2215772717671,
+  "fixT": 2.25,
+  "fails": 17,
+  "panels": 7,
+  "pwWarn": false,
+  "ts": 1760000000000,
+  "serverThrough": 0,
+  "col": 3,
+  "trend": 3,
+  "trendT": 218.68715756325383,
+  "boostT": 0,
+  "boostCd": 0,
+  "ach": [
+    "first",
+    "trendy",
+    "firstDesign",
+    "auto1",
+    "order1",
+    "k1",
+    "clicker",
+    "sales1000",
+    "toolbox",
+    "research10",
+    "order10",
+    "fixer",
+    "farm1",
+    "solar5",
+    "rich",
+    "farm10",
+    "designs",
+    "m1",
+    "liftoff",
+    "robots",
+    "miningFleet",
+    "b1",
+    "orbital10",
+    "beltPercent",
+    "half"
+  ],
+  "achT": 0,
+  "colorsUsed": 61,
+  "play": 4740,
+  "mev": null,
+  "mevT": 68.34704498613581,
+  "mfx": [],
+  "mdl": "helmet",
+  "mdls": [
+    "fig",
+    "keychain",
+    "bust",
+    "dragon",
+    "helmet",
+    "cableComb",
+    "planter",
+    "lunarBase",
+    "mechanicalOrrery"
+  ],
+  "clk": 6,
+  "mp": 0,
+  "offB": 0,
+  "offBi": 0,
+  "offBT": 0,
+  "slow": 1,
+  "dday": 0,
+  "dord": null,
+  "dstreak": 0,
+  "dbest": 0,
+  "today": 0,
+  "story": [
+    "mum",
+    "firstClient",
+    "neighbour",
+    "bulk",
+    "forum",
+    "viral",
+    "rival",
+    "pricing",
+    "grid",
+    "liftoff",
+    "board",
+    "drone",
+    "question"
+  ],
+  "msg": "question",
+  "msgT": 0,
+  "meta": {
+    "patents": 0,
+    "earned": 0,
+    "runs": 0,
+    "pat": {}
+  },
+  "precision": false,
+  "bedCalibrated": false,
+  "dryerInstalled": false,
+  "stockPremium": 0,
+  "materialId": "pla",
+  "materialStock": {},
+  "lowFil": false,
+  "matHint": false,
+  "autoMat": false,
+  "modelStock": {},
+  "orderStock": {},
+  "financeTime": 3501,
+  "finance": [
+    {
+      "index": 107,
+      "cash": {
+        "sales": 430664.6400000001,
+        "orders": 0,
+        "bonus": 0,
+        "filament": 35894.45591663945,
+        "equipment": 0,
+        "other": 0
+      },
+      "models": {
+        "helmet": {
+          "pieces": 747,
+          "revenue": 430664.6400000001,
+          "stocked": 939,
+          "cost": 28636.74649436197
+        }
+      }
+    },
+    {
+      "index": 108,
+      "cash": {
+        "sales": 428607.9599999999,
+        "orders": 0,
+        "bonus": 0,
+        "filament": 35002.780133813525,
+        "equipment": 0,
+        "other": 100000
+      },
+      "models": {
+        "helmet": {
+          "pieces": 778,
+          "revenue": 428607.9599999999,
+          "stocked": 939,
+          "cost": 28937.652936362796
+        }
+      }
+    },
+    {
+      "index": 109,
+      "cash": {
+        "sales": 320519.1599999998,
+        "orders": 0,
+        "bonus": 0,
+        "filament": 37959.941953705355,
+        "equipment": 545487.767286009,
+        "other": 80000
+      },
+      "models": {
+        "helmet": {
+          "pieces": 807,
+          "revenue": 320519.1599999998,
+          "stocked": 823,
+          "cost": 30601.411753258813
+        }
+      }
+    },
+    {
+      "index": 110,
+      "cash": {
+        "sales": 334861.5,
+        "orders": 1993530.8924999998,
+        "bonus": 0,
+        "filament": 40952.222318174485,
+        "equipment": 665495.076088931,
+        "other": 1326143.249318197
+      },
+      "models": {
+        "helmet": {
+          "pieces": 844,
+          "revenue": 334861.5,
+          "cost": 30445.468207479233,
+          "stocked": 461
+        }
+      }
+    },
+    {
+      "index": 111,
+      "cash": {
+        "sales": 677559.6199999998,
+        "orders": 0,
+        "bonus": 0,
+        "filament": 41659.9463250586,
+        "equipment": 990168.617705443,
+        "other": 50000
+      },
+      "models": {
+        "helmet": {
+          "pieces": 795,
+          "revenue": 438013.97999999963,
+          "stocked": 795,
+          "cost": 28951.064252502474
+        },
+        "lunarBase": {
+          "pieces": 600,
+          "revenue": 239545.63999999993,
+          "stocked": 600,
+          "cost": 12585.607527290162
+        }
+      }
+    },
+    {
+      "index": 112,
+      "cash": {
+        "sales": 949073.6800000003,
+        "orders": 0,
+        "bonus": 0,
+        "filament": 42539.51771443734,
+        "equipment": 0,
+        "other": 0
+      },
+      "models": {
+        "lunarBase": {
+          "pieces": 1687,
+          "revenue": 949073.6800000003,
+          "stocked": 1905,
+          "cost": 37632.50417526934
+        }
+      }
+    },
+    {
+      "index": 113,
+      "cash": {
+        "sales": 980987.0800000003,
+        "orders": 0,
+        "bonus": 0,
+        "filament": 45750.47793915999,
+        "equipment": 811903.9928284958,
+        "other": 0
+      },
+      "models": {
+        "lunarBase": {
+          "pieces": 1659,
+          "revenue": 980987.0800000003,
+          "stocked": 2038,
+          "cost": 37478.27534545055
+        }
+      }
+    },
+    {
+      "index": 114,
+      "cash": {
+        "sales": 1147803.1000000006,
+        "orders": 5540613.340499998,
+        "bonus": 0,
+        "filament": 77953.87913851392,
+        "equipment": 4969332.023763412,
+        "other": 0
+      },
+      "models": {
+        "lunarBase": {
+          "pieces": 1513,
+          "revenue": 826168.6,
+          "stocked": 916,
+          "cost": 31709.278508362506
+        },
+        "helmet": {
+          "pieces": 520,
+          "revenue": 321634.50000000006,
+          "stocked": 684,
+          "cost": 17354.13647820859
+        }
+      }
+    },
+    {
+      "index": 115,
+      "cash": {
+        "sales": 1510511.58,
+        "orders": 0,
+        "bonus": 0,
+        "filament": 95625.88948610042,
+        "equipment": 1798638.9747149586,
+        "other": 0
+      },
+      "models": {
+        "helmet": {
+          "pieces": 2542,
+          "revenue": 1510511.58,
+          "stocked": 3151,
+          "cost": 78138.26841340413
+        }
+      }
+    },
+    {
+      "index": 116,
+      "cash": {
+        "sales": 1047817.7400000005,
+        "orders": 0,
+        "bonus": 0,
+        "filament": 68796.99086118002,
+        "equipment": 0,
+        "other": 600000
+      },
+      "models": {
+        "helmet": {
+          "pieces": 1844,
+          "revenue": 1047817.7400000005,
+          "stocked": 2233,
+          "cost": 55561.44190075692
+        }
+      }
+    }
+  ],
+  "planT": 7,
+  "fleet": {},
+  "qOn": false,
+  "qLvl": 0,
+  "qp": 0,
+  "manualWork": 3510,
+  "priorPlay": 0,
+  "autoDroneBuilt": true,
+  "priorCompletions": 0,
+  "hints": {
+    "seen": [
+      "print",
+      "sell",
+      "spool",
+      "printer"
+    ],
+    "active": null,
+    "retired": false
+  }
+}

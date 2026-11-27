@@ -1,0 +1,244 @@
+{
+  "v": 6,
+  "ph": 1,
+  "total": 701.5,
+  "sold": 421,
+  "inv": 216,
+  "zl": 1265.604183787801,
+  "price": 9.894,
+  "fil": 1003.375,
+  "g": 15,
+  "spool": 54.84346159899692,
+  "spoolG": 1000,
+  "spoolT": 8.450526712555684,
+  "spoolD": -0.009644045631945986,
+  "auto": 4,
+  "farm": 0,
+  "farmOn": false,
+  "spd": 1,
+  "dem": 1.3,
+  "mkt": 4,
+  "rep": 1,
+  "proc": 1,
+  "mem": 2,
+  "ops": 235,
+  "done": [
+    "profil",
+    "dysza"
+  ],
+  "log": [
+    {
+      "k": "mkt",
+      "a": [
+        4
+      ]
+    },
+    {
+      "k": "msgNew",
+      "a": [
+        "=neighbour"
+      ]
+    },
+    {
+      "k": "ach",
+      "a": [
+        "!order1"
+      ]
+    },
+    {
+      "k": "goal",
+      "a": [
+        "Odblokuj pierwszy węzeł|Unlock your first node"
+      ]
+    },
+    {
+      "k": "goal",
+      "a": [
+        "Zdobądź punkt reputacji|Earn a reputation point"
+      ]
+    }
+  ],
+  "acc": 0,
+  "sacc": 0.7252757324660069,
+  "mat": 40000000,
+  "mat0": 40000000,
+  "drones": 0,
+  "fabs": 0,
+  "ft": 0,
+  "dMul": 1,
+  "fMul": 1,
+  "end": false,
+  "amOn": {},
+  "amT": 0.5,
+  "goal": 6,
+  "tab": "w",
+  "br": 0,
+  "warn": false,
+  "ord": null,
+  "ordT": 84.04915846746842,
+  "ordDone": 1,
+  "ordFail": 0,
+  "pen": 0,
+  "brk": 0,
+  "brkC": 0,
+  "brkT": 118.5,
+  "fixT": 0,
+  "fails": 0,
+  "panels": 0,
+  "pwWarn": false,
+  "ts": 1760000000000,
+  "serverThrough": 0,
+  "col": 2,
+  "trend": 2,
+  "trendT": 54.5,
+  "boostT": 0,
+  "boostCd": 0,
+  "ach": [
+    "first",
+    "trendy",
+    "auto1",
+    "order1"
+  ],
+  "achT": 0,
+  "colorsUsed": 5,
+  "play": 103.5,
+  "mev": null,
+  "mevT": 5.75,
+  "mfx": [],
+  "mdl": "fig",
+  "mdls": [
+    "fig",
+    "keychain"
+  ],
+  "clk": 4,
+  "mp": 0,
+  "offB": 0,
+  "offBi": 0,
+  "offBT": 0,
+  "slow": 1,
+  "dday": 0,
+  "dord": null,
+  "dstreak": 0,
+  "dbest": 0,
+  "today": 0,
+  "story": [
+    "mum",
+    "firstClient",
+    "neighbour"
+  ],
+  "msg": null,
+  "msgT": 0.5,
+  "meta": {
+    "patents": 0,
+    "earned": 0,
+    "runs": 0,
+    "pat": {}
+  },
+  "precision": false,
+  "bedCalibrated": false,
+  "dryerInstalled": false,
+  "stockPremium": 0,
+  "materialId": "pla",
+  "materialStock": {},
+  "lowFil": true,
+  "matHint": false,
+  "autoMat": false,
+  "modelStock": {
+    "fig": {
+      "pieces": 0,
+      "price": 5.1,
+      "premium": 0,
+      "saleCarry": 0,
+      "progress": 0.5,
+      "progressPremium": 0,
+      "printed": 701
+    },
+    "keychain": {
+      "pieces": 0,
+      "price": 8.9046,
+      "premium": 0,
+      "saleCarry": 0.8974042271345515,
+      "progress": 0,
+      "progressPremium": 0,
+      "printed": 1
+    }
+  },
+  "orderStock": {},
+  "financeTime": 103.5,
+  "finance": [
+    {
+      "index": 0,
+      "cash": {
+        "sales": 669.7970000000001,
+        "orders": 0,
+        "bonus": 0,
+        "filament": 113.9329173532139,
+        "equipment": 96,
+        "other": 0
+      },
+      "models": {
+        "fig": {
+          "pieces": 120,
+          "revenue": 669.7970000000001
+        }
+      }
+    },
+    {
+      "index": 1,
+      "cash": {
+        "sales": 961.0809999999985,
+        "orders": 0,
+        "bonus": 0,
+        "filament": 226.58612441700683,
+        "equipment": 275,
+        "other": 250
+      },
+      "models": {
+        "fig": {
+          "pieces": 142,
+          "revenue": 961.0809999999985
+        }
+      }
+    },
+    {
+      "index": 2,
+      "cash": {
+        "sales": 942.2069999999986,
+        "orders": 0,
+        "bonus": 0,
+        "filament": 284.5968244882605,
+        "equipment": 480.70000000000005,
+        "other": 180
+      },
+      "models": {
+        "fig": {
+          "pieces": 114,
+          "revenue": 942.2069999999986
+        }
+      }
+    },
+    {
+      "index": 3,
+      "cash": {
+        "sales": 424.32329999999985,
+        "orders": 1837.875,
+        "bonus": 0,
+        "filament": 110.75504995371593,
+        "equipment": 1228.1082000000001,
+        "other": 324
+      },
+      "models": {
+        "fig": {
+          "pieces": 44,
+          "revenue": 419.87099999999987
+        },
+        "keychain": {
+          "pieces": 1,
+          "revenue": 4.4523
+        }
+      }
+    }
+  ],
+  "fleetModel": "keychain",
+  "fleetPrinters": 2
+}

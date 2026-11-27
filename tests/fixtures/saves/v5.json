@@ -1,0 +1,156 @@
+{
+  "v": 5,
+  "ph": 1,
+  "total": 8026,
+  "sold": 5853,
+  "inv": 3,
+  "zl": 10355.834037859955,
+  "price": 6.9,
+  "fil": 3413,
+  "g": 15,
+  "spool": 59.62906343809575,
+  "spoolG": 1000,
+  "spoolT": 7.111637114482763,
+  "spoolD": -0.004343555730747739,
+  "auto": 23,
+  "farm": 0,
+  "farmOn": false,
+  "spd": 1.25,
+  "dem": 1.9500000000000002,
+  "mkt": 8,
+  "rep": 4,
+  "proc": 2,
+  "mem": 4,
+  "ops": 1825,
+  "done": [
+    "profil",
+    "dysza",
+    "autobuy",
+    "kamera",
+    "fw",
+    "tiktok"
+  ],
+  "log": [
+    {
+      "k": "mdlSel",
+      "a": [
+        "*bust"
+      ]
+    },
+    {
+      "k": "mdlBuy",
+      "a": [
+        "*bust"
+      ]
+    },
+    {
+      "k": "mkt",
+      "a": [
+        8
+      ]
+    },
+    {
+      "k": "oOk",
+      "a": [
+        "$14539.875"
+      ]
+    },
+    {
+      "k": "rep1",
+      "a": []
+    }
+  ],
+  "acc": 0.8125,
+  "sacc": 0.41944464921720925,
+  "mat": 40000000,
+  "mat0": 40000000,
+  "drones": 0,
+  "fabs": 0,
+  "ft": 0,
+  "dMul": 1,
+  "fMul": 1,
+  "end": false,
+  "amOn": {
+    "autobuy": true,
+    "kamera": true
+  },
+  "amT": 0.25,
+  "goal": 8,
+  "tab": "w",
+  "br": 0,
+  "warn": false,
+  "ord": null,
+  "ordT": 70.19966223589128,
+  "ordDone": 4,
+  "ordFail": 0,
+  "pen": 0,
+  "brk": 0,
+  "brkC": 5,
+  "brkT": 53.9753840203515,
+  "fixT": 4.5,
+  "fails": 2,
+  "panels": 0,
+  "pwWarn": false,
+  "ts": 1760000000000,
+  "serverThrough": 0,
+  "col": 3,
+  "trend": 3,
+  "trendT": 80.30012424560269,
+  "boostT": 0,
+  "boostCd": 0,
+  "ach": [
+    "first",
+    "trendy",
+    "auto1",
+    "order1",
+    "k1"
+  ],
+  "achT": 0.25,
+  "colorsUsed": 13,
+  "play": 443.25,
+  "mev": null,
+  "mevT": 72.34482790534145,
+  "mfx": [],
+  "mdl": "bust",
+  "mdls": [
+    "fig",
+    "keychain",
+    "bust"
+  ],
+  "clk": 5,
+  "mp": 2.25,
+  "offB": 0,
+  "offBi": 0,
+  "offBT": 0,
+  "slow": 1,
+  "dday": 0,
+  "dord": null,
+  "dstreak": 0,
+  "dbest": 0,
+  "today": 0,
+  "story": [
+    "mum",
+    "firstClient",
+    "neighbour",
+    "bulk",
+    "forum",
+    "viral"
+  ],
+  "msg": null,
+  "msgT": 0.25,
+  "meta": {
+    "patents": 0,
+    "earned": 0,
+    "runs": 0,
+    "pat": {}
+  },
+  "precision": false,
+  "bedCalibrated": false,
+  "dryerInstalled": false,
+  "stockPremium": 0,
+  "materialId": "pla",
+  "materialStock": {},
+  "lowFil": true,
+  "matHint": false,
+  "autoMat": false
+}
