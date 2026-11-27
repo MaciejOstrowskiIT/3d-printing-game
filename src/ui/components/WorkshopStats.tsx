@@ -74,9 +74,9 @@ function useChartScroll(range: PlotRange) {
   return frame?.start === range.start && frame.end === range.end ? frame : undefined;
 }
 
-function CashFlowChart({ periods, live, selected, periodLabel, onSelect }: {
+function CashFlowChart({ periods, liveProgress, selected, periodLabel, onSelect }: {
   periods: CashPeriod[];
-  live: boolean;
+  liveProgress: number | null;
   selected: number;
   periodLabel: (index: number) => string;
   onSelect: (index: number) => void;
@@ -84,19 +84,29 @@ function CashFlowChart({ periods, live, selected, periodLabel, onSelect }: {
   const first = periods[0];
   const start = first.index;
   const end = periods[periods.length - 1].index;
-  const peak = Math.max(1, ...periods.map(p => Math.max(income(p), expenses(p))));
-  const scroll = useChartScroll({ start, end, live, peak, first });
+  const samples = periods.map(period => ({ period, receipts: income(period), costs: expenses(period) }));
+  const latest = samples[samples.length - 1];
+  const previous = samples[samples.length - 2];
+  const rolling = liveProgress !== null && previous !== undefined;
+  if (rolling) {
+    // The stored totals are per bucket. Estimate the trailing window by keeping the
+    // unelapsed share of the previous bucket until the current one fills in.
+    latest.receipts += previous.receipts * (1 - liveProgress);
+    latest.costs += previous.costs * (1 - liveProgress);
+  }
+  const peak = Math.max(1, ...samples.map(({ receipts, costs }) => Math.max(receipts, costs)));
+  const scroll = useChartScroll({ start, end, live: liveProgress !== null, peak, first });
   const targetWidth = PLOT_WIDTH / periods.length;
   const oldWidth = scroll ? PLOT_WIDTH / (scroll.from.end - scroll.from.start + 1) : targetWidth;
   const width = scroll ? interpolate(oldWidth, targetWidth, scroll.progress) : targetWidth;
   const left = scroll ? interpolate((start - scroll.from.start) * oldWidth, 0, scroll.progress) : 0;
   const scale = scroll ? interpolate(scroll.from.peak, peak, scroll.progress) : peak;
   const height = (value: number) => PLOT_BOTTOM - (PLOT_BOTTOM - PLOT_TOP) * value / scale;
-  const plot = (period: CashPeriod) => ({
+  const plot = (period: CashPeriod, receipts = income(period), costs = expenses(period)) => ({
     period, x: left + width * (period.index - start + 0.5),
-    incomeY: height(income(period)), expensesY: height(expenses(period)),
+    incomeY: height(receipts), expensesY: height(costs),
   });
-  const points = periods.map(plot);
+  const points = samples.map(({ period, receipts, costs }) => plot(period, receipts, costs));
   const leaving = scroll && start > scroll.from.start ? plot(scroll.from.first) : null;
   const active = points.find(point => point.period.index === selected);
   const grid = [PLOT_TOP, (PLOT_TOP + PLOT_BOTTOM) / 2, PLOT_BOTTOM];
@@ -105,8 +115,7 @@ function CashFlowChart({ periods, live, selected, periodLabel, onSelect }: {
       <svg aria-hidden="true" viewBox={`0 0 ${PLOT_WIDTH} ${PLOT_HEIGHT}`} preserveAspectRatio="none">
         {grid.map(y => <line key={y} class="stats-gridline" x1="0" x2={PLOT_WIDTH} y1={y} y2={y} />)}
         {active && <line class="stats-crosshair" x1={active.x} x2={active.x} y1={PLOT_TOP} y2={PLOT_BOTTOM} />}
-        <CashFlowLines points={scroll ? points.slice(0, -1) : points} />
-        {scroll && <g opacity={scroll.progress}><CashFlowLines points={points.slice(-2)} /></g>}
+        <CashFlowLines points={points} />
         {scroll && leaving && <g opacity={1 - scroll.progress}><CashFlowLines points={[leaving, points[0]]} /></g>}
       </svg>
       <div class="stats-points">
@@ -115,6 +124,7 @@ function CashFlowChart({ periods, live, selected, periodLabel, onSelect }: {
           return (
             <button type="button" key={p.index} aria-pressed={point === active}
               style={{ left: 100 * (point.x - width / 2) / PLOT_WIDTH + '%', width: 100 * width / PLOT_WIDTH + '%' }}
+              title={rolling && p.index === end ? t('statsLiveHint') : undefined}
               aria-label={t('statsPoint', periodLabel(p.index), money(income(p)), money(expenses(p)))} onClick={() => onSelect(p.index)}>
               <i aria-hidden="true" class="stats-marker stats-in" style={{ top: 100 * point.incomeY / PLOT_HEIGHT + '%' }} />
               <i aria-hidden="true" class="stats-marker stats-out" style={{ top: 100 * point.expensesY / PLOT_HEIGHT + '%' }} />
@@ -131,7 +141,10 @@ export function WorkshopStats() {
   const [selected, setSelected] = useState<number | null>(null);
   const [from, setFrom] = useState<number | null>(null);
   const [to, setTo] = useState<number | null>(null);
-  const { current, history } = useS(s => ({ current: periodIndex(s), history: s.finance.filter(p => p.index > periodIndex(s) - PERIOD_COUNT) }));
+  const { current, financeTime, history } = useS(s => {
+    const current = periodIndex(s);
+    return { current, financeTime: s.financeTime, history: s.finance.filter(p => p.index > current - PERIOD_COUNT) };
+  });
   useEffect(() => {
     const screen = matchMedia(DESKTOP);
     const resize = () => setOpen(screen.matches);
@@ -202,7 +215,7 @@ export function WorkshopStats() {
             {filtered && <button type="button" onClick={() => { setFrom(null); setTo(null); }}>{t('statsWindow')}</button>}
           </div>}
           <div class="stats-legend"><span class="stats-in-key">{t('statsIncome')}</span><span class="stats-out-key">{t('statsExpenses')}</span></div>
-          <CashFlowChart periods={periods} live={end === current} selected={detail.index} periodLabel={periodLabel} onSelect={setSelected} />
+          <CashFlowChart periods={periods} liveProgress={end === current ? financeTime / PERIOD_SECONDS - current : null} selected={detail.index} periodLabel={periodLabel} onSelect={setSelected} />
           {periods.length > 1 && <div class="stats-axis" aria-hidden="true"><span>{periodLabel(start)}</span><span>{periodLabel(end)}</span></div>}
           <div class="stats-detail">
             <strong>{periodLabel(detail.index)}</strong>

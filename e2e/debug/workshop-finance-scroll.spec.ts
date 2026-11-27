@@ -52,3 +52,48 @@ for (const reducedMotion of ['no-preference', 'reduce'] as const) {
     await expectHealthy(page);
   });
 }
+
+test('continues the live line when a new period starts empty', async ({ page, isMobile }) => {
+  const state = { ...createState(), total: 50, goal: 2, financeTime: 8 * PERIOD_SECONDS };
+  bookCash(state, 'sales', 80);
+  bookCash(state, 'equipment', 20);
+  state.financeTime += PERIOD_SECONDS;
+  bookCash(state, 'sales', 80);
+  bookCash(state, 'equipment', 20);
+  state.financeTime = 10 * PERIOD_SECONDS - 3;
+
+  await page.clock.install();
+  await page.goto('/#debug');
+  await page.waitForFunction(() => Boolean(window.__drk));
+  await page.evaluate(save => window.__drk!.load(save), state);
+  if (isMobile) {
+    await page.getByRole('tab', { name: 'Sales', exact: true }).tap();
+    await page.getByRole('button', { name: /^Workshop results/ }).tap();
+  }
+
+  const chart = page.getByRole('group', { name: 'Income and spending in 30-second intervals' });
+  const live = chart.getByRole('button', { name: /^Now\./ });
+  await expect(live).toHaveAccessibleName('Now. Income $80.00. Spending $20.00.');
+  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 500));
+
+  const lineEndHeights = () => chart.locator('svg > .stats-line').evaluateAll(lines => lines.map(line => {
+    const path = line as SVGPathElement;
+    return 100 * path.getPointAtLength(path.getTotalLength()).y / path.ownerSVGElement!.viewBox.baseVal.height;
+  }));
+  const before = await lineEndHeights();
+  expect(before).toHaveLength(2);
+
+  await page.evaluate(() => window.__drk!.step(3));
+  await expect(live).toHaveAccessibleName('Now. Income $0.00. Spending $0.00.');
+  await page.clock.runFor(450);
+  const atRollover = await lineEndHeights();
+  for (const [i, y] of atRollover.entries()) expect(Math.abs(y - before[i])).toBeLessThan(8);
+
+  await page.evaluate(() => window.__drk!.step(14));
+  const halfway = await lineEndHeights();
+  for (const [i, y] of halfway.entries()) {
+    expect(y).toBeGreaterThan(atRollover[i]);
+    expect(y).toBeLessThan(90);
+  }
+  await expectHealthy(page);
+});
