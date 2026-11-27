@@ -8,6 +8,9 @@ import { quantumVisible } from './quantum';
 
 export type NodeStatus = 'done' | 'locked' | 'need' | 'ready' | 'avail';
 
+export const researchUnlocked = (s: GameState) =>
+  s.goal >= 5 || s.rep > 0 || s.done.length > 0 || s.meta.runs > 0 || s.meta.patents > 0;
+
 /** Money cost of a node, after patents (Investor discounts liftoff). */
 export const nodeZl = (s: GameState, n: TreeNode) => (n.zl ?? 0) * (n.liftoff ? 1 - 0.15 * patLvl(s, 'investor') : 1);
 

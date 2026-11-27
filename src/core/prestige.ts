@@ -49,6 +49,7 @@ export function prestige(s: GameState, ctx: Ctx, realistic = false): GameState |
   next.manualWork = s.manualWork;
   next.priorPlay = s.priorPlay + s.play;
   next.priorCompletions = s.priorCompletions + Number(s.end);
+  next.hints = { seen: [...s.hints.seen], active: null, retired: true };
   next.colorsUsed = s.colorsUsed;
   next.col = s.col;
   next.slow = realistic ? BAL.realisticSlow : 1;

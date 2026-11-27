@@ -11,6 +11,7 @@ import { validModelState } from '../systems/models';
 import { validOfflineBonus } from '../systems/offlineBonus';
 import { validDailyState } from '../systems/dailyOrder';
 import { validStoryState } from '../systems/story';
+import { validHints } from '../systems/hints';
 import { validWorkshopStats } from '../systems/workshopStats';
 import type { GameState } from './state';
 
@@ -66,6 +67,7 @@ export function validSave(s: GameState, defaults: GameState) {
   if (!validPatents(s.meta)) return false;
   if (s.priorPlay < 0) return false;
   if (!integer(s.priorCompletions)) return false;
+  if (!validHints(s.hints)) return false;
   const kept = KEPT_AUTOMATION[s.meta.pat.keep ?? 0];
   if (s.done.some(id => !kept.includes(id) && savedPrereqMissing(s.done, NODE[id]))) return false;
   if (!validMarketState(s) || !validModelState(s) || !validInventory(s) || !validFleet(s) || !validMaterialState(s) || !validOfflineBonus(s) || ![1, BAL.realisticSlow].includes(s.slow) || !validDailyState(s) || !validStoryState(s) || s.play < 0) return false;

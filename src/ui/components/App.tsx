@@ -1,5 +1,6 @@
 import { useEffect } from 'preact/hooks';
-import { fmt, playtime, prefs, t } from '../i18n';
+import { HINTS } from '../../content/hints';
+import { fmt, li, playtime, prefs, t } from '../i18n';
 import { act, dialog, mobileView, resetGame, screen, ui, useS } from '../store';
 import { Toasts } from './Achievements';
 import { AlphaBadge } from './AlphaBadge';
@@ -66,6 +67,18 @@ function End() {
   );
 }
 
+function OnboardingHint() {
+  const active = useS(s => s.hints.active);
+  const hint = HINTS.find(item => item.id === active);
+  if (!hint) return null;
+  return (
+    <div class="onboarding-hint">
+      <span role="status">{hint.text[li()]}</span>
+      <button aria-label={t('dismissHint')} onClick={() => act('hint-dismiss')}>×</button>
+    </div>
+  );
+}
+
 export function App() {
   const tab = useS(s => s.tab);
   const sp = useS(s => s.ph === 2);
@@ -92,6 +105,7 @@ export function App() {
         <div class="main">
           <Hud />
           <div class="content">
+            <OnboardingHint />
             {tab === 'r' ? <Research /> : tab === 'a' ? <AchievementsCard /> : <Workshop />}
             <Settings class="mset" />
           </div>

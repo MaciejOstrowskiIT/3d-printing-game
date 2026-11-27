@@ -84,3 +84,5 @@ h2{font-size:21px;margin:0;line-height:1.1}
 .am input{width:20px;height:20px;margin:1px 0 0;accent-color:var(--acc);flex:none}
 .am span{display:flex;flex-direction:column}.am small{color:var(--mute);font-size:13px}
 
+.onboarding-hint{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;padding:8px 12px;background:var(--card);border:1px solid var(--line);border-radius:12px;font-size:14px}
+.onboarding-hint button{flex:none}

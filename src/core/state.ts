@@ -1,3 +1,4 @@
+import type { HintProgress } from '../systems/hints';
 import type { CashPeriod } from '../systems/workshopStats';
 import type { ModelStock } from '../systems/inventory';
 import { DEFAULT_MATERIAL } from '../content/materials';
@@ -93,6 +94,7 @@ export interface GameState {
   autoDroneBuilt: boolean;
   /** Finished games before the current production line. */
   priorCompletions: number;
+  hints: HintProgress;
 }
 
 export const SAVE_VERSION = 7;
@@ -137,6 +139,7 @@ export const createState = (): GameState => ({
   priorPlay: 0,
   autoDroneBuilt: false,
   priorCompletions: 0,
+  hints: { seen: [], active: null, retired: false },
 });
 
 export const has = (s: GameState, id: string) => s.done.includes(id);
