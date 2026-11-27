@@ -31,10 +31,10 @@ test('switching material does not resize the Materials card or its buttons', asy
   await openWorkshop(page);
   if (info.project.use.isMobile) await page.locator('.dock .tab').first().click();
   const card = page.locator('.materials');
-  const snapshot = () => card.evaluate(c => ({ height: Math.round(c.getBoundingClientRect().height), buttons: [...c.querySelectorAll('.item > button')].map(b => Math.round(b.getBoundingClientRect().width)) }));
+  const snapshot = () => card.evaluate(c => ({ height: Math.round(c.getBoundingClientRect().height), buttons: [...c.querySelectorAll('.material-actions button')].map(b => Math.round(b.getBoundingClientRect().width)) }));
   const before = await snapshot();
   for (let i = 0; i < 3; i++) {
-    await card.locator('.item > button:not([disabled])').first().click();
+    await card.locator('.material-actions button[aria-pressed="false"]').first().click();
     expect(await snapshot()).toEqual(before);
   }
 });
