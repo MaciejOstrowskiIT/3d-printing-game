@@ -111,3 +111,10 @@ h2{font-size:21px;margin:0;line-height:1.1}
 .gain-float{position:absolute;right:0;top:0;font:700 14px "Barlow Condensed",sans-serif;font-style:normal;font-variant-numeric:tabular-nums;white-space:nowrap;color:light-dark(#0f7a3a,#5fd38a);animation:gain-rise 1.2s ease-out forwards}
 @keyframes gain-rise{0%{opacity:0;transform:translateY(4px)}15%{opacity:1}100%{opacity:0;transform:translateY(-22px)}}
 :root[data-motion=reduced] .gain-floats{display:none}
+/* Funds trend next to the money rate (#142): it only fills spare width (zero basis) and has negative margins,
+   so the chip never grows taller or wider; in a narrow chip it shrinks or disappears. */
+.chip-sub:has(.funds-spark){display:flex;align-items:center;white-space:nowrap}
+.funds-spark{flex:1 1 auto;width:0;max-width:36px;min-width:0;margin:-3px 0 -3px 6px;overflow:visible}
+.funds-spark polyline{fill:none;stroke-width:1.4;stroke-linejoin:round;stroke-linecap:round}
+.funds-spark .spark-in{stroke:light-dark(#0f7a3a,#5fd38a)}
+.funds-spark .spark-out{stroke:var(--bad);opacity:.75}

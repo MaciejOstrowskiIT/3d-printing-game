@@ -27,6 +27,7 @@ export const hudTexts = {
   navProd: 'Produkcja',
   navSales: 'Sprzedaż',
   moneyRate: '{0}/s',
+  sparkLabel: 'Wpływy (zielone) i wydatki (czerwone), ostatnie 5 minut',
   filLeft: 'na {0}',
   funds: 'Środki',
   stock: 'Na stanie',
