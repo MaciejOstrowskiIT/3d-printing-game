@@ -31,6 +31,19 @@ manual printing and navigation on desktop and at 390×844 with touch enabled. Ad
 `-- --headed` to watch the tests or `-- --project=chromium-mobile` to run only the phone
 scenario. Failure traces are written to `e2e/out/`.
 
+### Layout stability
+
+`npm run e2e:layout` checks all five promo saves in Chromium at 1280×800 and 390×844.
+It requires [CLS](https://web.dev/articles/cls) below 0.02 over 20 seconds of live play,
+limits vertical movement to 2 px using one-second samples, and checks for
+horizontal overflow. Run a single stage
+with `npm run e2e:layout -- -g factory`. Each case attaches its measurements to
+the Playwright result. The same tests also run in `npm run e2e`.
+
+The vertical position baseline resets only at goal or phase changes, research unlocks,
+or purchases of models, printers, farms, panels, drones and factories. Every reset
+is listed in the measurements. CLS and horizontal overflow cover the entire window.
+
 ### Debugging game stages
 
 `npm run dev` exposes `window.__drk` after the game boots. To test a built version,
