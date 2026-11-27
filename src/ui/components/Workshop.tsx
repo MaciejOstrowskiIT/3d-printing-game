@@ -1,4 +1,3 @@
-import { useLayoutEffect, useRef } from 'preact/hooks';
 import { signal } from '@preact/signals';
 import { dedicated, printersOn, rateOn, splitUnlocked } from '../../systems/fleet';
 import { stockGrowth } from '../../systems/workshopStats';
@@ -544,26 +543,17 @@ function Automation() {
   );
 }
 
-function WorkshopSupport({ research, farm, compact }: { research: boolean; farm: boolean; compact: boolean }) {
-  const panel = useRef<HTMLDetailsElement>(null);
-  useLayoutEffect(() => {
-    const screen = matchMedia(compact ? '(min-width: 1740px)' : '(min-width: 821px)');
-    const apply = () => { if (panel.current) panel.current.open = screen.matches; };
-    apply();
-    screen.addEventListener('change', apply);
-    return () => screen.removeEventListener('change', apply);
-  }, [compact]);
-
+/** Research, equipment, power and automation: always visible, no collapsible wrapper. */
+function WorkshopSupport({ research, farm }: { research: boolean; farm: boolean }) {
   return (
-    <details class={'workshop-support' + (compact ? ' compact' : '')} ref={panel}>
-      <summary>{t(research ? 'workshopSupportResearch' : 'workshopSupport')}</summary>
+    <div class="workshop-support">
       <div class="workshop-stack">
         {research && <ResearchPreview />}
         <PrintQuality />
         {farm && <Energy />}
         <Automation />
       </div>
-    </details>
+    </div>
   );
 }
 
@@ -602,7 +592,7 @@ export function Workshop() {
         </div>
         {(v.designs || support) && <div class="workshop-tools v-p">
           {v.designs && <div class="workshop-stack"><Materials /></div>}
-          {support && <WorkshopSupport research={research} farm={v.farm} compact={v.designs} />}
+          {support && <WorkshopSupport research={research} farm={v.farm} />}
         </div>}
       </div>
     </div>
