@@ -57,22 +57,40 @@ export function resetGame(logKey?: string) {
   restartClock();
   lastT = performance.now();
   awayReport.value = undefined;
+  clearAllNotes();
   save();
   bump();
 }
 
-/** Toasts currently on screen: achievements and new notifications. */
-export interface Toast { key: number; id?: string; note?: { icon: string; title: string; body: string } }
-export const toasts = signal<Toast[]>([]);
+/** Achievement toasts currently on screen. */
+export const toasts = signal<{ id: string; key: number }[]>([]);
 let toastKey = 0;
-function addToast(toast: Omit<Toast, 'key'>, ms: number) {
+function pushToast(id: string) {
   const key = ++toastKey;
-  toasts.value = [...toasts.value, { ...toast, key }].slice(-3);
-  setTimeout(() => { toasts.value = toasts.value.filter(x => x.key !== key); }, ms);
+  toasts.value = [...toasts.value, { id, key }].slice(-3);
+  setTimeout(() => { toasts.value = toasts.value.filter(x => x.key !== key); }, 4200);
 }
-function pushToast(id: string) { addToast({ id }, 4200); }
-/** A notification arrived (message, order, breakdown...): a toast the player can click to open the notification panel. */
-export const pushNote = (note: NonNullable<Toast['note']>) => addToast({ note }, 6500);
+
+/** A notification the player has received: kept in the notification panel until they clear it there. */
+export interface Note { key: number; icon: string; title: string; body: string; at: number }
+/** Received notifications, newest first. Session only; only the panel clears them. */
+export const inbox = signal<Note[]>([]);
+/** New notifications shown as toasts under the HUD bell. Swiping or timing out hides the toast, never the inbox entry. */
+export const noteToasts = signal<Note[]>([]);
+let noteKey = 0;
+const TOAST_MS = 6500;
+/** A notification arrived: it goes into the inbox, and (unless `silent`, e.g. already open on load) pops up as a toast. */
+export function pushNote(note: Omit<Note, 'key' | 'at'>, silent = false) {
+  const item: Note = { ...note, key: ++noteKey, at: Date.now() };
+  inbox.value = [item, ...inbox.value].slice(0, 30);
+  if (silent) return;
+  noteToasts.value = [...noteToasts.value, item].slice(-3);
+  setTimeout(() => hideNoteToast(item.key), TOAST_MS);
+}
+export const hideNoteToast = (key: number) => { noteToasts.value = noteToasts.value.filter(x => x.key !== key); };
+/** Clears from the panel: one notification, or all of them. */
+export const clearNote = (key: number) => { inbox.value = inbox.value.filter(x => x.key !== key); hideNoteToast(key); };
+export const clearAllNotes = () => { inbox.value = []; noteToasts.value = []; };
 /** Bumped to ask the HUD to open the notification panel (a toast was clicked). */
 export const notifRequest = signal(0);
 
@@ -158,6 +176,7 @@ export function startGame(fresh = false) {
 export function loadImported(s: GameState) {
   lastT = performance.now();
   awayReport.value = undefined;
+  clearAllNotes();
   game.load(s);
   restartClock();
   save();
@@ -173,6 +192,7 @@ export function loadDebugState(s: GameState) {
   game.load(s);
   awayReport.value = undefined;
   toasts.value = [];
+  clearAllNotes();
   dialog.value = null;
   mobileView.value = 'p';
   screen.value = 'game';
