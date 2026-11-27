@@ -71,9 +71,15 @@ export function automationSystem(s: GameState, dt: number, ctx: Ctx) {
         if (s.planT >= 30) { s.planT = 0; const best = bestModel(s); if (best !== s.mdl) selectModel(s, ctx, best); }
       }
     }
-  } else if (on(s, 'autobud')) {
+  } else if (!s.end && on(s, 'autobud')) {
     const free = s.inv - reserveWyd(s);
-    if (mining(s) <= fabCap(s) * 1.2) { if (free >= droneCost(s)) { s.inv -= droneCost(s); s.drones++; } }
+    if (mining(s) <= fabCap(s) * 1.2) {
+      if (free >= droneCost(s)) {
+        s.inv -= droneCost(s);
+        s.drones++;
+        s.autoDroneBuilt = true;
+      }
+    }
     else if (free >= fabCost(s)) { s.inv -= fabCost(s); s.fabs++; }
   }
 
