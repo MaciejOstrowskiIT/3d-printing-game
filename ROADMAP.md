@@ -14,6 +14,7 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 |---|---|---|
 | **Smooth workshop finance chart scrolling** | #47 | Live rollover and scale animation |
 | **QA2: Debug hook and stage fixtures** | #43 | Five promo stages and time stepping |
+| **Bug report preview mode** | #46 | Form visible in dev and QA `#debug` without a transport |
 
 ## In progress
 
@@ -66,6 +67,7 @@ Every prompt below implicitly starts with: *"Read `AGENTS.md` and `README.md` fi
 | Umami on Proxmox + HTTPS (Cloudflare Tunnel or your reverse proxy) | `infra/umami/README.md` |
 | Set repo variables `UMAMI_HOST` and `UMAMI_WEBSITE_ID`, re-run the deploy | Analytics stays off until then |
 | Playtest with 5–10 people, read Umami after a week | Where players drop off decides the backlog order |
+| Bug reports: renew the fine-grained `GITHUB_TOKEN` before it expires (`cd infra/report-worker && npx wrangler secret put GITHUB_TOKEN`); reports become public issues labelled `bug-report` | Worker: `https://drukarnia-report.printworks-game.workers.dev`, repo variable `REPORT_ENDPOINT` is set. If reports stop arriving, check the token first |
 | CrazyGames submission: progress saving = "Yes, using the Data Module from the CrazyGames SDK" | Without it the data module is disabled (the game falls back to localStorage) |
 
 ## 📋 Backlog
@@ -124,3 +126,5 @@ Every prompt below implicitly starts with: *"Read `AGENTS.md` and `README.md` fi
 | Workshop redesign: production line, investments, mobile nav | #39 |
 | QA1: Browser smoke test harness (Codex) | #40 |
 | ALPHA badge, bug report form, GitHub issue worker | #41 |
+| Tab width and Materials layout shifts | #45 |
+| Bug report worker deployed, `REPORT_ENDPOINT` set (Maciej) | #41 |
