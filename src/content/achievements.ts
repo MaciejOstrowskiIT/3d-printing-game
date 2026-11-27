@@ -19,6 +19,7 @@ const allColors = (1 << COLORS.length) - 1;
 export const ACHIEVEMENTS: Achievement[] = [
   { id: 'first', n: ['Pierwsza warstwa', 'First layer'], d: ['Wydrukuj pierwszą figurkę.', 'Print your first figurine.'], check: s => s.total >= 1 },
   { id: 'k1', n: ['Seria próbna', 'Test batch'], d: ['Wydrukuj 1000 figurek.', 'Print 1,000 figurines.'], check: s => s.total >= 1e3 },
+  { id: 'clicker', n: ['Klikacz', 'Clicker'], d: ['Wydrukuj ręcznie równowartość 1000 figurek.', 'Manually print the equivalent of 1,000 figurines.'], check: s => s.manualWork + 1e-9 >= 1e3 },
   { id: 'm1', n: ['Milion warstw', 'A million layers'], d: ['Wydrukuj milion figurek.', 'Print a million figurines.'], check: s => s.total >= 1e6 },
   { id: 'b1', n: ['Masowa produkcja', 'Mass production'], d: ['Wydrukuj miliard figurek.', 'Print a billion figurines.'], check: s => s.total >= 1e9 },
   { id: 'auto1', n: ['Nie muszę klikać', 'Hands off'], d: ['Kup pierwszą drukarkę automatyczną.', 'Buy your first auto printer.'], check: s => s.auto >= 1 },

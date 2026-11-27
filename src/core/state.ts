@@ -83,6 +83,8 @@ export interface GameState {
   planT: number;
   /** Auto printers dedicated to models other than the main one (model id → printers). */
   fleet: Record<string, number>;
+  /** Figurine-equivalent work done by hand across all production lines. */
+  manualWork: number;
 }
 
 export const SAVE_VERSION = 7;
@@ -122,6 +124,7 @@ export const createState = (): GameState => ({
   financeTime: 0, finance: [],
   planT: 0,
   fleet: {},
+  manualWork: 0,
 });
 
 export const has = (s: GameState, id: string) => s.done.includes(id);

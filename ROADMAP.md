@@ -12,6 +12,7 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 
 | Card | PR | Notes |
 |---|---|---|
+| **Clicker achievement** | #64 | Unlocks at 1,000 figurines of manual work (#59) |
 | **Explain when the next daily order is available** | #62 | Clarifies the calendar-day limit and streak in PL/EN (#58) |
 | **R4: Tree view shows the connections** | #60 | Requires chips with jump, path highlight, dotted alternative routes (stacked on #57) |
 | **R1: Tech tree audit** | #54 | `npm run treeaudit` and `docs/tree-audit.md`; findings for R2 and R3 |
