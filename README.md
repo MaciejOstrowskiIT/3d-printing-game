@@ -45,6 +45,10 @@ keeps the persisted save intact. The real-time loop continues to run.
 Debug specs live under `e2e/debug/` and use the separate QA preview. Navigate to
 `/#debug` and call `loadStage(page, 'factory')` to load a committed promo state.
 
+Run the full bot playthrough in Polish and English with
+`npm run e2e -- playthrough --project=chromium-qa-desktop`. Screenshots of goals,
+liftoff, the ending and prestige are stored under `e2e/out/`.
+
 ### Portals and rewarded ads
 
 The platform is chosen at build time (`--mode crazygames|poki`, see `.env.*`); unused adapters are tree-shaken out. Each adapter loads its SDK, reports loading/gameplay events, mutes audio and pauses the game during ads, and exposes `showRewardedAd()`.

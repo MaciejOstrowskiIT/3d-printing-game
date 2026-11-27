@@ -218,6 +218,9 @@ async function synchronizeClock() {
 /** Count only foreground simulation time toward the active-play heartbeat. */
 const HEARTBEAT_S = 300;
 
+let manualDebugTime = false;
+export const pauseDebugLoop = () => { manualDebugTime = true; };
+
 export function startLoop() {
   let suspended = false;
   let lastSave = performance.now();
@@ -226,6 +229,7 @@ export function startLoop() {
   let sinceBeat = 0, sinceDay = 0;
 
   function advance(resuming = false) {
+    if (import.meta.env.MODE === 'qa' && manualDebugTime) return;
     const now = performance.now();
     const dt = (now - lastT) / 1000;
     // Some mobile clocks pause during sleep. The device date is only a hint
