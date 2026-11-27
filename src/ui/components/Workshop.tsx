@@ -27,7 +27,6 @@ import { act, game, adPending, mobileView, useS, watchAdForBoost } from '../stor
 import { clock, colorName, dict, dur, fmt, li, mass, money, nf, t } from '../i18n';
 import { BuyButton, CardHead, Item, Meter, Tile } from './common';
 import { PriceEditor } from './PriceEditor';
-import { WorkshopStats } from './WorkshopStats';
 import { PrestigeCard } from './Prestige';
 
 /** A market event offer (content/events.ts) with its price, countdown and a take-it-or-leave-it choice. */
@@ -577,7 +576,6 @@ export function Workshop() {
             {v.sales && <Sales />}
             <Investments />
           </div>
-          {v.sales && <div class="v-s"><WorkshopStats /></div>}
         </div>
         {(v.designs || support) && <div class="workshop-tools v-p">
           {v.designs && <div class="workshop-stack"><Materials /></div>}

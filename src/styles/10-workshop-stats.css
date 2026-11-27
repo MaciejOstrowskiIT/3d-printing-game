@@ -74,3 +74,4 @@
   .workshop-production .tile b,.workshop-sales .tile b{font-size:clamp(14px,4.2vw,17px)}
 }
 
+.stats-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font:700 22px "Barlow Condensed",Barlow,sans-serif;margin:0 0 8px}

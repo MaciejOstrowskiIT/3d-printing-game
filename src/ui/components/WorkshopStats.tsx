@@ -1,10 +1,9 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { MODELS } from '../../content/models';
 import { CASH_KINDS, expenses, income, newPeriod, PERIOD_COUNT, PERIOD_SECONDS, periodIndex, type CashPeriod } from '../../systems/workshopStats';
 import { fmt, li, money, t } from '../i18n';
 import { useS } from '../store';
 
-const DESKTOP = '(min-width: 821px)';
 const signedMoney = (value: number) => value > 0 ? '+' + money(value) : money(value);
 
 const PLOT_WIDTH = 1000;
@@ -137,7 +136,6 @@ function CashFlowChart({ periods, liveProgress, selected, periodLabel, onSelect 
 }
 
 export function WorkshopStats() {
-  const [open, setOpen] = useState(() => matchMedia(DESKTOP).matches);
   const [selected, setSelected] = useState<number | null>(null);
   const [from, setFrom] = useState<number | null>(null);
   const [to, setTo] = useState<number | null>(null);
@@ -145,13 +143,6 @@ export function WorkshopStats() {
     const current = periodIndex(s);
     return { current, financeTime: s.financeTime, history: s.finance.filter(p => p.index > current - PERIOD_COUNT) };
   });
-  useEffect(() => {
-    const screen = matchMedia(DESKTOP);
-    const resize = () => setOpen(screen.matches);
-    screen.addEventListener('change', resize);
-    return () => screen.removeEventListener('change', resize);
-  }, []);
-
   const first = Math.max(0, current - PERIOD_COUNT + 1);
   const available = Array.from({ length: current - first + 1 }, (_, i) => first + i);
   const start = from !== null && from > first && from <= current ? from : first;
@@ -180,13 +171,11 @@ export function WorkshopStats() {
 
   return (
     <section class="card wide workshop-stats" aria-labelledby="workshop-stats-title">
-      <h2 id="workshop-stats-title">
-        <button class="stats-toggle" aria-expanded={open} aria-controls="workshop-stats-body" onClick={() => setOpen(!open)}>
-          <span>{t('statsTitle')}</span>
-          <span class="stats-summary"><small>{t(filtered ? 'statsSelectedWindow' : 'statsWindow')}</small><strong class={'stats-money' + netClass}>{signedMoney(net)}</strong><i aria-hidden="true">{open ? '▴' : '▾'}</i></span>
-        </button>
+      <h2 id="workshop-stats-title" class="stats-head">
+        <span>{t('statsTitle')}</span>
+        <span class="stats-summary"><small>{t(filtered ? 'statsSelectedWindow' : 'statsWindow')}</small><strong class={'stats-money' + netClass}>{signedMoney(net)}</strong></span>
       </h2>
-      <div id="workshop-stats-body" hidden={!open}>
+      <div id="workshop-stats-body">
         {!hasTransactions ? <p class="stats-empty">{t('statsEmpty')}</p> : <>
           <div class="stats-totals">
             <div><small>{t('statsNet')}</small><strong class={'stats-money' + netClass}>{signedMoney(net)}</strong></div>

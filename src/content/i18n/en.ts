@@ -3,7 +3,7 @@ import type { Dict } from './pl';
 export const en: Dict = {
 priceApply:'Set',priceInvalid:'Enter a price of at least $0.01 with up to two decimal places.',priceRelative:'Percentage price adjustments',priceFixed:'Fixed price adjustments',priceMinor:'{0}¢',priceMajor:'${0}',priceDecrease:'Decrease price by {0}',priceIncrease:'Increase price by {0}',
 dismissHint:'Dismiss hint',
-linePlaytime:'Line time',totalPlaytime:'Total playtime',
+popClose:'Close panel',popStock:'In stock by project',popFil:'Filament by type',popFilActive:'in the printer',popStockNone:'Nothing in stock.',linePlaytime:'Line time',totalPlaytime:'Total playtime',
 qualityTitle:'Print quality',calibrateBed:'Bed calibration',calibrateHint:'Prevents loose prints and spaghetti.',filamentDryer:'Filament dryer',dryerHint:'Prevents wet filament problems.',precisionTitle:'Slow and fine',precisionHint:'Speed −{0}% · new prints sell for {1}% more on the open market.',qualityOn:'On',qualityOff:'Off',qualityInstalled:'Ready',qualityPrice:'Average sale price with quality premium: {0}.',
 materialUse:'Use',materialsTitle:'Materials',materialStock:'{0} in stock',materialPrice:'{0}/kg',materialDurability:'Durability {0}/5',materialMatch:'Demand for current model +{0}%',
 modelPrinted:'{0} printed',modelPieces:'{0} in stock',modelPiecePrice:'{0} each',
