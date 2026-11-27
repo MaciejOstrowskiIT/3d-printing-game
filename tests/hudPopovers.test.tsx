@@ -7,7 +7,7 @@ import { renderHealthyApp, setupAppRenderTests } from './uiHarness';
 setupAppRenderTests();
 
 const state = () => ({ ...createState(), goal: 2, total: 400, sold: 40, mdls: ['fig', 'keychain'], materialId: 'pla', materialStock: { petg: 2500 }, fil: 1800 });
-const chip = (c: HTMLElement, label: string) => [...c.querySelectorAll<HTMLElement>('.chip.has-pop')].find(x => x.textContent?.includes(label))!;
+const chip = (c: Element, label: string) => [...c.querySelectorAll<HTMLElement>('.chip.has-pop')].find(x => x.textContent?.includes(label))!;
 // jsdom has no PointerEvent, so a plain event carries the pointer type the handlers read.
 function hover(el: Element) {
   // Preact keeps the camel-cased name when the DOM has no onpointerenter property (jsdom), so send both spellings.
