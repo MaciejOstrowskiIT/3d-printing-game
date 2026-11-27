@@ -28,6 +28,7 @@ game (Report a bug) --POST JSON--> worker --GitHub API--> issue in the repo
 - Accepts `POST` JSON `{description, lang, build, min, line, goal, phase, view, at}`, body under 4 KB, text 10–600 chars.
 - Rejects other origins (CORS), more than 3 requests per minute per IP, anything malformed.
 - Writes the text into a code fence, so a player cannot inject markdown, links or `@mentions` into the issue.
+- Moderates the text with Llama Guard on Workers AI (free tier, `[ai]` binding in `wrangler.toml`, no key needed) before opening the issue: unsafe reports (hate, harassment, threats, sexual or violent content) get `422` and never reach GitHub. Plain swearing is not blocked, only harmful content. It fails open: without the binding, or on an error or timeout (4 s), the report goes through. Deploy again with `npx wrangler deploy` to pick up the binding.
 - Answers only `202`/`4xx`/`502`, never GitHub's response.
 
 ## Local test

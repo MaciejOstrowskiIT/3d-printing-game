@@ -89,6 +89,8 @@ export interface GameState {
   manualWork: number;
   /** Active play seconds accumulated before the current production line. */
   priorPlay: number;
+  /** Whether Self-replication has built a mining drone on this line. */
+  autoDroneBuilt: boolean;
   /** Finished games before the current production line. */
   priorCompletions: number;
 }
@@ -133,6 +135,7 @@ export const createState = (): GameState => ({
   qOn: false, qLvl: 0, qp: 0,
   manualWork: 0,
   priorPlay: 0,
+  autoDroneBuilt: false,
   priorCompletions: 0,
 });
 

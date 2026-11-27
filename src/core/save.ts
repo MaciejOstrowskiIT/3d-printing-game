@@ -35,6 +35,8 @@ export function migrate(raw: unknown): GameState {
   const knownFields = Object.entries(r).filter(([key]) => Object.hasOwn(defaults, key));
   const s = { ...defaults, ...Object.fromEntries(knownFields) } as GameState;
   if (!validSave(s, defaults)) throw new Error('Invalid saved progress');
+  // Older lines with Self-replication cannot distinguish manual and automatic builds.
+  if (!Object.hasOwn(r, 'autoDroneBuilt')) s.autoDroneBuilt = s.done.includes('autobud');
   // These multipliers come exclusively from research. Rebuild them from the
   // purchased projects, on a scratch state so one-time rewards never replay.
   const researched = createState();

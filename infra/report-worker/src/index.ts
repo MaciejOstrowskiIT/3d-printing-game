@@ -9,6 +9,28 @@ export interface Env {
   ALLOWED_ORIGINS?: string;
   /** Optional Workers Rate Limiting binding (see wrangler.toml); keyed by client IP. */
   LIMITER?: { limit(opts: { key: string }): Promise<{ success: boolean }> };
+  /** Optional Workers AI binding (free tier) used to moderate the text before it becomes a public issue. */
+  AI?: { run(model: string, input: unknown): Promise<unknown> };
+}
+
+export const MODERATION_MODEL = '@cf/meta/llama-guard-3-8b';
+const MODERATION_TIMEOUT_MS = 4000;
+
+/** Asks Llama Guard whether the text is safe to publish (hate, harassment, threats, sexual or violent content...).
+ *  Fails open: with no AI binding, an error or a timeout the report is let through, because losing a real bug report
+ *  is worse than a rare rude one; the rate limit and GitHub's own moderation still apply. */
+export async function moderationOk(text: string, ai?: Env['AI']): Promise<boolean> {
+  if (!ai) return true;
+  try {
+    const out = await Promise.race([
+      ai.run(MODERATION_MODEL, { messages: [{ role: 'user', content: text }] }),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), MODERATION_TIMEOUT_MS)),
+    ]) as { response?: unknown } | null;
+    const r = out?.response;
+    if (r && typeof r === 'object') return (r as { safe?: unknown }).safe !== false;
+    if (typeof r === 'string') return !/^\s*unsafe/i.test(r);
+    return true;
+  } catch { return true; }
 }
 
 const MAX_BODY = 4096;
@@ -89,6 +111,7 @@ export async function handle(req: Request, env: Env, fetchFn: typeof fetch = fet
   let report: Report | null = null;
   try { report = parseReport(JSON.parse(text)); } catch { /* falls through to 400 */ }
   if (!report) return reply(400);
+  if (!(await moderationOk(report.description, env.AI))) return reply(422);
 
   const res = await fetchFn(`https://api.github.com/repos/${env.GITHUB_REPO}/issues`, {
     method: 'POST',

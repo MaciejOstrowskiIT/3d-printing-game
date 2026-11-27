@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fence, handle, issueFrom, originAllowed, parseReport, type Env } from '../infra/report-worker/src/index';
+import { MODERATION_MODEL, fence, handle, moderationOk, issueFrom, originAllowed, parseReport, type Env } from '../infra/report-worker/src/index';
 
 const env: Env = { GITHUB_TOKEN: 't0ken', GITHUB_REPO: 'me/game', ALLOWED_ORIGINS: 'https://me.github.io,*.crazygames.com' };
 const post = (body: unknown, origin = 'https://me.github.io') =>
@@ -62,5 +62,38 @@ describe('report worker', () => {
   it('keeps only whitelisted, sanitised context', () => {
     const r = parseReport({ description: 'a valid description', build: '1.0 <script>', min: NaN, goal: 3, other: 'x' })!;
     expect(r.context).toEqual({ build: '1.0 script', goal: 3 });
+  });
+
+  describe('moderation', () => {
+    const ai = (response: unknown): Env['AI'] => ({ run: async () => ({ response }) });
+
+    it('holds back a report Llama Guard marks unsafe and does not call GitHub', async () => {
+      const calls: { url: string; init: RequestInit }[] = [];
+      const res = await handle(post({ description: 'long enough hateful text' }), { ...env, AI: ai({ safe: false, categories: ['S10'] }) }, ghOk(calls));
+      expect(res.status).toBe(422);
+      expect(calls).toHaveLength(0);
+    });
+
+    it('lets safe reports through, in both answer formats', async () => {
+      for (const response of [{ safe: true, categories: [] }, 'safe']) {
+        const calls: { url: string; init: RequestInit }[] = [];
+        expect((await handle(post({ description: 'long enough bug text' }), { ...env, AI: ai(response) }, ghOk(calls))).status).toBe(202);
+        expect(calls).toHaveLength(1);
+      }
+      expect(await moderationOk('x', ai('unsafe\nS1'))).toBe(false);
+    });
+
+    it('sends the text to the free model as a user message', async () => {
+      let seen: unknown[] = [];
+      await moderationOk('hello there', { run: async (m, i) => { seen = [m, i]; return { response: { safe: true } }; } });
+      expect(seen).toEqual([MODERATION_MODEL, { messages: [{ role: 'user', content: 'hello there' }] }]);
+    });
+
+    it('fails open without a binding, on errors, on timeouts and on odd answers', async () => {
+      expect(await moderationOk('x')).toBe(true);
+      expect(await moderationOk('x', { run: async () => { throw new Error('down'); } })).toBe(true);
+      expect(await moderationOk('x', ai(undefined))).toBe(true);
+      expect(await moderationOk('x', { run: async () => null })).toBe(true);
+    });
   });
 });
