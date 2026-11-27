@@ -3,6 +3,8 @@ import { defineConfig, devices } from '@playwright/test';
 const baseURL = 'http://127.0.0.1:4173';
 const qaBaseURL = 'http://127.0.0.1:4174';
 const debugSpecs = '**/debug/*.spec.ts';
+const playthroughSpec = '**/playthrough.spec.ts';
+const qaSpecs = [debugSpecs, playthroughSpec];
 const desktop = devices['Desktop Chrome'];
 const mobile = { ...desktop, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true };
 
@@ -11,9 +13,9 @@ export default defineConfig({
   outputDir: './e2e/out',
   use: { baseURL, locale: 'en-US', trace: 'retain-on-failure' },
   projects: [
-    { name: 'chromium-desktop', testIgnore: debugSpecs, use: desktop },
-    { name: 'chromium-mobile', testIgnore: debugSpecs, use: mobile },
-    { name: 'chromium-qa-desktop', testMatch: debugSpecs, use: { ...desktop, baseURL: qaBaseURL } },
+    { name: 'chromium-desktop', testIgnore: qaSpecs, use: desktop },
+    { name: 'chromium-mobile', testIgnore: qaSpecs, use: mobile },
+    { name: 'chromium-qa-desktop', testMatch: qaSpecs, use: { ...desktop, baseURL: qaBaseURL } },
     { name: 'chromium-qa-mobile', testMatch: debugSpecs, use: { ...mobile, baseURL: qaBaseURL } },
   ],
   webServer: [

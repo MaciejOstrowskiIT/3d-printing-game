@@ -1,7 +1,7 @@
 import { TREE } from '../src/content/tree';
 import { seededRng } from '../src/core/ctx';
 import { autoCost, clickCost, drawP, droneCost, fabCap, fabCost, farmCost, freePts, gpu, mining, mktCost, panelCost, rate1, spoolPrice, supply } from '../src/core/formulas';
-import { createGame } from '../src/core/game';
+import { createGame, type Game } from '../src/core/game';
 import { applyStartBonuses } from '../src/core/prestige';
 import type { GameState, Meta } from '../src/core/state';
 import { has } from '../src/core/state';
@@ -14,6 +14,46 @@ export { bestModel } from '../src/systems/models';
 
 export interface BotResult { ended: boolean; minutes: number; goalMinutes: number[]; ordersDone: number; ordersFailed: number }
 
+/** Apply the bot's decisions for one simulated second. */
+export function botDecision(game: Pick<Game, 's' | 'act'>, t: number) {
+  const s = game.s;
+  if (s.msg) game.act('msgok'); // reads story messages in any phase
+  if (s.ph === 1) {
+    if (s.auto < 15) for (let i = 0; i < 4; i++) game.act('print');
+    if (s.fil < gpu(s) * Math.max(10, rate1(s) * 15) && s.zl >= spoolPrice(s)) game.act('spool');
+    // A player sets prices by hand less often than the automation does: same idea, every 3 s.
+    if (!has(s, 'autocena') && Math.round(t) % 3 === 0) autoPrice(s);
+    const reserve = spoolPrice(s) * 2;
+    if (s.farmOn && supply(s) < drawP(s) + 20 && panelCost(s) < s.zl - reserve) game.act('panel');
+    else if (!(has(s, 'slicer') && s.farm >= 5) && s.farmOn && farmCost(s) < (s.zl - reserve) * 0.7 && supply(s) >= drawP(s) + 20) game.act('farm');
+    else if (autoCost(s) < (s.zl - reserve) * 0.5) game.act('auto');
+    if (!(has(s, 'slicer') && s.farm >= 5) && mktCost(s) < (s.zl - reserve) * 0.3) game.act('mkt');
+    if (s.ord && !s.ord.acc) game.act('oacc');
+    // Market offers: take them when they cost under a third of what the bot has.
+    if (s.mev && s.mev.cost < s.zl / 3) game.act('mevyes');
+    // Click tools while clicking still matters; designs when cheap; every 10 s print the most profitable model.
+    if (s.auto < 15 && clickCost(s) < (s.zl - reserve) * 0.25) game.act('tool');
+    for (const m of MODELS) if (!s.mdls.includes(m.id) && designVisible(s, m) && designCost(s, m) < (s.zl - reserve) * 0.3) game.act(`stl:${m.id}`);
+    if (Math.round(t) % 10 === 0) { const best = bestModel(s); if (best !== s.mdl) game.act(`mdl:${best}`); }
+    if (s.brk > 0) game.act('fix');
+    if (s.col !== s.trend && s.goal >= 2) game.act(`col:${s.trend}`);
+  } else {
+    const free = s.inv - reserveWyd(s);
+    if (mining(s) <= fabCap(s) * 1.2) { if (free >= droneCost(s)) game.act('drone'); }
+    else if (free >= fabCost(s)) game.act('fab');
+  }
+  const f = freePts(s);
+  if (f > 0) {
+    const open = TREE.filter(n => !has(s, n.id) && nodeStatus(s, n) !== 'locked');
+    const need = open.length ? Math.max(...open.map(n => n.ops)) : 0;
+    if (need > s.mem * 1000) { const m = Math.min(f, Math.ceil((need - s.mem * 1000) / 1000)); s.mem += m; s.proc += f - m; }
+    else s.proc += f;
+  }
+  // Like a sensible player: once liftoff is within reach, research only the liftoff node.
+  const r = TREE.filter(n => nodeStatus(s, n) === 'ready' && (!savingForLiftoff(s) || n.liftoff)).sort((a, b) => a.ops - b.ops)[0];
+  if (r) game.act(`t:${r.id}`);
+}
+
 /** Bot that plays like a skilled player: clicks early, watches filament and price, buys sensibly, takes orders. */
 export function playthrough(seed = 1, maxHours = 6, dt = 0.25, meta?: Partial<Meta>, observe?: (s: GameState, t: number) => void, init?: Partial<GameState>): BotResult {
   const game = createGame({ rng: seededRng(seed) });
@@ -22,44 +62,7 @@ export function playthrough(seed = 1, maxHours = 6, dt = 0.25, meta?: Partial<Me
   const goalMinutes: number[] = [];
   let t = 0;
   while (t < maxHours * 3600 && !game.s.end) {
-    const s = game.s;
-    if (Math.abs(t - Math.round(t)) < 1e-6) {
-      if (s.msg) game.act('msgok'); // reads story messages in any phase
-      if (s.ph === 1) {
-        if (s.auto < 15) for (let i = 0; i < 4; i++) game.act('print');
-        if (s.fil < gpu(s) * Math.max(10, rate1(s) * 15) && s.zl >= spoolPrice(s)) game.act('spool');
-        // A player sets prices by hand less often than the automation does: same idea, every 3 s.
-        if (!has(s, 'autocena') && Math.round(t) % 3 === 0) autoPrice(s);
-        const reserve = spoolPrice(s) * 2;
-        if (s.farmOn && supply(s) < drawP(s) + 20 && panelCost(s) < s.zl - reserve) game.act('panel');
-        else if (!(has(s, 'slicer') && s.farm >= 5) && s.farmOn && farmCost(s) < (s.zl - reserve) * 0.7 && supply(s) >= drawP(s) + 20) game.act('farm');
-        else if (autoCost(s) < (s.zl - reserve) * 0.5) game.act('auto');
-        if (!(has(s, 'slicer') && s.farm >= 5) && mktCost(s) < (s.zl - reserve) * 0.3) game.act('mkt');
-        if (s.ord && !s.ord.acc) game.act('oacc');
-        // Market offers: take them when they cost under a third of what the bot has.
-        if (s.mev && s.mev.cost < s.zl / 3) game.act('mevyes');
-        // Click tools while clicking still matters; designs when cheap; every 10 s print the most profitable model.
-        if (s.auto < 15 && clickCost(s) < (s.zl - reserve) * 0.25) game.act('tool');
-        for (const m of MODELS) if (!s.mdls.includes(m.id) && designVisible(s, m) && designCost(s, m) < (s.zl - reserve) * 0.3) game.act(`stl:${m.id}`);
-        if (Math.round(t) % 10 === 0) { const best = bestModel(s); if (best !== s.mdl) game.act(`mdl:${best}`); }
-        if (s.brk > 0) game.act('fix');
-        if (s.col !== s.trend && s.goal >= 2) game.act(`col:${s.trend}`);
-      } else {
-        const free = s.inv - reserveWyd(s);
-        if (mining(s) <= fabCap(s) * 1.2) { if (free >= droneCost(s)) game.act('drone'); }
-        else if (free >= fabCost(s)) game.act('fab');
-      }
-      const f = freePts(s);
-      if (f > 0) {
-        const open = TREE.filter(n => !has(s, n.id) && nodeStatus(s, n) !== 'locked');
-        const need = open.length ? Math.max(...open.map(n => n.ops)) : 0;
-        if (need > s.mem * 1000) { const m = Math.min(f, Math.ceil((need - s.mem * 1000) / 1000)); s.mem += m; s.proc += f - m; }
-        else s.proc += f;
-      }
-      // Like a sensible player: once liftoff is within reach, research only the liftoff node.
-      const r = TREE.filter(n => nodeStatus(s, n) === 'ready' && (!savingForLiftoff(s) || n.liftoff)).sort((a, b) => a.ops - b.ops)[0];
-      if (r) game.act(`t:${r.id}`);
-    }
+    if (Math.abs(t - Math.round(t)) < 1e-6) botDecision(game, t);
     const before = game.s.goal;
     game.tick(dt);
     t = Math.round((t + dt) * 100) / 100;
