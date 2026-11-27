@@ -5,4 +5,6 @@ dist
 dist-crazygames
 dist-poki
 promo/out
+e2e/out/
+playwright-report/
 __pycache__

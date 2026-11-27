@@ -15,5 +15,5 @@
     "resolveJsonModule": true,
     "types": ["vite/client"]
   },
-  "include": ["src", "tests", "promo/covers.ts"]
+  "include": ["src", "tests", "promo/covers.ts", "e2e", "playwright.config.ts"]
 }
