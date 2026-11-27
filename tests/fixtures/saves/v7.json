@@ -1,0 +1,424 @@
+{
+  "v": 7,
+  "ph": 1,
+  "total": 3747,
+  "sold": 4213,
+  "inv": 770.5,
+  "zl": 5757.583411987351,
+  "price": 4.008,
+  "fil": 1618.5,
+  "g": 15,
+  "spool": 60.014389033538045,
+  "spoolG": 1000,
+  "spoolT": 1.213959277008641,
+  "spoolD": -0.06689009991015116,
+  "auto": 12,
+  "farm": 0,
+  "farmOn": false,
+  "spd": 1,
+  "dem": 1.3,
+  "mkt": 6,
+  "rep": 2,
+  "proc": 2,
+  "mem": 2,
+  "ops": 18.75,
+  "done": [
+    "profil",
+    "dysza",
+    "kurier",
+    "chlodzenie",
+    "skaner",
+    "kamera",
+    "autobuy"
+  ],
+  "log": [
+    {
+      "k": "goal",
+      "a": [
+        "Pierwsza automatyzacja|First automation"
+      ]
+    },
+    {
+      "k": "node",
+      "a": [
+        "@autobuy"
+      ]
+    },
+    {
+      "k": "node",
+      "a": [
+        "@kamera"
+      ]
+    },
+    {
+      "k": "mev",
+      "a": [
+        "^shortage"
+      ]
+    },
+    {
+      "k": "fix",
+      "a": []
+    }
+  ],
+  "acc": 0,
+  "sacc": 0.5191319558590177,
+  "mat": 40000000,
+  "mat0": 40000000,
+  "drones": 0,
+  "fabs": 0,
+  "ft": 0,
+  "dMul": 1,
+  "fMul": 1,
+  "end": false,
+  "amOn": {
+    "kamera": true,
+    "autobuy": true
+  },
+  "amT": 0.25,
+  "goal": 8,
+  "tab": "w",
+  "br": 0,
+  "warn": false,
+  "ord": null,
+  "ordT": 28.95135009903524,
+  "ordDone": 2,
+  "ordFail": 0,
+  "pen": 0,
+  "brk": 0,
+  "brkC": 3,
+  "brkT": 95.06958223009462,
+  "fixT": 5,
+  "fails": 1,
+  "panels": 0,
+  "pwWarn": false,
+  "ts": 1760000000000,
+  "serverThrough": 0,
+  "col": 0,
+  "trend": 0,
+  "trendT": 53.37076942977532,
+  "boostT": 0,
+  "boostCd": 0,
+  "ach": [
+    "first",
+    "trendy",
+    "firstDesign",
+    "auto1",
+    "order1",
+    "k1",
+    "clicker",
+    "sales1000",
+    "toolbox"
+  ],
+  "achT": 0.25,
+  "colorsUsed": 5,
+  "play": 278.25,
+  "mev": null,
+  "mevT": 68.05589875837597,
+  "mfx": [
+    {
+      "id": "shortage",
+      "t": 46.5
+    }
+  ],
+  "mdl": "keychain",
+  "mdls": [
+    "fig",
+    "keychain"
+  ],
+  "clk": 5,
+  "mp": 0,
+  "offB": 0,
+  "offBi": 0,
+  "offBT": 0,
+  "slow": 1,
+  "dday": 0,
+  "dord": null,
+  "dstreak": 0,
+  "dbest": 0,
+  "today": 0,
+  "story": [
+    "mum",
+    "firstClient",
+    "neighbour",
+    "bulk",
+    "forum"
+  ],
+  "msg": null,
+  "msgT": 0.25,
+  "meta": {
+    "patents": 0,
+    "earned": 0,
+    "runs": 0,
+    "pat": {}
+  },
+  "precision": false,
+  "bedCalibrated": false,
+  "dryerInstalled": false,
+  "stockPremium": 0,
+  "materialId": "pla",
+  "materialStock": {},
+  "lowFil": true,
+  "matHint": false,
+  "autoMat": false,
+  "modelStock": {
+    "fig": {
+      "pieces": 0,
+      "price": 12.554,
+      "premium": 0,
+      "saleCarry": 0,
+      "progress": 0,
+      "progressPremium": 0,
+      "printed": 1185,
+      "progressCost": 0,
+      "knownCostPieces": 0,
+      "filamentCost": 0
+    },
+    "keychain": {
+      "pieces": 1541,
+      "price": 6.99,
+      "premium": 0,
+      "saleCarry": 0.6695376916641127,
+      "progress": 0,
+      "progressPremium": 0,
+      "printed": 5124,
+      "progressCost": 0,
+      "knownCostPieces": 1541,
+      "filamentCost": 513.7707134037167
+    }
+  },
+  "orderStock": {},
+  "financeTime": 278.25,
+  "finance": [
+    {
+      "index": 0,
+      "cash": {
+        "sales": 669.7970000000001,
+        "orders": 0,
+        "bonus": 0,
+        "filament": 113.9329173532139,
+        "equipment": 96,
+        "other": 0
+      },
+      "models": {
+        "fig": {
+          "pieces": 120,
+          "revenue": 669.7970000000001,
+          "stocked": 140,
+          "cost": 138.6880702777183
+        }
+      }
+    },
+    {
+      "index": 1,
+      "cash": {
+        "sales": 961.0809999999985,
+        "orders": 0,
+        "bonus": 0,
+        "filament": 226.58612441700683,
+        "equipment": 275,
+        "other": 250
+      },
+      "models": {
+        "fig": {
+          "pieces": 142,
+          "revenue": 961.0809999999985,
+          "cost": 162.59835800459786,
+          "stocked": 190
+        }
+      }
+    },
+    {
+      "index": 2,
+      "cash": {
+        "sales": 942.2069999999986,
+        "orders": 0,
+        "bonus": 0,
+        "filament": 284.5968244882605,
+        "equipment": 480.70000000000005,
+        "other": 180
+      },
+      "models": {
+        "fig": {
+          "pieces": 114,
+          "revenue": 942.2069999999986,
+          "stocked": 244,
+          "cost": 126.71758266316893
+        }
+      }
+    },
+    {
+      "index": 3,
+      "cash": {
+        "sales": 1128.6759999999992,
+        "orders": 1837.875,
+        "bonus": 0,
+        "filament": 337.56379815729946,
+        "equipment": 1837.325204,
+        "other": 324
+      },
+      "models": {
+        "fig": {
+          "pieces": 120,
+          "revenue": 1128.6759999999992,
+          "stocked": 268,
+          "cost": 115.13305942953853
+        }
+      }
+    },
+    {
+      "index": 4,
+      "cash": {
+        "sales": 2058.7865,
+        "orders": 0,
+        "bonus": 0,
+        "filament": 298.5398036443014,
+        "equipment": 1650.0033336335998,
+        "other": 0
+      },
+      "models": {
+        "fig": {
+          "pieces": 196,
+          "revenue": 1566.240000000001,
+          "stocked": 278,
+          "cost": 177.35203115115863
+        },
+        "keychain": {
+          "pieces": 136,
+          "revenue": 492.5465,
+          "stocked": 264,
+          "cost": 33.915603860469815
+        }
+      }
+    },
+    {
+      "index": 5,
+      "cash": {
+        "sales": 3397.137999999996,
+        "orders": 0,
+        "bonus": 0,
+        "filament": 234.27036475690295,
+        "equipment": 1106.2454782793918,
+        "other": 583.2
+      },
+      "models": {
+        "keychain": {
+          "pieces": 456,
+          "revenue": 1686.6090000000013,
+          "stocked": 928,
+          "cost": 113.15960802122127
+        },
+        "fig": {
+          "pieces": 209,
+          "revenue": 1710.5289999999986,
+          "cost": 188.59441509900105
+        }
+      }
+    },
+    {
+      "index": 6,
+      "cash": {
+        "sales": 3290.320500000009,
+        "orders": 4831.155,
+        "bonus": 0,
+        "filament": 243.87654606696105,
+        "equipment": 5707.696892614582,
+        "other": 1049.7600000000002
+      },
+      "models": {
+        "keychain": {
+          "pieces": 566,
+          "revenue": 1803.515499999999,
+          "stocked": 584,
+          "cost": 136.47149618588
+        },
+        "fig": {
+          "pieces": 150,
+          "revenue": 1486.8050000000007,
+          "cost": 135.35484337248897
+        }
+      }
+    },
+    {
+      "index": 7,
+      "cash": {
+        "sales": 2631.7015000000006,
+        "orders": 0,
+        "bonus": 0,
+        "filament": 412.54983371729975,
+        "equipment": 2450.7038398760656,
+        "other": 0
+      },
+      "models": {
+        "keychain": {
+          "pieces": 684,
+          "revenue": 1820.6655000000012,
+          "stocked": 1232,
+          "cost": 177.5184102522406
+        },
+        "fig": {
+          "pieces": 69,
+          "revenue": 811.0359999999998,
+          "cost": 62.26322795134489
+        }
+      }
+    },
+    {
+      "index": 8,
+      "cash": {
+        "sales": 2057.100999999999,
+        "orders": 0,
+        "bonus": 0,
+        "filament": 434.907982360817,
+        "equipment": 0,
+        "other": 0
+      },
+      "models": {
+        "keychain": {
+          "pieces": 945,
+          "revenue": 2057.100999999999,
+          "stocked": 1260,
+          "cost": 293.78548517573677
+        }
+      }
+    },
+    {
+      "index": 9,
+      "cash": {
+        "sales": 613.2240000000004,
+        "orders": 0,
+        "bonus": 0,
+        "filament": 84.02014464695326,
+        "equipment": 0,
+        "other": 0
+      },
+      "models": {
+        "keychain": {
+          "pieces": 306,
+          "revenue": 613.2240000000004,
+          "stocked": 366,
+          "cost": 101.50383465051162
+        }
+      }
+    }
+  ],
+  "planT": 0,
+  "fleet": {},
+  "qOn": false,
+  "qLvl": 0,
+  "qp": 0,
+  "manualWork": 2107,
+  "priorPlay": 0,
+  "autoDroneBuilt": false,
+  "priorCompletions": 0,
+  "hints": {
+    "seen": [
+      "print",
+      "sell",
+      "spool",
+      "printer"
+    ],
+    "active": null,
+    "retired": false
+  }
+}

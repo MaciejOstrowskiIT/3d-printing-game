@@ -1,0 +1,84 @@
+{
+  "ph": 1,
+  "total": 20,
+  "sold": 20,
+  "inv": 0,
+  "zl": 50,
+  "price": 5,
+  "fil": 600,
+  "g": 20,
+  "spool": 60,
+  "spoolG": 1000,
+  "auto": 1,
+  "farm": 0,
+  "farmOn": false,
+  "spd": 1,
+  "dem": 1,
+  "mkt": 1,
+  "rep": 0,
+  "proc": 1,
+  "mem": 1,
+  "ops": 200,
+  "done": [],
+  "log": [
+    {
+      "k": "goal",
+      "a": [
+        "Kup drukarkę automatyczną|Buy an auto printer"
+      ]
+    },
+    {
+      "k": "firstPr",
+      "a": []
+    },
+    {
+      "k": "goal",
+      "a": [
+        "Sprzedaj 10 figurek|Sell 10 figurines"
+      ]
+    },
+    {
+      "k": "goal",
+      "a": [
+        "Wydrukuj 10 figurek|Print 10 figurines"
+      ]
+    },
+    {
+      "k": "start",
+      "a": []
+    }
+  ],
+  "acc": 0,
+  "sacc": 0,
+  "mat": 40000000,
+  "mat0": 40000000,
+  "drones": 0,
+  "fabs": 0,
+  "ft": 0,
+  "dMul": 1,
+  "fMul": 1,
+  "end": false,
+  "amOn": {},
+  "amT": 0,
+  "goal": 3,
+  "tab": "w",
+  "br": 0,
+  "warn": false,
+  "ord": null,
+  "ordT": 45,
+  "ordDone": 0,
+  "pen": 0,
+  "brk": 0,
+  "brkC": 0,
+  "brkT": 120,
+  "fixT": 0,
+  "fails": 0,
+  "panels": 0,
+  "pwWarn": false,
+  "ts": 1760000000000,
+  "col": 0,
+  "trend": 2,
+  "trendT": 140,
+  "spoolT": 1.5,
+  "spoolD": 0
+}
