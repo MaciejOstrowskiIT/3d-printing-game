@@ -106,4 +106,12 @@ export const workshopTexts = {
   oHint: 'Nowe figurki trafiają najpierw do zamówienia, potem do sprzedaży.',
   bDesc: 'Stoi {0}% mocy produkcyjnej: {1}.',
   bAuto: 'Kamera wykryła problem, naprawa za {0} s.',
+  priceApply: 'Ustaw',
+  priceInvalid: 'Wpisz cenę od 0,01 zł z maksymalnie dwoma miejscami po przecinku.',
+  priceRelative: 'Zmiana procentowa ceny',
+  priceFixed: 'Zmiana ceny o stałą kwotę',
+  priceMinor: '{0} gr',
+  priceMajor: '{0} zł',
+  priceDecrease: 'Obniż cenę o {0}',
+  priceIncrease: 'Podnieś cenę o {0}',
 };

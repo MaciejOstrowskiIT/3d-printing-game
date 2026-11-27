@@ -106,4 +106,12 @@ export const workshopTexts = {
   oHint: 'New figurines go to the order first, then to sales.',
   bDesc: '{0}% of capacity is down: {1}.',
   bAuto: 'The camera spotted it, fixing in {0} s.',
+  priceApply: 'Set',
+  priceInvalid: 'Enter a price of at least $0.01 with up to two decimal places.',
+  priceRelative: 'Percentage price adjustments',
+  priceFixed: 'Fixed price adjustments',
+  priceMinor: '{0}¢',
+  priceMajor: '${0}',
+  priceDecrease: 'Decrease price by {0}',
+  priceIncrease: 'Increase price by {0}',
 };

@@ -35,3 +35,22 @@ export function changePrice(s: GameState, delta: number, id = s.mdl) {
   setStockPrice(s, id, price);
   return true;
 }
+
+export type PriceEdit = 'set' | 'delta' | 'percent';
+
+/** Edit the price per piece in cents while keeping the stored price per unit of work. */
+export function editPiecePrice(s: GameState, id: string, mode: string, amount: number): boolean {
+  if (s.ph !== 1 || !Object.hasOwn(MODEL, id) || !s.mdls.includes(id) || !Number.isFinite(amount)) return false;
+  const seconds = MODEL[id].seconds;
+  const current = Math.round(stockPrice(s, id) * seconds * 100);
+  let cents: number;
+  switch (mode) {
+    case 'set': cents = amount; break;
+    case 'delta': cents = Math.max(1, current + amount); break;
+    case 'percent': cents = Math.max(1, Math.round(current * (100 + amount) / 100)); break;
+    default: return false;
+  }
+  if (!Number.isSafeInteger(cents) || cents < 1) return false;
+  setStockPrice(s, id, cents / 100 / seconds);
+  return true;
+}

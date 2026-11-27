@@ -6,7 +6,8 @@ import { has } from '../../../core/state';
 import { MODEL } from '../../../content/models';
 import { act, useS } from '../../store';
 import { colorName, dur, fmt, li, money, t } from '../../i18n';
-import { CardHead, Tile, useHold } from '../common';
+import { CardHead, Tile } from '../common';
+import { PriceEditor } from '../PriceEditor';
 import { salesPick } from './salesPick';
 
 function ColorPicker() {
@@ -21,18 +22,6 @@ function ColorPicker() {
         ))}
       </div>
       {v.on && <p class={'hint' + (v.inT ? ' good' : '')}>{v.inT ? t('trendYes') : t('trendNo', colorName(v.trend))}</p>}
-    </div>
-  );
-}
-
-function PriceStepper({ id }: { id: string }) {
-  const price = useS(s => stockPrice(s, id) * MODEL[id].seconds);
-  const minus = useHold(`price-down:${id}`), plus = useHold(`price-up:${id}`);
-  return (
-    <div class="stepper">
-      <button aria-label="−" {...minus}>−</button>
-      <div class="pv"><small>{t('price')}</small><b>{money(price)}</b></div>
-      <button aria-label="+" {...plus}>+</button>
     </div>
   );
 }
@@ -71,7 +60,7 @@ export function Sales() {
       <ColorPicker />
       {v.auto
         ? <p class="hint sales-auto-price">{t('salesCurrentPrice', money(v.price))}</p>
-        : <PriceStepper id={id} key={id} />}
+        : <PriceEditor id={id} key={id} />}
       <div class="sales-notes">
         <div class="sales-flow">
           {v.growth
