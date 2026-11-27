@@ -1,4 +1,5 @@
 import { signal } from '@preact/signals';
+import { massText } from '../core/units';
 import { ACH } from '../content/achievements';
 import { MARKET_EVENT } from '../content/events';
 import { MODEL } from '../content/models';
@@ -50,6 +51,9 @@ export function fmt(n: number, d = 0): string {
   return nf(n, d);
 }
 
+/** Mass from grams in the largest sensible unit (850 g, 10 kg, 1.5 t). */
+export const mass = (g: number) => massText(g, prefs.value.lang, fmt);
+
 export function money(n: number): string {
   const m = n < 0 ? '−' : '', a = Math.abs(n);
   return prefs.value.lang === 'pl' ? m + fmt(a, a < 1e4 ? 2 : 0) + ' zł' : m + '$' + fmt(a, a < 1e4 ? 2 : 0);
@@ -86,6 +90,7 @@ export function logText(e: LogEntry): string {
       case '#': return D.clients[+x.slice(1)];
       case '%': return D.causes[+x.slice(1)];
       case '~': return dur(+x.slice(1));
+      case '(': return mass(+x.slice(1));
       case '&': return colorName(+x.slice(1));
       case '!': return ACH[x.slice(1)]?.n[li()] ?? x;
       case '^': return MARKET_EVENT[x.slice(1)]?.name[li()] ?? x;

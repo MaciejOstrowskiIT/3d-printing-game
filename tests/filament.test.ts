@@ -32,7 +32,7 @@ describe('running out of filament', () => {
     const g = createGame({ state: shop({ fil: 0, materialStock: { petg: 2000 } }) });
     expect(stockedAlternative(g.s)).toBe('petg');
     for (let i = 0; i < 5; i++) g.tick(1);
-    expect(logs(g.s, 'matHint')).toBe(1);
+    expect(logs(g.s, 'matHintM')).toBe(1);
     expect(g.s.materialId).toBe('pla');
   });
 

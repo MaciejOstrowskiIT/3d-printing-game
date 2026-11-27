@@ -33,6 +33,7 @@ Planned work and its order: `ROADMAP.md` (task board). Pick cards from "Next up"
 | #73 / `feat/report-moderation` | Claude | `infra/report-worker/` (moderation, wrangler.toml, README), `tests/reportWorker.test.ts` |
 | #71 / `feat/realistic-harder` | Claude | `balance.ts` (realistic*), `formulas.ts`, `breakdowns.ts`, Prestige text, realistic and balance tests |
 | #78 / `fix/order-text-jitter` | Claude | `Workshop.tsx` (Countdown), `styles.css` (.ev, .countdown), order i18n texts |
+| #79 / `fix/filament-units` | Claude | `core/units.ts`, `ui/i18n.ts` (mass, log prefix `(`), HUD, material texts, `systems/filament.ts` |
 | #69 / `feat/quantum-rebalance` | Claude | `tests/bot.ts` (opt-in quantum), `balance.sim.test.ts`, `achievements.ts`, `docs/tree-audit.md`, README (R7) |
 | #67 / `test/qa6-i18n-integrity` | Claude | `tests/i18n.test.ts`, ROADMAP |
 | #65 / `feat/quantum-branch` | Claude | `content/tree.ts` (Quantum branch), `systems/research.ts`, `Research.tsx`, i18n, tests (R6) |

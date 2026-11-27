@@ -6,7 +6,7 @@ import { TREE } from '../../content/tree';
 import { eff, freePts, gpu, opsCap } from '../../core/formulas';
 import { has } from '../../core/state';
 import { nodeStatus } from '../../systems/research';
-import { dur, fmt, money, playtime, t } from '../i18n';
+import { dur, fmt, mass, money, playtime, t } from '../i18n';
 import { incomePerSecond } from '../../systems/workshopStats';
 import { ui, useS } from '../store';
 
@@ -60,7 +60,7 @@ function PlaytimeChips() {
 
 export function Hud() {
   const v = useS(s => ({
-    sp: s.ph === 2, g: s.goal, zl: money(s.zl), inv: fmt(s.ph === 2 ? Math.floor(s.inv) : MODELS.reduce((sum, m) => sum + piecesInStock(s, m.id), 0)), fil: fmt(s.fil) + ' g', filWarn: s.ph === 1 && (s.fil < gpu(s) || (filamentRunway(s) < BAL.filamentWarnSeconds && !autobuyOn(s) && s.total > 0)),
+    sp: s.ph === 2, g: s.goal, zl: money(s.zl), inv: fmt(s.ph === 2 ? Math.floor(s.inv) : MODELS.reduce((sum, m) => sum + piecesInStock(s, m.id), 0)), fil: mass(s.fil), filWarn: s.ph === 1 && (s.fil < gpu(s) || (filamentRunway(s) < BAL.filamentWarnSeconds && !autobuyOn(s) && s.total > 0)),
     earn: s.ph === 1 ? incomePerSecond(s) : 0, run: s.ph === 1 ? filamentRunway(s) : Infinity, auto: autobuyOn(s),
     real: (s.slow || 1) > 1, farmOn: s.farmOn, en: Math.round(eff(s) * 100), ops: fmt(Math.floor(s.ops)) + ' / ' + fmt(opsCap(s)), mat: fmt(s.mat) + ' t',
   }), );

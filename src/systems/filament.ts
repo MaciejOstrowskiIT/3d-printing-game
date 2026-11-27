@@ -51,7 +51,7 @@ export function filamentSystem(s: GameState, dt: number, ctx: Ctx) {
     if (selectMaterial(s, alt)) log(s, ctx, 'matAuto', '/' + alt);
   } else if (!s.matHint) {
     s.matHint = true;
-    log(s, ctx, 'matHint', '/' + alt, Math.round(materialStock(s, alt)));
+    log(s, ctx, 'matHintM', '/' + alt, '(' + Math.round(materialStock(s, alt)));
   }
 }
 

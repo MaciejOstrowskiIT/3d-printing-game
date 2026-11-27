@@ -5,7 +5,7 @@ import type { DailyOrder } from '../systems/dailyOrder';
 import { BAL } from '../content/balance';
 
 /** Log entry argument. String prefixes are kept for compatibility with old saves:
- *  '@id' tree node, '$123' money, '#2' client, '%1' breakdown cause, '~90' duration in s, '&3' colour, '!id' achievement, '^id' market event, '*id' print model, '+id' calendar event, '=id' story message sender, '/id' material, 'pl|en' goal text. */
+ *  '@id' tree node, '$123' money, '#2' client, '%1' breakdown cause, '~90' duration in s, '&3' colour, '!id' achievement, '^id' market event, '*id' print model, '+id' calendar event, '=id' story message sender, '/id' material, '(1500' mass in grams, 'pl|en' goal text. */
 export type LogArg = string | number;
 export interface LogEntry { k: string; a: LogArg[] }
 
