@@ -1,5 +1,5 @@
 import { useEffect } from 'preact/hooks';
-import { dur, fmt, logText, money, prefs, t } from '../i18n';
+import { dur, fmt, logText, money, playtime, prefs, t } from '../i18n';
 import { act, adPending, awayReport, dialog, mobileView, resetGame, screen, ui, useS, watchAdForOfflineBonus } from '../store';
 import { offlineBonusReady } from '../../systems/offlineBonus';
 import { platform } from '../platform';
@@ -44,13 +44,14 @@ function Dock() {
 }
 
 function End() {
-  const total = useS(s => (s.end ? s.total : 0));
-  if (!total) return null;
+  const result = useS(s => s.end ? { total: s.total, play: s.play, totalPlay: s.priorPlay + s.play } : null);
+  if (!result) return null;
   return (
     <div class="end">
       <div>
         <h2>{t('endTitle')}</h2>
-        <p>{t('endTxt', fmt(total))}</p>
+        <p>{t('endTxt', fmt(result.total))}</p>
+        <p>{t('linePlaytime')} <b>{playtime(result.play)}</b> · {t('totalPlaytime')} <b>{playtime(result.totalPlay)}</b></p>
         <div class="end-actions">
           <PrestigeButton class="btn-main big" />
           <PrestigeButton class="big" realistic />

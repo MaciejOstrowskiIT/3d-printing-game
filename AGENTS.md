@@ -20,8 +20,9 @@ Planned work and its order: `ROADMAP.md` (task board). Pick cards from "Next up"
 ## In flight
 | PR / branch | Agent | Touches |
 |---|---|---|
-| #77 / `feat/sisyphus-achievement` | Codex | Self-replication drone tracking, save defaults and achievement tests |
+| #75 / `feat/skywalker-playtime` | Codex | SkyWalker achievement, play time across lines, HUD and end screen |
 | #64 / `feat/clicker-achievement` | Codex | Manual print progress, Clicker achievement in PL/EN, save and prestige tests |
+| #77 / `feat/sisyphus-achievement` | Codex | Self-replication drone tracking, save defaults and achievement tests |
 | #62 / `fix/daily-order-streak` | Codex | Daily order copy in PL/EN and Playwright coverage |
 | #51 / `fix/continuous-finance-line` | Codex | Live finance chart data, PL/EN tooltip, Playwright rollover coverage |
 | #56 / `test/qa4-layout-stability` | Codex | Playwright layout tests and config, workshop and research UI stability, PL/EN maintenance text, README |

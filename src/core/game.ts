@@ -167,7 +167,12 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
       return { ...s.log[0], idle: idleNote };
     },
     load(next) { s = next; },
-    reset(logKey = 'fresh') { s = createState(); log(s, ctx, logKey); },
+    reset(logKey = 'fresh') {
+      const priorPlay = s.priorPlay + s.play;
+      s = createState();
+      s.priorPlay = priorPlay;
+      log(s, ctx, logKey);
+    },
     on(fn) { listeners.add(fn); return () => listeners.delete(fn); },
   };
   return game;
