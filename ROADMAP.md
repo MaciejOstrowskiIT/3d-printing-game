@@ -1,7 +1,7 @@
 # Roadmap & task board
 
 Move a card by moving its line between columns. When a PR opens, put its number on the card; when it merges, move
-the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches.
+the card to **Done**. Agents: `gh pr list` shows what is open; each PR description has a **Touches:** line.
 
 **Effort:** S = up to a day · M = a few days · L = a week or more
 **Owner:** Dev = coding (Claude/Codex) · Maciej = needs you
@@ -46,7 +46,7 @@ it. Then paste the card's prompt as your task. One card = one branch = one PR. W
 Lanes are independent: QA cards depend only on earlier QA cards, Gameplay cards are independent of each other.
 
 Every prompt below implicitly starts with: *"Read `AGENTS.md` and `README.md` first. Follow the rules there. Run
-`npm test` and `npm run typecheck` before opening the PR. Update the 'In flight' table in `AGENTS.md`."*
+`npm test` and `npm run typecheck` before opening the PR. Put a **Touches:** line in the PR description."*
 
 ### 🧪 Lane QA: test the whole flow (do in order; QA1–QA3 are done, QA4 is in review)
 

@@ -1,7 +1,7 @@
 # Notes for coding agents
 
-More than one agent works on this repo in parallel (Claude, Codex). Read this before you start, and update the
-"In flight" table when you open or merge a PR.
+More than one agent works on this repo in parallel (Claude, Codex). Read this before you start, and check
+what is in flight on GitHub (see "In flight" below).
 
 Planned work and its order: `ROADMAP.md` (task board). Pick cards from "Next up" and move them as you go.
 
@@ -18,28 +18,11 @@ Planned work and its order: `ROADMAP.md` (task board). Pick cards from "Next up"
 - One feature per branch, branched from the latest `main`; rebase before opening the PR.
 
 ## In flight
-| PR / branch | Agent | Touches |
-|---|---|---|
-| #82 / `fix/order-card-height` | Codex | Special order card layout and Playwright acceptance coverage |
-| #81 / `fix/tree-done-nodes-expanded` | Claude | `styles.css` (finished tree nodes stay expanded) |
-| #75 / `feat/skywalker-playtime` | Codex | SkyWalker achievement, play time across lines, HUD and end screen |
-| #76 / `feat/three-crowns` | Codex | Completion tracking, save validation and achievement tests |
-| #64 / `feat/clicker-achievement` | Codex | Manual print progress, Clicker achievement in PL/EN, save and prestige tests |
-| #77 / `feat/sisyphus-achievement` | Codex | Self-replication drone tracking, save defaults and achievement tests |
-| #62 / `fix/daily-order-streak` | Codex | Daily order copy in PL/EN and Playwright coverage |
-| #51 / `fix/continuous-finance-line` | Codex | Live finance chart data, PL/EN tooltip, Playwright rollover coverage |
-| #56 / `test/qa4-layout-stability` | Codex | Playwright layout tests and config, workshop and research UI stability, PL/EN maintenance text, README |
-| #54 / `feat/tree-audit` | Claude | `tests/treeAudit.ts`, `scripts/treeaudit.ts`, `docs/tree-audit.md`, README |
-| #55 / `feat/tree-progression` | Claude | `content/tree.ts`, `tests/tree.test.ts`, `docs/tree-audit.md` (R2) |
-| #57 / `feat/tree-joins` | Claude | `content/tree.ts`, `systems/research.ts`, `core/saveValidation.ts`, `Research.tsx` lines, tests (R3) |
-| #73 / `feat/report-moderation` | Claude | `infra/report-worker/` (moderation, wrangler.toml, README), `tests/reportWorker.test.ts` |
-| #71 / `feat/realistic-harder` | Claude | `balance.ts` (realistic*), `formulas.ts`, `breakdowns.ts`, Prestige text, realistic and balance tests |
-| #78 / `fix/order-text-jitter` | Claude | `Workshop.tsx` (Countdown), `styles.css` (.ev, .countdown), order i18n texts |
-| #79 / `fix/filament-units` | Claude | `core/units.ts`, `ui/i18n.ts` (mass, log prefix `(`), HUD, material texts, `systems/filament.ts` |
-| #69 / `feat/quantum-rebalance` | Claude | `tests/bot.ts` (opt-in quantum), `balance.sim.test.ts`, `achievements.ts`, `docs/tree-audit.md`, README (R7) |
-| #67 / `test/qa6-i18n-integrity` | Claude | `tests/i18n.test.ts`, ROADMAP |
-| #65 / `feat/quantum-branch` | Claude | `content/tree.ts` (Quantum branch), `systems/research.ts`, `Research.tsx`, i18n, tests (R6) |
-| #60 / `feat/tree-view-links` | Claude | `Research.tsx` (Tree, Node, lines), `styles.css` tree rules, i18n (R4) |
+There is no table in this file any more: it conflicted on every parallel PR. Open PRs are the source of truth.
+- Before you start: `gh pr list --state open` and skim the titles; for overlap, `gh pr diff <n> --name-only`.
+- When you open a PR, add a line **Touches:** to its description listing the files or areas it changes, so other
+  agents can check for overlap without opening the diff.
+- Do not add per-PR rows or status lists to this file or to `ROADMAP.md` (card numbers in `ROADMAP.md` are fine).
 
 Merged: #8–#41 (see `ROADMAP.md` → Done).
 
