@@ -3,7 +3,8 @@
 More than one agent works on this repo in parallel (Claude, Codex). Read this before you start, and check
 what is in flight on GitHub (see "In flight" below).
 
-Planned work and its order: `ROADMAP.md` (task board). Pick cards from "Next up" and move them as you go.
+Planned work: GitHub Issues (see `ROADMAP.md` for the labels and direction). Pick an unassigned `next-up` issue,
+assign yourself, and open the PR with `Closes #<issue>`.
 
 ## Rules
 - Code, comments, commits, PR titles and descriptions: **English**. Player-facing text: PL + EN.
@@ -22,7 +23,7 @@ There is no table in this file any more: it conflicted on every parallel PR. Ope
 - Before you start: `gh pr list --state open` and skim the titles; for overlap, `gh pr diff <n> --name-only`.
 - When you open a PR, add a line **Touches:** to its description listing the files or areas it changes, so other
   agents can check for overlap without opening the diff.
-- Do not add per-PR rows or status lists to this file or to `ROADMAP.md` (card numbers in `ROADMAP.md` are fine).
+- Do not add per-PR rows or status lists to this file or to `ROADMAP.md` (status lives in issues and PRs).
 
 Merged: #8–#41 (see `ROADMAP.md` → Done).
 
