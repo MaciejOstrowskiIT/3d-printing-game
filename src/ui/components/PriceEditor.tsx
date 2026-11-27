@@ -42,24 +42,23 @@ export function PriceEditor({ id }: { id: string }) {
       {([
         ['percent', PERCENT_STEPS, t('priceRelative')],
         ['delta', CENT_STEPS, t('priceFixed')],
-      ] as const).map(([mode, steps, label]) => (
-        <div class="price-adjustments" role="group" aria-label={label} key={mode}>
-          {steps.map(step => {
-            const amount = mode === 'percent' ? `${step}%` : step < 100 ? t('priceMinor', step) : t('priceMajor', step / 100);
-            return (
-              <div class="price-pair" key={step}>
-                {([-1, 1] as const).map(direction => (
-                  <button type="button" key={direction}
-                    aria-label={t(direction < 0 ? 'priceDecrease' : 'priceIncrease', amount)}
-                    onClick={() => { if (act(`price:${id}:${mode}:${direction * step}`)) reset(); }}>
-                    {direction < 0 ? '−' : '+'}{amount}
-                  </button>
-                ))}
-              </div>
-            );
-          })}
-        </div>
-      ))}
+      ] as const).map(([mode, steps, label]) => {
+        const amountOf = (step: number) => mode === 'percent' ? `${step}%` : step < 100 ? t('priceMinor', step) : t('priceMajor', step / 100);
+        const side = (direction: -1 | 1) => (direction < 0 ? [...steps].reverse() : steps).map(step => (
+          <button type="button" key={direction * step}
+            aria-label={t(direction < 0 ? 'priceDecrease' : 'priceIncrease', amountOf(step))}
+            onClick={() => { if (act(`price:${id}:${mode}:${direction * step}`)) reset(); }}>
+            {direction < 0 ? '−' : '+'}{amountOf(step)}
+          </button>
+        ));
+        // Cheaper on the left, pricier on the right, smallest steps meeting in the middle.
+        return (
+          <div class="price-adjustments" role="group" aria-label={label} key={mode} style={{ '--n': steps.length }}>
+            <div class="price-side down">{side(-1)}</div>
+            <div class="price-side up">{side(1)}</div>
+          </div>
+        );
+      })}
     </div>
   );
 }
