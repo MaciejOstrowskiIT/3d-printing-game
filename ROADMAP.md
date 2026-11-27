@@ -12,7 +12,7 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 
 | Card | PR | Notes |
 |---|---|---|
-| **Smooth workshop finance chart scrolling** | #47 | Live rollover and scale animation |
+| **Keep the live finance line continuous** | #51 | Smooth transition into a new empty interval |
 | **QA2: Debug hook and stage fixtures** | #43 | Five promo stages and time stepping |
 | **Bug report preview mode** | #46 | Form visible in dev and QA `#debug` without a transport |
 
@@ -94,6 +94,7 @@ Every prompt below implicitly starts with: *"Read `AGENTS.md` and `README.md` fi
 
 | Card | PR |
 |---|---|
+| Smooth workshop finance chart scrolling | #47 |
 | Workshop finance line chart | #44 |
 | Preact + Vite architecture, tests, balance bot | #1 |
 | GitHub Pages deploy | #2 |
