@@ -26,6 +26,7 @@ Planned work and its order: `ROADMAP.md` (task board). Pick cards from "Next up"
 | #54 / `feat/tree-audit` | Claude | `tests/treeAudit.ts`, `scripts/treeaudit.ts`, `docs/tree-audit.md`, README |
 | #55 / `feat/tree-progression` | Claude | `content/tree.ts`, `tests/tree.test.ts`, `docs/tree-audit.md` (R2) |
 | #57 / `feat/tree-joins` | Claude | `content/tree.ts`, `systems/research.ts`, `core/saveValidation.ts`, `Research.tsx` lines, tests (R3) |
+| #60 / `feat/tree-view-links` | Claude | `Research.tsx` (Tree, Node, lines), `styles.css` tree rules, i18n (R4) |
 
 Merged: #8–#41 (see `ROADMAP.md` → Done).
 
