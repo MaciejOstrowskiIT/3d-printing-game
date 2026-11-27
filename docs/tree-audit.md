@@ -8,9 +8,9 @@ The bot only buys when it is ready and, close to liftoff, only the liftoff node,
 
 - 69 nodes, 8 branches, 7 roots.
 - 11 nodes bought less than 1 min after their last prerequisite.
-- 28 nodes have exactly one prerequisite and no `need`.
+- 9 nodes have exactly one prerequisite and no `need`.
 - 6 nodes have 2+ prerequisites; 6 link to another branch.
-- 40 nodes where `row` differs from depth.
+- 0 nodes whose `row` is above their depth (must be 0: rows only grow downwards).
 - Cycles or missing ids: none.
 
 ## 1. Nodes bought under 1 min after their last prerequisite
@@ -20,15 +20,15 @@ Nothing slows these down: the bot can chain them as fast as compute allows.
 | Node | Depth | Gap (min) | Cost | `need` |
 |---|---|---|---|---|
 | `lustra` (Space) | 14 | 0.0 | 400000 ops | - |
-| `b2b` (Sales) | 7 | 0.1 | 15000 ops | 10 orders |
-| `franczyza` (Sales) | 7 | 0.3 | 19500 ops, 400000 zl | - |
-| `kolekcja` (Sales) | 6 | 0.4 | 9100 ops | - |
-| `stocznia` (Space) | 12 | 0.5 | 120000 ops, 5e+8 fig | - |
-| `profil` (Sales) | 1 | 0.5 | 300 ops | 50 sold |
+| `b2b` (Sales) | 7 | 0.1 | 15000 ops | 20 orders |
+| `franczyza` (Sales) | 7 | 0.3 | 19500 ops, 400000 zl | 4 farms |
+| `kolekcja` (Sales) | 6 | 0.4 | 9100 ops | 15 orders |
 | `automodel` (Automation) | 7 | 0.5 | 7800 ops | 3 models |
-| `regolit` (Space) | 10 | 0.6 | 40000 ops | 5 factories |
+| `stocznia` (Space) | 12 | 0.5 | 120000 ops, 5e+8 fig | 8 factories |
+| `regolit` (Space) | 10 | 0.5 | 40000 ops | 5 factories |
+| `profil` (Sales) | 1 | 0.5 | 300 ops | 50 sold |
+| `leasing` (Production) | 4 | 0.6 | 1300 ops | 8 printers |
 | `autobud` (Space) | 8 | 0.7 | 15000 ops | 3 drones |
-| `leasing` (Production) | 4 | 0.9 | 1300 ops | - |
 | `mieszanki` (Materials & quality) | 2 | 0.9 | 1300 ops | 5K figurines |
 
 ## 2. One prerequisite and no `need`
@@ -37,34 +37,15 @@ Gated only by compute (and money when listed). Compare with section 1: these are
 
 | Node | Requires | Gap (min) | Cost |
 |---|---|---|---|
-| `hurt` (Production) | `fw` | 7.7 | 2500 ops, 1000 zl |
-| `pudelka` (Sales) | `sklep` | 19.2 | 5000 ops, 8000 zl |
+| `hurt` (Production) | `fw` | 4.5 | 2500 ops, 1000 zl |
+| `pudelka` (Sales) | `sklep` | 23.6 | 5000 ops, 8000 zl |
 | `eksport` (Sales) | `marka` | 4.4 | 20000 ops, 150000 zl |
-| `autopkt` (Automation) | `autodruk` | 2.1 | 10000 ops |
 | `nano` (Space) | `regolit` | 2.5 | 80000 ops, 2e+8 fig |
-| `sondy` (Space) | `nano` | 2.0 | 150000 ops, 2e+9 fig |
-| `grawi` (Space) | `sondy` | 6.6 | 250000 ops, 2e+10 fig |
-| `leasing` (Production) | `hurt` | 0.9 | 1300 ops |
-| `hotend` (Production) | `shaping` | 1.3 | 3900 ops, 15000 zl |
-| `marketplace` (Sales) | `sklep` | 1.9 | 2900 ops, 5000 zl |
-| `kolekcja` (Sales) | `marka` | 0.4 | 9100 ops |
-| `franczyza` (Sales) | `eksport` | 0.3 | 19500 ops, 400000 zl |
-| `autooffer` (Automation) | `automkt` | 1.7 | 3900 ops |
-| `autodaily` (Automation) | `autooffer` | 2.1 | 4600 ops |
-| `stocznia` (Space) | `nano` | 0.5 | 120000 ops, 5e+8 fig |
-| `serwis` (Materials & quality) | `recykling` | 2.9 | 1600 ops |
-| `chemia` (Materials & quality) | `kontrakt` | 16.1 | 7800 ops |
-| `parametr` (Design) | `skaner` | 8.7 | 1600 ops |
-| `podpory` (Design) | `parametr` | 8.5 | 3200 ops |
-| `studio` (Design) | `licencje` | 18.8 | 10400 ops, 100000 zl |
-| `magazyn` (Orders & logistics) | `kurier` | 3.3 | 1000 ops |
-| `paczkomaty` (Orders & logistics) | `crm` | 12.0 | 3900 ops |
-| `negocjator` (Orders & logistics) | `crm` | 27.5 | 5200 ops |
-| `dronydost` (Orders & logistics) | `hub` | 5.4 | 18200 ops |
-| `serwer` (Energy & computing) | `chlodzenie` | 5.0 | 1300 ops |
-| `baterie` (Energy & computing) | `taryfa` | 1.6 | 5800 ops |
-| `neuro` (Energy & computing) | `chmura` | 9.3 | 13000 ops |
-| `offline` (Energy & computing) | `chmura` | 1.2 | 6500 ops |
+| `sondy` (Space) | `nano` | 1.9 | 150000 ops, 2e+9 fig |
+| `grawi` (Space) | `sondy` | 5.9 | 250000 ops, 2e+10 fig |
+| `hotend` (Production) | `shaping` | 1.7 | 3900 ops, 15000 zl |
+| `marketplace` (Sales) | `sklep` | 2.0 | 2900 ops, 5000 zl |
+| `studio` (Design) | `licencje` | 17.9 | 10400 ops, 100000 zl |
 
 ## 3. Branch shape
 
@@ -95,127 +76,100 @@ Gated only by compute (and money when listed). Compare with section 1: these are
 - Cycles or missing prerequisites: none.
 - Never bought by the bot in any seed: none.
 
-`row` versus depth (the layout row is hand-written):
+Nodes whose layout `row` is above their graph depth (a node must sit below everything it needs; empty is good):
 
 | Node | Row | Depth |
 |---|---|---|
-| `autocena` (Automation) | 3 | 4 |
-| `automkt` (Automation) | 4 | 5 |
-| `autodruk` (Automation) | 5 | 6 |
-| `autopkt` (Automation) | 6 | 7 |
-| `zarzad` (Automation) | 7 | 8 |
-| `autobud` (Space) | 1 | 8 |
-| `roje` (Space) | 2 | 9 |
-| `regolit` (Space) | 3 | 10 |
-| `nano` (Space) | 4 | 11 |
-| `sondy` (Space) | 5 | 12 |
-| `grawi` (Space) | 6 | 13 |
-| `leasing` (Production) | 8 | 4 |
-| `hotend` (Production) | 9 | 5 |
-| `prefab` (Production) | 10 | 6 |
-| `corexy` (Production) | 11 | 6 |
-| `nocna` (Production) | 12 | 7 |
-| `agencja` (Sales) | 8 | 2 |
-| `marketplace` (Sales) | 9 | 4 |
-| `kolekcja` (Sales) | 10 | 6 |
-| `franczyza` (Sales) | 11 | 7 |
-| `autooffer` (Automation) | 8 | 6 |
-| `autodaily` (Automation) | 9 | 7 |
-| `automodel` (Automation) | 10 | 7 |
-| `stocznia` (Space) | 7 | 12 |
-| `rojai` (Space) | 8 | 13 |
-| `lustra` (Space) | 9 | 14 |
-| `mieszanki` (Materials & quality) | 3 | 2 |
-| `czesci` (Materials & quality) | 4 | 3 |
-| `kontrakt` (Materials & quality) | 5 | 3 |
-| `chemia` (Materials & quality) | 6 | 4 |
-| `granulat` (Materials & quality) | 7 | 5 |
-| `licencje` (Design) | 4 | 3 |
-| `studio` (Design) | 5 | 4 |
-| `genai` (Design) | 6 | 5 |
-| `negocjator` (Orders & logistics) | 5 | 4 |
-| `hub` (Orders & logistics) | 6 | 5 |
-| `dronydost` (Orders & logistics) | 7 | 6 |
-| `chmura` (Energy & computing) | 5 | 3 |
-| `neuro` (Energy & computing) | 6 | 4 |
-| `offline` (Energy & computing) | 7 | 4 |
 
 ## All nodes
 
 | Node | Depth | Row | Requires | `need` | Cost | Bought at (min) | Gap (min) |
 |---|---|---|---|---|---|---|---|
 | `dysza` (Production) | 1 | 1 | - | 100 figurines | 500 ops | 1.3 | 1.3 |
-| `fw` (Production) | 2 | 2 | `dysza` | 5 printers | 1200 ops | 6.1 | 4.8 |
-| `hurt` (Production) | 3 | 3 | `fw` | - | 2500 ops, 1000 zl | 13.8 | 7.7 |
-| `shaping` (Production) | 4 | 4 | `hurt` | 12 printers | 5000 ops | 39.3 | 25.4 |
-| `leasing` (Production) | 4 | 8 | `hurt` | - | 1300 ops | 14.7 | 0.9 |
-| `farma` (Production) | 5 | 5 | `shaping` | 20 printers | 8000 ops, 5000 zl | 51.0 | 11.8 |
-| `hotend` (Production) | 5 | 9 | `shaping` | - | 3900 ops, 15000 zl | 40.6 | 1.3 |
-| `slicer` (Production) | 6 | 6 | `farma` | 1 farm | 15000 ops | 58.5 | 7.5 |
-| `prefab` (Production) | 6 | 10 | `farma` | 2 farms | 5800 ops | 52.4 | 1.4 |
-| `corexy` (Production) | 6 | 11 | `hotend` | 40 printers | 9100 ops, 80000 zl | 54.9 | 14.3 |
-| `replik` (Production) | 7 | 7 | `slicer` | 5 farms | 40000 ops, 600000 zl | 59.6 | 1.1 |
-| `nocna` (Production) | 7 | 12 | `prefab` | 8 farms | 14300 ops | 58.1 | 5.7 |
+| `fw` (Production) | 2 | 2 | `dysza` | 5 printers | 1200 ops | 5.9 | 4.5 |
+| `hurt` (Production) | 3 | 3 | `fw` | - | 2500 ops, 1000 zl | 10.4 | 4.5 |
+| `shaping` (Production) | 4 | 4 | `hurt` | 12 printers | 5000 ops | 33.3 | 23.0 |
+| `leasing` (Production) | 4 | 5 | `hurt` | 8 printers | 1300 ops | 10.9 | 0.6 |
+| `farma` (Production) | 5 | 6 | `shaping` | 20 printers | 8000 ops, 5000 zl | 43.0 | 9.7 |
+| `hotend` (Production) | 5 | 7 | `shaping` | - | 3900 ops, 15000 zl | 35.1 | 1.7 |
+| `slicer` (Production) | 6 | 8 | `farma` | 1 farm | 15000 ops | 51.1 | 8.1 |
+| `prefab` (Production) | 6 | 9 | `farma` | 2 farms | 5800 ops | 45.1 | 2.1 |
+| `corexy` (Production) | 6 | 10 | `hotend` | 40 printers | 9100 ops, 80000 zl | 47.6 | 12.6 |
+| `replik` (Production) | 7 | 11 | `slicer` | 5 farms | 40000 ops, 600000 zl | 52.2 | 1.1 |
+| `nocna` (Production) | 7 | 12 | `prefab` | 8 farms | 14300 ops | 50.7 | 5.6 |
 | `profil` (Sales) | 1 | 1 | - | 50 sold | 300 ops | 0.5 | 0.5 |
-| `tiktok` (Sales) | 2 | 2 | `profil` | 2K figurines | 1500 ops | 10.0 | 9.5 |
-| `agencja` (Sales) | 2 | 8 | `profil` | 3 campaigns | 1300 ops | 7.0 | 6.5 |
-| `sklep` (Sales) | 3 | 3 | `tiktok` | 10K figurines | 3500 ops, 2500 zl | 23.0 | 13.0 |
-| `pudelka` (Sales) | 4 | 4 | `sklep` | - | 5000 ops, 8000 zl | 42.2 | 19.2 |
-| `marketplace` (Sales) | 4 | 9 | `sklep` | - | 2900 ops, 5000 zl | 25.0 | 1.9 |
-| `marka` (Sales) | 5 | 5 | `pudelka` | 2 farms | 12000 ops, 50000 zl | 56.9 | 14.6 |
-| `eksport` (Sales) | 6 | 6 | `marka` | - | 20000 ops, 150000 zl | 61.3 | 4.4 |
-| `kolekcja` (Sales) | 6 | 10 | `marka` | - | 9100 ops | 57.2 | 0.4 |
-| `b2b` (Sales) | 7 | 7 | `eksport` | 10 orders | 15000 ops | 61.4 | 0.1 |
-| `franczyza` (Sales) | 7 | 11 | `eksport` | - | 19500 ops, 400000 zl | 61.6 | 0.3 |
+| `tiktok` (Sales) | 2 | 2 | `profil` | 2K figurines | 1500 ops | 7.7 | 7.2 |
+| `agencja` (Sales) | 2 | 3 | `profil` | 3 campaigns | 1300 ops | 6.5 | 6.0 |
+| `sklep` (Sales) | 3 | 4 | `tiktok` | 10K figurines | 3500 ops, 2500 zl | 13.6 | 5.9 |
+| `pudelka` (Sales) | 4 | 5 | `sklep` | - | 5000 ops, 8000 zl | 37.2 | 23.6 |
+| `marketplace` (Sales) | 4 | 6 | `sklep` | - | 2900 ops, 5000 zl | 15.6 | 2.0 |
+| `marka` (Sales) | 5 | 7 | `pudelka` | 2 farms | 12000 ops, 50000 zl | 49.5 | 12.3 |
+| `eksport` (Sales) | 6 | 8 | `marka` | - | 20000 ops, 150000 zl | 53.8 | 4.4 |
+| `kolekcja` (Sales) | 6 | 9 | `marka` | 15 orders | 9100 ops | 49.8 | 0.4 |
+| `b2b` (Sales) | 7 | 10 | `eksport` | 20 orders | 15000 ops | 54.0 | 0.1 |
+| `franczyza` (Sales) | 7 | 11 | `eksport` | 4 farms | 19500 ops, 400000 zl | 54.1 | 0.3 |
 | `kamera` (Automation) | 1 | 1 | - | 1 breakdown | 800 ops | 4.0 | 4.0 |
 | `autobuy` (Automation) | 2 | 2 | `dysza` | 3 printers | 1000 ops | 4.6 | 3.3 |
-| `autocena` (Automation) | 4 | 3 | `autobuy`, `sklep` | - | 3500 ops, 3000 zl | 26.7 | 3.7 |
-| `automkt` (Automation) | 5 | 4 | `autocena`, `sklep` | - | 4000 ops, 2000 zl | 32.0 | 5.3 |
-| `autodruk` (Automation) | 6 | 5 | `automkt` | 25 printers | 8000 ops | 53.8 | 21.8 |
-| `autooffer` (Automation) | 6 | 8 | `automkt` | - | 3900 ops | 33.7 | 1.7 |
-| `autopkt` (Automation) | 7 | 6 | `autodruk` | - | 10000 ops | 55.9 | 2.1 |
-| `autodaily` (Automation) | 7 | 9 | `autooffer` | - | 4600 ops | 35.8 | 2.1 |
-| `automodel` (Automation) | 7 | 10 | `autodruk` | 3 models | 7800 ops | 54.3 | 0.5 |
-| `zarzad` (Automation) | 8 | 7 | `autopkt`, `slicer` | - | 15000 ops | 60.0 | 1.4 |
-| `autobud` (Space) | 8 | 1 | `replik` | 3 drones | 15000 ops | 60.3 | 0.7 |
-| `roje` (Space) | 9 | 2 | `autobud` | 10 drones | 20000 ops | 61.8 | 1.5 |
-| `regolit` (Space) | 10 | 3 | `roje` | 5 factories | 40000 ops | 62.3 | 0.6 |
-| `nano` (Space) | 11 | 4 | `regolit` | - | 80000 ops, 2e+8 fig | 64.8 | 2.5 |
-| `sondy` (Space) | 12 | 5 | `nano` | - | 150000 ops, 2e+9 fig | 66.8 | 2.0 |
-| `stocznia` (Space) | 12 | 7 | `nano` | - | 120000 ops, 5e+8 fig | 65.3 | 0.5 |
-| `grawi` (Space) | 13 | 6 | `sondy` | - | 250000 ops, 2e+10 fig | 73.4 | 6.6 |
-| `rojai` (Space) | 13 | 8 | `sondy` | 100 drones | 200000 ops | 73.6 | 6.8 |
-| `lustra` (Space) | 14 | 9 | `grawi`, `stocznia` | - | 400000 ops | 73.4 | 0.0 |
+| `autocena` (Automation) | 4 | 5 | `autobuy`, `sklep` | - | 3500 ops, 3000 zl | 20.0 | 6.4 |
+| `automkt` (Automation) | 5 | 6 | `autocena`, `sklep` | - | 4000 ops, 2000 zl | 23.6 | 3.5 |
+| `autodruk` (Automation) | 6 | 7 | `automkt` | 25 printers | 8000 ops | 46.7 | 23.1 |
+| `autooffer` (Automation) | 6 | 8 | `automkt` | 8 campaigns | 3900 ops | 25.3 | 1.7 |
+| `autopkt` (Automation) | 7 | 9 | `autodruk` | 8 reputation points | 10000 ops | 48.5 | 1.9 |
+| `autodaily` (Automation) | 7 | 10 | `autooffer` | 12 orders | 4600 ops | 27.3 | 2.0 |
+| `automodel` (Automation) | 7 | 11 | `autodruk` | 3 models | 7800 ops | 47.1 | 0.5 |
+| `zarzad` (Automation) | 8 | 12 | `autopkt`, `slicer` | - | 15000 ops | 52.6 | 1.5 |
+| `autobud` (Space) | 8 | 12 | `replik` | 3 drones | 15000 ops | 52.9 | 0.7 |
+| `roje` (Space) | 9 | 13 | `autobud` | 10 drones | 20000 ops | 54.3 | 1.4 |
+| `regolit` (Space) | 10 | 14 | `roje` | 5 factories | 40000 ops | 54.8 | 0.5 |
+| `nano` (Space) | 11 | 15 | `regolit` | - | 80000 ops, 2e+8 fig | 57.3 | 2.5 |
+| `sondy` (Space) | 12 | 16 | `nano` | - | 150000 ops, 2e+9 fig | 59.2 | 1.9 |
+| `stocznia` (Space) | 12 | 17 | `nano` | 8 factories | 120000 ops, 5e+8 fig | 57.8 | 0.5 |
+| `grawi` (Space) | 13 | 18 | `sondy` | - | 250000 ops, 2e+10 fig | 65.2 | 5.9 |
+| `rojai` (Space) | 13 | 19 | `sondy` | 100 drones | 200000 ops | 65.3 | 6.1 |
+| `lustra` (Space) | 14 | 20 | `grawi`, `stocznia` | - | 400000 ops | 65.2 | 0.0 |
 | `recykling` (Materials & quality) | 1 | 1 | - | 3 breakdowns | 500 ops | 8.2 | 8.2 |
-| `serwis` (Materials & quality) | 2 | 2 | `recykling` | - | 1600 ops | 11.1 | 2.9 |
+| `serwis` (Materials & quality) | 2 | 2 | `recykling` | 6 breakdowns | 1600 ops | 15.6 | 7.5 |
 | `mieszanki` (Materials & quality) | 2 | 3 | `recykling` | 5K figurines | 1300 ops | 9.0 | 0.9 |
-| `czesci` (Materials & quality) | 3 | 4 | `serwis`, `kamera` | - | 3200 ops | 18.6 | 7.5 |
-| `kontrakt` (Materials & quality) | 3 | 5 | `mieszanki` | 50K figurines | 3900 ops, 20000 zl | 30.2 | 21.2 |
-| `chemia` (Materials & quality) | 4 | 6 | `kontrakt` | - | 7800 ops | 46.3 | 16.1 |
-| `granulat` (Materials & quality) | 5 | 7 | `chemia` | 6 farms | 16200 ops, 250000 zl | 60.6 | 14.2 |
+| `czesci` (Materials & quality) | 3 | 4 | `serwis`, `kamera` | - | 3200 ops | 17.1 | 1.4 |
+| `kontrakt` (Materials & quality) | 3 | 5 | `mieszanki` | 50K figurines | 3900 ops, 20000 zl | 29.1 | 20.0 |
+| `chemia` (Materials & quality) | 4 | 6 | `kontrakt` | 200K figurines | 7800 ops | 46.2 | 17.1 |
+| `granulat` (Materials & quality) | 5 | 7 | `chemia` | 6 farms | 16200 ops, 250000 zl | 53.1 | 7.0 |
 | `skaner` (Design) | 1 | 1 | - | 500 figurines | 600 ops | 3.4 | 3.4 |
-| `parametr` (Design) | 2 | 2 | `skaner` | - | 1600 ops | 12.2 | 8.7 |
-| `podpory` (Design) | 3 | 3 | `parametr` | - | 3200 ops | 20.7 | 8.5 |
-| `licencje` (Design) | 3 | 4 | `parametr` | 3 models | 4600 ops | 37.6 | 25.4 |
-| `studio` (Design) | 4 | 5 | `licencje` | - | 10400 ops, 100000 zl | 56.4 | 18.8 |
-| `genai` (Design) | 5 | 6 | `studio`, `podpory` | 1M figurines | 19500 ops | 61.1 | 4.7 |
+| `parametr` (Design) | 2 | 2 | `skaner` | 2 models | 1600 ops | 9.2 | 5.8 |
+| `podpory` (Design) | 3 | 3 | `parametr` | 20K figurines | 3200 ops | 18.5 | 9.3 |
+| `licencje` (Design) | 3 | 4 | `parametr` | 3 models | 4600 ops | 31.1 | 21.9 |
+| `studio` (Design) | 4 | 5 | `licencje` | - | 10400 ops, 100000 zl | 49.0 | 17.9 |
+| `genai` (Design) | 5 | 6 | `studio`, `podpory` | 1M figurines | 19500 ops | 53.6 | 4.6 |
 | `kurier` (Orders & logistics) | 1 | 1 | - | 1 order | 400 ops | 2.0 | 2.0 |
-| `magazyn` (Orders & logistics) | 2 | 2 | `kurier` | - | 1000 ops | 5.3 | 3.3 |
-| `crm` (Orders & logistics) | 3 | 3 | `magazyn` | 5 orders | 2600 ops | 16.4 | 11.1 |
-| `paczkomaty` (Orders & logistics) | 4 | 4 | `crm` | - | 3900 ops | 28.5 | 12.0 |
-| `negocjator` (Orders & logistics) | 4 | 5 | `crm` | - | 5200 ops | 44.0 | 27.5 |
-| `hub` (Orders & logistics) | 5 | 6 | `paczkomaty` | 20 orders | 9800 ops, 80000 zl | 55.4 | 26.9 |
-| `dronydost` (Orders & logistics) | 6 | 7 | `hub` | - | 18200 ops | 60.8 | 5.4 |
+| `magazyn` (Orders & logistics) | 2 | 2 | `kurier` | 3 orders | 1000 ops | 5.4 | 3.4 |
+| `crm` (Orders & logistics) | 3 | 3 | `magazyn` | 5 orders | 2600 ops | 12.1 | 6.7 |
+| `paczkomaty` (Orders & logistics) | 4 | 4 | `crm` | 10 orders | 3900 ops | 21.8 | 9.7 |
+| `negocjator` (Orders & logistics) | 4 | 5 | `crm` | 3 farms | 5200 ops | 44.5 | 32.4 |
+| `hub` (Orders & logistics) | 5 | 6 | `paczkomaty` | 20 orders | 9800 ops, 80000 zl | 48.1 | 26.3 |
+| `dronydost` (Orders & logistics) | 6 | 7 | `hub` | 2M figurines | 18200 ops | 53.4 | 5.3 |
 | `chlodzenie` (Energy & computing) | 1 | 1 | - | - | 500 ops | 2.8 | 2.8 |
-| `serwer` (Energy & computing) | 2 | 2 | `chlodzenie` | - | 1300 ops | 7.8 | 5.0 |
-| `taryfa` (Energy & computing) | 3 | 3 | `serwer` | 1 farm | 2600 ops | 51.5 | 43.6 |
-| `chmura` (Energy & computing) | 3 | 5 | `serwer` | 20K figurines | 7800 ops | 48.4 | 40.6 |
-| `baterie` (Energy & computing) | 4 | 4 | `taryfa` | - | 5800 ops | 53.1 | 1.6 |
-| `neuro` (Energy & computing) | 4 | 6 | `chmura` | - | 13000 ops | 57.7 | 9.3 |
-| `offline` (Energy & computing) | 4 | 7 | `chmura` | - | 6500 ops | 49.6 | 1.2 |
+| `serwer` (Energy & computing) | 2 | 2 | `chlodzenie` | 2 memory points | 1300 ops | 7.1 | 4.2 |
+| `taryfa` (Energy & computing) | 3 | 3 | `serwer` | 1 farm | 2600 ops | 43.6 | 36.5 |
+| `chmura` (Energy & computing) | 3 | 4 | `serwer` | 20K figurines | 7800 ops | 39.8 | 32.8 |
+| `baterie` (Energy & computing) | 4 | 5 | `taryfa` | 2 farms | 5800 ops | 45.6 | 2.0 |
+| `neuro` (Energy & computing) | 4 | 6 | `chmura` | 100K figurines | 13000 ops | 50.3 | 10.5 |
+| `offline` (Energy & computing) | 4 | 7 | `chmura` | 50K figurines | 6500 ops | 41.3 | 1.5 |
 
 
 <!-- PROPOSALS: hand-written, kept by `npm run treeaudit` -->
+
+## Status after R2
+
+Done in R2 (`feat/tree-progression`): 19 nodes got a stage `need` (all single-prerequisite nodes that had none and no
+money or figurine cost, plus `franczyza`, `stocznia`; `b2b` raised from 10 to 20 orders), and `row` was recomputed so
+every node sits below all of its prerequisites. Two nodes of one branch cannot share a grid cell, so rows are not
+literally equal to depth where a branch forks; `tests/tree.test.ts` enforces `row >= depth` and `row > row of every
+prerequisite` instead.
+
+Still open: joins and alternative routes (R3). The "gap under 1 min" list in section 1 shrinks only for nodes whose
+`need` the bot had not met yet; several (`b2b`, `kolekcja`, `leasing`) are still bought quickly because the bot meets
+the new need early. That is the signal for R3: more conditions of the same kind will not slow research, joining
+branches will.
 
 ## Proposals
 

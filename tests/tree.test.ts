@@ -3,6 +3,7 @@ import { AUTOMATIONS, BRANCHES, NODE, TREE, TREE_PAGES } from '../src/content/tr
 import { mod } from '../src/core/mods';
 import { createState, type GameState } from '../src/core/state';
 import { playthrough } from './bot';
+import { depths } from './treeAudit';
 
 const MOD_KEYS = ['speed', 'demand', 'filament', 'spool', 'click', 'ops', 'opsCap', 'rep', 'orderPay', 'orderTime', 'penalty',
   'dailyPay', 'offer', 'breakdown', 'repair', 'power', 'printerCost', 'farmCost', 'marketingCost', 'design', 'offline', 'mining', 'fab'];
@@ -34,6 +35,25 @@ describe('research tree registry', () => {
       seen.set(id, 2);
     };
     TREE.forEach(n => visit(n.id));
+  });
+
+  it('rows follow the graph: every node sits below all its prerequisites and no higher than its depth allows', () => {
+    const { depth } = depths(TREE);
+    for (const n of TREE) {
+      expect(n.row, `${n.id} row vs depth`).toBeGreaterThanOrEqual(depth[n.id]);
+      for (const r of n.req ?? []) expect(n.row, `${n.id} must be below ${r}`).toBeGreaterThan(NODE[r].row);
+    }
+  });
+
+  it('research goes step by step: only roots are free of prerequisites, and nothing opens on compute alone', () => {
+    const roots = TREE.filter(n => !(n.req ?? []).length);
+    for (const n of roots) expect(n.row, `root ${n.id} sits in the first row`).toBe(1);
+    expect(roots.length).toBeLessThanOrEqual(BRANCHES.length);
+    // A gate beyond compute: a stage condition, money or figurines, or several prerequisites.
+    for (const n of TREE.filter(n => (n.req ?? []).length)) {
+      const gated = !!n.need || !!n.zl || !!n.wyd || (n.req ?? []).length > 1;
+      expect(gated, `${n.id} opens as soon as its prerequisite is bought and compute allows`).toBe(true);
+    }
   });
 
   it.each(TREE.map(n => [n.id, n] as const))('%s has texts, a cost and an effect', (_, n) => {

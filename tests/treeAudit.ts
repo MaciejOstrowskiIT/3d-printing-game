@@ -80,7 +80,7 @@ export function buildReport(): string {
     `- ${rows.filter(r => r.gap < 1).length} nodes bought less than 1 min after their last prerequisite.`,
     `- ${TREE.filter(n => (n.req ?? []).length === 1 && !n.need).length} nodes have exactly one prerequisite and no \`need\`.`,
     `- ${TREE.filter(n => (n.req ?? []).length > 1).length} nodes have 2+ prerequisites; ${TREE.filter(n => (n.req ?? []).some(r => NODE[r].col !== n.col)).length} link to another branch.`,
-    `- ${TREE.filter(n => depth[n.id] !== undefined && n.row !== depth[n.id]).length} nodes where \`row\` differs from depth.`,
+    `- ${TREE.filter(n => depth[n.id] !== undefined && n.row < depth[n.id]).length} nodes whose \`row\` is above their depth (must be 0: rows only grow downwards).`,
     `- Cycles or missing ids: ${broken.length ? broken.map(i => `\`${i}\``).join(', ') : 'none'}.`, '');
 
   const quick = rows.filter(r => r.gap < 1 && Number.isFinite(r.gap)).sort((a, b) => a.gap - b.gap);
@@ -104,11 +104,11 @@ export function buildReport(): string {
   out.push('## 4. Cross-branch links', '',
     '| From | To |', '|---|---|', ...cross.map(c => `| ${name(c.from)} | ${name(c.to)} |`), '');
 
-  const rowMismatch = rows.filter(r => Number.isFinite(r.d) && r.n.row !== r.d);
+  const rowMismatch = rows.filter(r => Number.isFinite(r.d) && r.n.row < r.d);
   out.push('## 5. Structure problems', '',
     `- Cycles or missing prerequisites: ${broken.length ? broken.map(i => `\`${i}\``).join(', ') : 'none'}.`,
     `- Never bought by the bot in any seed: ${rows.filter(r => !r.seen).map(r => `\`${r.n.id}\``).join(', ') || 'none'}.`, '',
-    '`row` versus depth (the layout row is hand-written):', '',
+    'Nodes whose layout `row` is above their graph depth (a node must sit below everything it needs; empty is good):', '',
     '| Node | Row | Depth |', '|---|---|---|', ...rowMismatch.map(r => `| ${name(r.n)} | ${r.n.row} | ${r.d} |`), '');
 
   out.push('## All nodes', '',
