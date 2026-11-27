@@ -3,7 +3,7 @@ import { MODELS } from '../../../content/models';
 import { piecesInStock } from '../../../systems/inventory';
 import { materialStock } from '../../../systems/materials';
 import { fmt, li, mass, t } from '../../i18n';
-import { useS } from '../../store';
+import { act, useS } from '../../store';
 
 export function StockPanel() {
   const rows = useS(s => MODELS.filter(m => s.mdls.includes(m.id)).map(m => m.id + ':' + piecesInStock(s, m.id)).join(','));
@@ -25,9 +25,11 @@ export function FilamentPanel() {
   return (
     <section class="pop-body">
       <h2>{t('popFil')}</h2>
-      <ul class="pop-list">
-        {list.map(({ m, g }) => <li key={m.id} class={m.id === active ? 'active' : ''}>
-          <span>{m.name[li()]}{m.id === active && <small>{t('popFilActive')}</small>}</span><b>{mass(g)}</b>
+      <ul class="pop-list pop-materials">
+        {list.map(({ m, g }) => <li key={m.id}>
+          <button type="button" aria-pressed={m.id === active} onClick={() => act(`material:${m.id}`)}>
+            <span>{m.name[li()]}{m.id === active && <small>{t('popFilActive')}</small>}</span><b>{mass(g)}</b>
+          </button>
         </li>)}
       </ul>
     </section>
