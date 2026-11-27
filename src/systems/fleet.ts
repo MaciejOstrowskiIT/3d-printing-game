@@ -48,6 +48,15 @@ export function swapMain(s: GameState, from: string, to: string) {
   if (rest > 0) s.fleet[from] = rest;
 }
 
+/** Progress (0–100) of the piece being printed, or null when it should not be shown: out of phase 1, nothing
+ *  printing, or printing so fast (a piece under BAL.printProgressMinSeconds) that a bar would only flicker. */
+export function printProgress(s: GameState): number | null {
+  if (s.ph !== 1) return null;
+  const m = model(s), rate = rateOn(s, s.mdl);
+  if (rate <= 0 || m.seconds / rate < BAL.printProgressMinSeconds) return null;
+  return Math.round(100 * Math.min(1, (s.modelStock[s.mdl]?.progress ?? 0) / m.seconds));
+}
+
 export function validFleet(s: GameState) {
   if (!s.fleet || typeof s.fleet !== 'object' || Array.isArray(s.fleet)) return false;
   let sum = 0;

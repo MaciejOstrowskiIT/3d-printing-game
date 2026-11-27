@@ -1,8 +1,9 @@
-import { describe, expect, it } from 'vitest';
-import { BAL } from '../src/content/balance';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { BAL, setPace } from '../src/content/balance';
 import { clickPower, rateBase } from '../src/core/formulas';
 import { createGame } from '../src/core/game';
 import { createState } from '../src/core/state';
+import { printProgress } from '../src/systems/fleet';
 
 describe('garage printer', () => {
   it('prints on its own from the start, with no extra printers and no clicks', () => {
@@ -31,5 +32,24 @@ describe('garage printer', () => {
     const g = createGame({ state: { ...createState(), fil: 0 } });
     g.tick(10);
     expect(g.s.total).toBe(0);
+  });
+});
+
+describe('print progress bar', () => {
+  // Written for the shipped pace: at pace 1 the garage printer already finishes a piece every second.
+  beforeAll(() => setPace(BAL.pace));
+  afterAll(() => setPace(1));
+
+  it('shows early while one piece takes a few seconds, then hides once printing is fast', () => {
+    const slow = createGame({ state: { ...createState(), fil: 1000 } });
+    expect(printProgress(slow.s)).toBe(0);
+    slow.act('print');
+    expect(printProgress(slow.s)).toBeGreaterThan(0);
+    const fast = createGame({ state: { ...createState(), auto: 50, fil: 1000 } });
+    expect(printProgress(fast.s)).toBeNull();
+  });
+
+  it('is hidden in space', () => {
+    expect(printProgress({ ...createState(), ph: 2 })).toBeNull();
   });
 });
