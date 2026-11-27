@@ -1,7 +1,7 @@
 import { render } from 'preact';
 // Fonts are bundled (Latin + Latin Extended for Polish) so the game makes no third-party requests.
 import './fonts.css';
-import './styles.css';
+import './styles/index.css';
 import { App } from './ui/components/App';
 import { platform } from './ui/platform';
 import { initAnalytics } from './ui/analytics';

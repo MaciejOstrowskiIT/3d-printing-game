@@ -1,0 +1,15 @@
+/* Stylesheet entry. The cascade order is the file order: later files override earlier ones, so a new rule goes into
+   the file for its area (add a new numbered file only for a new area, at the position it should win). */
+@import './01-base.css'; /* Tokens, themes, base elements, touch rules */
+@import './02-shell.css'; /* App shell and the side panel: printer picture, counter, goal, log */
+@import './03-hud-cards.css'; /* Resource bar, tabs, events and orders, cards, tiles, shop rows, colours, price, automation list */
+@import './04-research.css'; /* Computer cell and the research tree */
+@import './05-responsive.css'; /* Phone and narrow-window rules for the parts above */
+@import './06-progress.css'; /* Rewarded boost row, achievements and toasts, prestige and patents */
+@import './07-title.css'; /* Title screen */
+@import './08-modal.css'; /* Modal dialogs (save, report) */
+@import './09-research-ui.css'; /* Tree pages, research preview, finished nodes, tab dot */
+@import './10-workshop-stats.css'; /* Workshop finance and margin tables */
+@import './11-frame.css'; /* Common frame across tabs, sidebar surfaces */
+@import './12-workshop-line.css'; /* Workshop redesign: production line, investments, events, HUD, mobile nav */
+@import './13-extras.css'; /* Alpha badge, materials row, report dialog, report button */
