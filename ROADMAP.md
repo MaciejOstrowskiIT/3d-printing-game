@@ -12,6 +12,7 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 
 | Card | PR | Notes |
 |---|---|---|
+| **Three Crowns achievement** | #76 | Unlocks after three completed games (#72) |
 | **Much harder realistic line** | #71 | Costs, demand, breakdowns and printer speed; bot needs about 5 h instead of 3 h |
 | **R7: Rebalance and QA of the new tree** | #69 | Quantum bot option and pacing test, "Quantum investor" achievement, audit and README refreshed |
 | **QA6: i18n and content integrity tests** | #67 | `tests/i18n.test.ts`: same keys, placeholders and texts in PL and EN; no content gaps found |
