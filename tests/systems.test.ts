@@ -103,7 +103,7 @@ describe('offline', () => {
     const g = newGame();
     g.s.inv = 3;
     g.s.goal = 2;
-    expect(g.catchUp(120)).toEqual({ k: 'offSales', a: ['~120', 3] });
+    expect(g.catchUp(120)).toMatchObject({ k: 'offSales', a: ['~120', 3] });
     expect(g.s.total).toBe(0);
   });
 

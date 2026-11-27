@@ -25,6 +25,8 @@ export interface Ctx {
   /** Offline catch-up: no random events, no sounds and almost no log entries. */
   offline: boolean;
   emit(e: GameEvent): void;
+  /** Offline catch-up only: running totals the summary reads (set by catchUp, cleared afterwards). */
+  tally?: { filament: number };
 }
 
 export const rnd = (ctx: Ctx, a: number, b: number) => a + ctx.rng() * (b - a);

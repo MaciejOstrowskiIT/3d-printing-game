@@ -17,6 +17,7 @@ import { dismissMessage, storySystem } from '../systems/story';
 import { filamentSystem, idleForFilament, toggleAutoMaterial } from '../systems/filament';
 import { buyQuantum, quantumSystem, upgradeQuantum } from '../systems/quantum';
 import { claimOfflineBonus, grantOfflineBonus, offlineBonusSystem } from '../systems/offlineBonus';
+import { buildAwaySummary, type AwaySummary } from '../systems/awaySummary';
 import { buyClickTool, buyDesign, printManual, selectModel } from '../systems/models';
 import { assignPoint, buyNode, computeSystem, goalsSystem, reputationSystem } from '../systems/research';
 import { changePrice, salesSystem } from '../systems/sales';
@@ -65,7 +66,7 @@ export interface Game {
   act(a: Action): boolean;
   /** Simulates time spent away and logs what was produced. */
   /** Simulates time away; returns the summary line, plus how long printers stood idle without filament. */
-  catchUp(seconds: number): (LogEntry & { idle?: number }) | undefined;
+  catchUp(seconds: number): (LogEntry & { idle?: number; summary: AwaySummary }) | undefined;
   load(s: GameState): void;
   reset(logKey?: string): void;
   on(fn: (e: GameEvent) => void): () => void;
@@ -138,9 +139,10 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
     },
     catchUp(seconds) {
       if (s.end || !Number.isFinite(seconds) || seconds <= 0) return;
-      const before = { total: s.total, sold: s.sold };
+      const before = { total: s.total, sold: s.sold, zl: s.zl };
       const elapsed = Math.min(seconds, (s.slow > 1 ? BAL.realisticOfflineMax : BAL.offlineMaxSeconds) * mod(s, 'offline'));
       ctx.offline = true;
+      ctx.tally = { filament: 0 };
       let rem = elapsed, revenue = 0, idle = 0;
       while (rem > 0) {
         const d = Math.min(1, rem), sold = s.sold, price = s.price;
@@ -150,21 +152,24 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
         rem -= d;
       }
       ctx.offline = false;
+      const filament = ctx.tally.filament;
+      ctx.tally = undefined;
       const made = Math.floor(s.total - before.total);
       const sold = s.goal >= 1 ? s.sold - before.sold : 0;
       grantOfflineBonus(s, elapsed, revenue, made);
       if (elapsed < 120) return;
       const duration = '~' + Math.round(elapsed);
       const idleNote = idle >= BAL.offlineIdleNoteSeconds ? Math.round(idle) : undefined;
+      const summary = buildAwaySummary(s, { seconds, elapsed, before, revenue, filament, idle: idleNote ?? 0 });
       if (!made && !sold) {
         if (!idleNote) return;
         log(s, ctx, 'offIdle', duration);
-        return { ...s.log[0], idle: idleNote };
+        return { ...s.log[0], idle: idleNote, summary };
       }
       if (made && sold) log(s, ctx, 'offProductionSales', duration, made, sold);
       else if (sold) log(s, ctx, 'offSales', duration, sold);
       else log(s, ctx, 'off2', duration, made);
-      return { ...s.log[0], idle: idleNote };
+      return { ...s.log[0], idle: idleNote, summary };
     },
     load(next) { s = next; },
     reset(logKey = 'fresh') {
