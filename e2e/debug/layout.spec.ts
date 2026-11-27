@@ -1,5 +1,7 @@
 import { expect, type Page } from '@playwright/test';
 import research from '../../promo/states/research.json' with { type: 'json' };
+import { createState } from '../../src/core/state';
+import { newPeriod, PERIOD_SECONDS } from '../../src/systems/workshopStats';
 import { test } from '../helpers';
 
 /** Loads the research save with enough total output for every material to be unlocked, on the Workshop tab. */
@@ -38,3 +40,41 @@ test('switching material does not resize the Materials card or its buttons', asy
     expect(await snapshot()).toEqual(before);
   }
 });
+
+for (const { locale, sales, fast, growth } of [
+  { locale: 'pl-PL', sales: 'Sprzedaż', fast: 'Wszystko schodzi od ręki', growth: 'Zapas rośnie' },
+  { locale: 'en-US', sales: 'Sales', fast: 'Everything sells instantly', growth: 'Stock is growing' },
+]) {
+  test.describe(locale, () => {
+    test.use({ locale });
+
+    test('sales advice does not resize the Sales card', async ({ page, isMobile }) => {
+      if (isMobile) await page.setViewportSize({ width: 320, height: 844 });
+      await page.goto('/#debug');
+      await page.waitForFunction(() => Boolean(window.__drk));
+      const state = { ...createState(), goal: 1, total: 35, financeTime: PERIOD_SECONDS };
+      const period = newPeriod(0);
+      period.models.fig = { pieces: 4, revenue: 24, stocked: 18 };
+      const card = page.locator('.workshop-sales');
+      const advice = card.locator('.sales-flow');
+      const load = async (save: typeof state) => {
+        await page.evaluate(save => window.__drk!.load(save), save);
+        if (isMobile) await page.getByRole('tab', { name: sales, exact: true }).click();
+      };
+
+      await load(state);
+      await expect(advice).toBeEmpty();
+      await expect(card).toBeVisible();
+      await page.evaluate(() => document.fonts.ready);
+      const { height } = await rect(page, '.workshop-sales');
+
+      await load({ ...state, sold: 20 });
+      await expect(advice).toContainText(fast);
+      expect((await rect(page, '.workshop-sales')).height).toBe(height);
+
+      await load({ ...state, sold: 20, inv: 15, finance: [period] });
+      await expect(advice).toContainText(growth);
+      expect((await rect(page, '.workshop-sales')).height).toBe(height);
+    });
+  });
+}

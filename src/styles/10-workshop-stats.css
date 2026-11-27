@@ -55,7 +55,6 @@
 .stats-margins small{display:block;color:var(--mute);font-size:12px;font-weight:500}
 .stats-margins td{overflow-wrap:anywhere}
 .stats-margins .loss{color:var(--bad)}
-.stock-growth{margin:8px 0;padding:6px 8px;border-left:2px solid var(--or);background:var(--orS);border-radius:4px;color:var(--ink);font-size:13px}
 @media(max-width:420px){.stats-margins th,.stats-margins td{padding-left:4px;font-size:13px}}
 
 .workshop-production .ch span,.workshop-sales .ch span{flex:none;white-space:nowrap}
@@ -67,8 +66,11 @@
 .workshop-sales .colors .sw button{width:32px;height:32px;min-height:32px}
 .workshop-sales .colors .hint{min-block-size:2lh}
 .sales-notes{margin-top:8px}
-.sales-flow:has(*){min-block-size:2.4rem}
 .sales-notes p{margin:0}
+/* Reserve the same room for wrapping sales advice even when there is no advice to show. */
+.sales-flow{display:grid;font-size:13px;line-height:1.25;min-block-size:calc(3lh + 12px)}
+.sales-flow>p{display:flex;align-items:center;padding:6px 8px;border-left:2px solid transparent;border-radius:4px;background:var(--sub);font-size:inherit}
+.sales-flow>.stock-growth{border-left-color:var(--or);background:var(--orS);color:var(--ink)}
 .sales-notes>.hint{min-block-size:2lh}
 @media(max-width:420px){
   .sales-notes>.hint{min-block-size:3lh}
