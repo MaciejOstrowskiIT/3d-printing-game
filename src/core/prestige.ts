@@ -39,13 +39,14 @@ export function applyStartBonuses(s: GameState) {
 }
 
 /** Starts a new production line, optionally a realistic one (challenge: slower printing, more patents).
- *  Keeps meta progress, achievements and colours; returns the fresh state. */
+ *  Keeps meta progress, achievements, manual print progress and colours. */
 export function prestige(s: GameState, ctx: Ctx, realistic = false): GameState | null {
   if (!canPrestige(s)) return null;
   const gain = patentsFor(s);
   const next = createState();
   next.meta = { ...s.meta, pat: { ...s.meta.pat }, patents: s.meta.patents + gain, earned: s.meta.earned + gain, runs: s.meta.runs + 1 };
   next.ach = [...s.ach];
+  next.manualWork = s.manualWork;
   next.colorsUsed = s.colorsUsed;
   next.col = s.col;
   next.slow = realistic ? BAL.realisticSlow : 1;

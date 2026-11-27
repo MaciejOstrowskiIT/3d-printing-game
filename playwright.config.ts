@@ -2,9 +2,9 @@ import { defineConfig, devices } from '@playwright/test';
 
 const baseURL = 'http://127.0.0.1:4173';
 const qaBaseURL = 'http://127.0.0.1:4174';
-const debugSpecs = '**/debug/*.spec.ts';
+const debugSpecs = ['**/debug/*.spec.ts', '**/e2e/layout.spec.ts'];
 const playthroughSpec = '**/playthrough.spec.ts';
-const qaSpecs = [debugSpecs, playthroughSpec];
+const qaSpecs = [...debugSpecs, playthroughSpec];
 const desktop = devices['Desktop Chrome'];
 const mobile = { ...desktop, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true };
 

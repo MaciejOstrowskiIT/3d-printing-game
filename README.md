@@ -12,6 +12,7 @@ Roadmap and task board: [`ROADMAP.md`](ROADMAP.md).
 npm install
 npm run dev        # dev server with hot reload
 npm test           # unit tests + a bot that plays the whole game
+npm run treeaudit  # research tree audit -> docs/tree-audit.md (about a minute, plays the bot)
 npm run build      # dist/index.html: one self-contained file (GitHub Pages)
 npm run build:crazygames   # dist-crazygames/index.html with the CrazyGames SDK
 npm run build:poki         # dist-poki/index.html with the Poki SDK
@@ -30,6 +31,19 @@ Playwright builds the game, serves `dist/` with Vite Preview, and checks the tit
 manual printing and navigation on desktop and at 390×844 with touch enabled. Add
 `-- --headed` to watch the tests or `-- --project=chromium-mobile` to run only the phone
 scenario. Failure traces are written to `e2e/out/`.
+
+### Layout stability
+
+`npm run e2e:layout` checks all five promo saves in Chromium at 1280×800 and 390×844.
+It requires [CLS](https://web.dev/articles/cls) below 0.02 over 20 seconds of live play,
+limits vertical movement to 2 px using one-second samples, and checks for
+horizontal overflow. Run a single stage
+with `npm run e2e:layout -- -g factory`. Each case attaches its measurements to
+the Playwright result. The same tests also run in `npm run e2e`.
+
+The vertical position baseline resets only at goal or phase changes, research unlocks,
+or purchases of models, printers, farms, panels, drones and factories. Every reset
+is listed in the measurements. CLS and horizontal overflow cover the entire window.
 
 ### Debugging game stages
 

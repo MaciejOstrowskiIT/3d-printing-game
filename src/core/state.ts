@@ -85,6 +85,8 @@ export interface GameState {
   fleet: Record<string, number>;
   /** Quantum computer: bought, qubit level (0 when not bought) and quantum points. */
   qOn: boolean; qLvl: number; qp: number;
+  /** Figurine-equivalent work done by hand across all production lines. */
+  manualWork: number;
 }
 
 export const SAVE_VERSION = 7;
@@ -125,6 +127,7 @@ export const createState = (): GameState => ({
   planT: 0,
   fleet: {},
   qOn: false, qLvl: 0, qp: 0,
+  manualWork: 0,
 });
 
 export const has = (s: GameState, id: string) => s.done.includes(id);

@@ -12,8 +12,13 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 
 | Card | PR | Notes |
 |---|---|---|
+| **Clicker achievement** | #64 | Unlocks at 1,000 figurines of manual work (#59) |
 | **Explain when the next daily order is available** | #62 | Clarifies the calendar-day limit and streak in PL/EN (#58) |
 | **R5: Quantum computer** | #61 | Machine, QP, qubit upgrades, power draw, Research panel; QP sink comes in R6 |
+| **R4: Tree view shows the connections** | #60 | Requires chips with jump, path highlight, dotted alternative routes (stacked on #57) |
+| **R1: Tech tree audit** | #54 | `npm run treeaudit` and `docs/tree-audit.md`; findings for R2 and R3 |
+| **R2: Step-by-step progression** | #55 | Stage needs on 19 nodes, rows follow the graph (stacked on #54) |
+| **R3: Cross-branch joins and alternative routes** | #57 | 11 joins, 3 `reqAny` nodes, old saves stay valid (stacked on #55) |
 | **Keep the live finance line continuous** | #51 | Smooth transition into a new empty interval |
 | **QA4: Repeatable layout stability tests** | #56 | Run with `npm run e2e:layout` |
 | **Bug report preview mode** | #46 | Form visible in dev and QA `#debug` without a transport |
@@ -22,7 +27,6 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 
 | Card | Branch | Owner |
 |---|---|---|
-| **R1: Tech tree audit** | `feat/tree-audit` | Claude |
 
 ## 🚦 Next up
 
@@ -81,8 +85,6 @@ Design decisions for R5 and R6 (change them in the PR if the audit says otherwis
 | # | Card | Effort | Prompt |
 |---|---|---|---|
 | R2 | **Step-by-step progression** | M | Using `docs/tree-audit.md`, rework `req`, `need` and costs in `content/tree.ts` so research goes step by step: every node except the eight branch roots requires at least one earlier node, no node can be bought right after its prerequisite without a real new condition (a `need` that matches the stage, or a cost jump), and `row` equals depth in the graph (derive it in a test instead of trusting hand-written rows; fix the rows). Do not rename ids or change what a node does, only when it opens. Add to `tests/tree.test.ts`: depth rule, no node below the audit's minimum gap, graph is acyclic and every node is reachable from a root. Run `balance.sim.test.ts`; if pacing moves, adjust costs, not effects, and report the before/after goal times. |
-| R3 | **Merging paths and joins** | M | Make the tree a graph, not parallel chains. Add 8 to 12 joins: nodes that require two or more prerequisites from different branches (for example a Production node plus an Energy node), each with a clear in-game reason in its text. Add an optional `reqAny?: string[]` ("any one of these", an alternative route) for 2 or 3 nodes, with `nodeStatus` and the bot support it. Keep `req` (all of) as is. Old saves must keep working: only gate nodes that are not yet bought; a node already in `s.done` stays done. Tests: join and alternative routes behave as documented, nothing becomes unreachable, balance bot still finishes within range. Depends on R2. |
-| R4 | **Tree view: show the connections** | M | Update `ui/components/Research.tsx` for the graph from R3. Edges that cross to another branch or page are not drawn today, so show them as a small "requires: Name (Branch)" chip on the node that jumps to that node on click. Hovering or focusing a node highlights its whole prerequisite path; `reqAny` edges use a different line style and the legend explains it. Keyboard accessible, works on mobile (tap to highlight), no layout jump when highlighting. Check PL and EN text lengths. Depends on R3. |
 | R6 | **Quantum branch** | M | Add a ninth branch **Quantum** (append to `BRANCHES`, new entry in `TREE_PAGES`, do not reorder existing). Add a `qp` cost field to `TreeNode`, show it in the node and in `canBuy`/`buyNode`, and let the bot buy them. 8 to 10 nodes, optional and profitable (demand, speed, order pay, compute rate, offline, patent-style bonuses), stronger than regular nodes but paid in a currency only the machine produces; the first node is the entry point, the rest form a small graph with at least two joins, and 2 or 3 require a regular node so the trees connect. No node may be needed to finish the game. PL and EN texts, tests for costs and unlock rules. Depends on R3 and R5. |
 | R7 | **Rebalance and QA of the new tree** | S | Run the whole suite and the QA lane checks (`balance.sim.test.ts`, content/i18n tests when merged, e2e playthrough when merged) against R2 to R6. Make sure quantum does not break pacing (the bot may use it but must finish in the same range), update the README "Research tree" section and `docs/tree-audit.md` with the new numbers, and add the Quantum branch to the story/achievements list if it fits (one achievement for the first QP spent). Fix what breaks; list leftovers as Backlog cards. |
 

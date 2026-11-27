@@ -13,7 +13,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "playwright test",
+    "e2e:layout": "playwright test e2e/layout.spec.ts",
     "typecheck": "tsc --noEmit",
+    "treeaudit": "vite-node scripts/treeaudit.ts",
     "promo": "npm run build && vite-node promo/snapshots.ts && python3 promo/render.py && python3 promo/video.py"
   },
   "dependencies": {

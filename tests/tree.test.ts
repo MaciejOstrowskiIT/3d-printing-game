@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { AUTOMATIONS, BRANCHES, NODE, TREE, TREE_PAGES } from '../src/content/tree';
+import { AUTOMATIONS, BRANCHES, NODE, prereqs, TREE, TREE_PAGES } from '../src/content/tree';
 import { mod } from '../src/core/mods';
 import { createState, type GameState } from '../src/core/state';
+import { validSave } from '../src/core/saveValidation';
+import { nodeStatus } from '../src/systems/research';
 import { playthrough } from './bot';
+import { depths } from './treeAudit';
 
 const MOD_KEYS = ['speed', 'demand', 'filament', 'spool', 'click', 'ops', 'opsCap', 'rep', 'orderPay', 'orderTime', 'penalty',
   'dailyPay', 'offer', 'breakdown', 'repair', 'power', 'printerCost', 'farmCost', 'marketingCost', 'design', 'offline', 'mining', 'fab'];
@@ -24,16 +27,92 @@ describe('research tree registry', () => {
   });
 
   it('requirements exist and contain no cycles', () => {
-    for (const n of TREE) for (const r of n.req ?? []) expect(NODE[r], `${n.id} requires ${r}`).toBeDefined();
+    for (const n of TREE) for (const r of prereqs(n)) expect(NODE[r], `${n.id} requires ${r}`).toBeDefined();
     const seen = new Map<string, number>();
     const visit = (id: string): void => {
       if (seen.get(id) === 2) return;
       expect(seen.get(id), `cycle at ${id}`).not.toBe(1);
       seen.set(id, 1);
-      for (const r of NODE[id].req ?? []) visit(r);
+      for (const r of prereqs(NODE[id])) visit(r);
       seen.set(id, 2);
     };
     TREE.forEach(n => visit(n.id));
+  });
+
+  it('rows follow the graph: every node sits below all its prerequisites and no higher than its depth allows', () => {
+    const { depth } = depths(TREE);
+    for (const n of TREE) {
+      expect(n.row, `${n.id} row vs depth`).toBeGreaterThanOrEqual(depth[n.id]);
+      for (const r of prereqs(n)) expect(n.row, `${n.id} must be below ${r}`).toBeGreaterThan(NODE[r].row);
+    }
+  });
+
+  it('research goes step by step: only roots are free of prerequisites, and nothing opens on compute alone', () => {
+    const roots = TREE.filter(n => !prereqs(n).length);
+    for (const n of roots) expect(n.row, `root ${n.id} sits in the first row`).toBe(1);
+    expect(roots.length).toBeLessThanOrEqual(BRANCHES.length);
+    // A gate beyond compute: a stage condition, money or figurines, or several prerequisites.
+    for (const n of TREE.filter(n => prereqs(n).length)) {
+      const gated = !!n.need || !!n.zl || !!n.wyd || prereqs(n).length > 1;
+      expect(gated, `${n.id} opens as soon as its prerequisite is bought and compute allows`).toBe(true);
+    }
+  });
+
+  it('the tree is a graph: joins across branches and alternative routes', () => {
+    const joins = TREE.filter(n => (n.req ?? []).length > 1 && (n.req ?? []).some(r => NODE[r].col !== n.col));
+    expect(joins.length).toBeGreaterThanOrEqual(8);
+    const alt = TREE.filter(n => n.reqAny);
+    expect(alt.length).toBeGreaterThanOrEqual(2);
+    expect(alt.length).toBeLessThanOrEqual(3);
+    for (const n of alt) {
+      expect(n.reqAny!.length, `${n.id} alternatives`).toBeGreaterThanOrEqual(2);
+      expect(new Set(n.reqAny!.map(r => NODE[r].col)).size, `${n.id} alternatives come from different branches`).toBeGreaterThan(1);
+    }
+    for (const n of TREE) for (const r of n.reqNew ?? []) expect(n.req, `${n.id} reqNew must be part of req`).toContain(r);
+  });
+
+  it('with an alternative route one prerequisite is enough, and none is not', () => {
+    const n = NODE.autooffer;
+    const s = createState();
+    expect(nodeStatus(s, n)).toBe('locked');
+    s.done = ['automkt'];
+    expect(nodeStatus(s, n)).not.toBe('locked');
+    s.done = ['negocjator'];
+    expect(nodeStatus(s, n)).not.toBe('locked');
+  });
+
+  it('a join needs every prerequisite', () => {
+    const s = createState();
+    s.done = ['hotend'];
+    expect(nodeStatus(s, NODE.corexy)).toBe('locked');
+    s.done = ['hotend', 'baterie'];
+    expect(nodeStatus(s, NODE.corexy)).not.toBe('locked');
+  });
+
+  it('old saves stay valid: a bought node does not need joins added later, but still needs its original prerequisites', () => {
+    const fresh = () => createState();
+    const old = fresh();
+    old.done = ['dysza', 'fw', 'hurt', 'shaping', 'hotend', 'corexy'];
+    expect(validSave(old, fresh())).toBe(true);
+    const forged = fresh();
+    forged.done = ['fw'];
+    expect(validSave(forged, fresh())).toBe(false);
+    const alt = fresh();
+    alt.done = ['automkt', 'autooffer'];
+    expect(validSave(alt, fresh())).toBe(false); // automkt itself is missing its own prerequisites
+  });
+
+  it('every reachable node can be researched: no node is blocked by a missing branch', () => {
+    const done = new Set<string>();
+    let grew = true;
+    while (grew) {
+      grew = false;
+      for (const n of TREE) {
+        if (done.has(n.id)) continue;
+        if ((n.req ?? []).every(r => done.has(r)) && (!n.reqAny || n.reqAny.some(r => done.has(r)))) { done.add(n.id); grew = true; }
+      }
+    }
+    expect(TREE.filter(n => !done.has(n.id)).map(n => n.id)).toEqual([]);
   });
 
   it.each(TREE.map(n => [n.id, n] as const))('%s has texts, a cost and an effect', (_, n) => {
