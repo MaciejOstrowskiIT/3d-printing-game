@@ -153,20 +153,23 @@ function Events() {
         </div>
       )}
       {o && (
-        <div class="ev">
+        <div class="ev order-card">
           <div class="evt">
             <b>{t('oFrom', dict().clients[o.c])}</b>
-            <p>{o.acc ? t('oProg', fmt(o.got), fmt(o.n), money(o.pay)) : t('oOffer', fmt(o.n), fmt(o.time), money(o.pay))}</p>
+            <div class="order-card-state">
+              <p aria-hidden={o.acc}>{t('oOffer', fmt(o.n), fmt(o.time), money(o.pay))}</p>
+              <p aria-hidden={!o.acc}>{t('oProg', fmt(o.got), fmt(o.n), money(o.pay))}</p>
+            </div>
             <Meter tone="or" pct={o.acc ? (100 * o.got) / o.n : (100 * o.offer) / BAL.orderOffer} />
-            {o.acc && <p class="hint">{t('oHint')}</p>}
           </div>
           <Countdown left={o.acc ? o.left : o.offer} total={o.acc ? o.time : BAL.orderOffer} />
-          {!o.acc && (
-            <div class="evb">
+          <div class="order-card-state order-card-footer">
+            <div class="evb" aria-hidden={o.acc}>
               <button class="btn-main" onClick={() => act('oacc')}>{t('accept')}</button>
               <button onClick={() => act('odec')}>{t('decline')}</button>
             </div>
-          )}
+            <p class="hint" aria-hidden={!o.acc}>{t('oHint')}</p>
+          </div>
         </div>
       )}
       <StoryCard />

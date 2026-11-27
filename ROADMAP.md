@@ -12,6 +12,7 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 
 | Card | PR | Notes |
 |---|---|---|
+| **Keep special order cards stable when accepted** | #82 | Reserve room for both order states on desktop and mobile |
 | **Report moderation with Workers AI** | #73 | Llama Guard in the worker instead of a word list; supersedes #70 |
 | **SkyWalker and play time** | #75 | Under-30-minute achievement, current line and total active play time (#68) |
 | **Three Crowns achievement** | #76 | Unlocks after three completed games (#72) |
