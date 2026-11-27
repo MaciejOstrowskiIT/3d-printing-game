@@ -39,7 +39,7 @@ export function Title() {
         </div>
         <div class="settings title-settings">
           <button onClick={() => setPrefs({ lang: prefs.value.lang === 'pl' ? 'en' : 'pl' })}>{t('langBtn')}</button>
-          {reporter.enabled && <button onClick={() => { dialog.value = 'report'; }}>{t('rOpen')}</button>}
+          {reporter.enabled && <button class="report-btn" onClick={() => { dialog.value = 'report'; }}><span aria-hidden="true">🐞</span> {t('rOpen')}</button>}
           <button onClick={() => setPrefs({ mute: !prefs.value.mute })}>{prefs.value.mute ? t('mOff') : t('mOn')}</button>
         </div>
       </div>

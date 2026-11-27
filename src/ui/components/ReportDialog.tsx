@@ -47,11 +47,12 @@ export function ReportDialog() {
         <p class="hint">{t('rHint')}</p>
         <textarea aria-label={t('rField')} placeholder={t('rPh')} rows={5} maxLength={REPORT_MAX} value={text} autofocus
           onInput={e => { setText((e.currentTarget as HTMLTextAreaElement).value); if (status !== 'idle') setStatus('idle'); }} />
-        <div class="ctl">
+        <div class="count-row"><span class={'chars' + (text.length >= REPORT_MAX * 0.9 ? ' near' : '')} aria-live="off">{text.length}/{REPORT_MAX}</span></div>
+        <div class="report-actions">
+          <button type="button" onClick={close}>{t('sClose')}</button>
           <button type="submit" class="btn-main" disabled={wait > 0 || text.trim().length < REPORT_MIN}>{wait > 0 ? t('rWait', wait) : t('rSend')}</button>
-          <span class="hint">{text.length}/{REPORT_MAX}</span>
         </div>
-        <p class="hint" role="status">{status === 'sent' ? t('rSent') : status === 'short' ? t('rShort', REPORT_MIN) : t('rPrivacy')}</p>
+        <p class="hint report-note" role="status">{status === 'sent' ? t('rSent') : status === 'short' ? t('rShort', REPORT_MIN) : t('rPrivacy')}</p>
       </form>
     </dialog>
   );
