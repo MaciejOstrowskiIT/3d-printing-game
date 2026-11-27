@@ -12,8 +12,7 @@ export const qualityTexts = {
   qualityPrice: 'Średnia cena sprzedaży z premią: {0}.',
   materialUse: 'Użyj',
   materialsTitle: 'Materiały',
-  materialStock: '{0} w zapasie',
+  materialBuy: 'Kup {0} · {1}',
   materialPrice: '{0}/kg',
-  materialDurability: 'Trwałość {0}/5',
   materialMatch: 'Popyt na bieżący model +{0}%',
 };

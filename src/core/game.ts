@@ -58,6 +58,7 @@ export const SYSTEMS: System[] = [
 export type Action =
   | 'calibrate' | 'dryer' | 'precision' | 'automat' | 'hint-dismiss'
   | 'print' | 'spool' | 'auto' | 'farm' | 'panel' | 'mkt' | 'drone' | 'fab'
+  | `spool:${string}`
   | 'pminus' | 'pplus' | `price:${string}:${PriceEdit}:${number}` | 'oacc' | 'odec' | 'fix' | 'mevyes' | 'mevno' | 'tool'
   | 'proc1' | 'procmax' | 'mem1' | 'memmax' | 'boost' | 'adfail' | 'prestige' | 'prestigeR' | 'offx2' | 'daily' | 'msgok' | 'qbuy' | 'qup'
   | `t:${string}` | `col:${number}` | `material:${string}` | `price-up:${string}` | `price-down:${string}` | `fleet:${string}:${number}` | `mdl:${string}` | `stl:${string}` | `day:${number}` | `am:${string}:${0 | 1}` | `pat:${string}`;
@@ -100,7 +101,11 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
       if (a === 'hint-dismiss') return dismissHint(s);
       if (a === 'calibrate' || a === 'dryer' || a === 'precision') return setQualityAction(s, a);
       if (a === 'print') return printManual(s, ctx);
-      if (a === 'spool') { const ok = buySpool(s); if (ok) sfx(ctx, 'buy'); return ok; }
+      if (a === 'spool' || a.startsWith('spool:')) {
+        const ok = buySpool(s, a === 'spool' ? undefined : a.slice('spool:'.length));
+        if (ok) sfx(ctx, 'buy');
+        return ok;
+      }
       if (a === 'auto') return spend(autoCost(s), () => { s.auto++; if (s.auto === 1) log(s, ctx, 'firstPr'); });
       if (a === 'farm') return spend(farmCost(s), () => { s.farm++; log(s, ctx, 'farm', s.farm); });
       if (a === 'panel') return spend(panelCost(s), () => { s.panels++; });

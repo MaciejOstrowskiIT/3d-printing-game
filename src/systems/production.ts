@@ -1,4 +1,5 @@
 import { bookCash, recordStockOutput } from './workshopStats';
+import { MATERIAL } from '../content/materials';
 import { MODEL } from '../content/models';
 import { fleetFilamentPerSecond, printing } from './fleet';
 import { BAL } from '../content/balance';
@@ -8,6 +9,7 @@ import { gpu, model, rate1, spoolPrice, unitCost } from '../core/formulas';
 import { has, type GameState } from '../core/state';
 import { pickOrderCooldown } from './orders';
 import { stockedAlternative } from './filament';
+import { addMaterial } from './materials';
 
 /** New figurines fill an accepted order first; the rest goes to stock. */
 export function make(s: GameState, ctx: Ctx, n: number, premium = s.precision ? BAL.precisionPremium : 0, cost: number | null = null, m = model(s)) {
@@ -45,12 +47,13 @@ export function make(s: GameState, ctx: Ctx, n: number, premium = s.precision ? 
   if (n > 0) recordStockOutput(s, m.id, n / m.seconds);
 }
 
-export function buySpool(s: GameState): boolean {
-  const c = spoolPrice(s);
+export function buySpool(s: GameState, id = s.materialId): boolean {
+  if (s.ph !== 1 || !Object.hasOwn(MATERIAL, id) || s.total < MATERIAL[id].unlockAt) return false;
+  const c = spoolPrice(s, MATERIAL[id]);
   if (s.zl < c) return false;
   bookCash(s, 'filament', c);
-  s.fil += s.spoolG;
-  s.warn = false;
+  addMaterial(s, id, s.spoolG);
+  if (id === s.materialId) s.warn = false;
   return true;
 }
 

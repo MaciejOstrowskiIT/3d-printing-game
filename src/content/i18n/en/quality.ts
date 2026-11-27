@@ -12,8 +12,7 @@ export const qualityTexts = {
   qualityPrice: 'Average sale price with quality premium: {0}.',
   materialUse: 'Use',
   materialsTitle: 'Materials',
-  materialStock: '{0} in stock',
+  materialBuy: 'Buy {0} · {1}',
   materialPrice: '{0}/kg',
-  materialDurability: 'Durability {0}/5',
   materialMatch: 'Demand for current model +{0}%',
 };

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { MATERIAL } from '../src/content/materials';
 import { createGame } from '../src/core/game';
 import { demand, spoolPrice } from '../src/core/formulas';
 import { exportSave, importSave, migrate } from '../src/core/save';
@@ -32,6 +33,26 @@ describe('print materials', () => {
     expect(resumed.s.fil).toBe(350);
     resumed.act('material:petg');
     expect(resumed.s.fil).toBe(remaining);
+  });
+
+  it('buys an unlocked material directly without changing the active spool', () => {
+    const game = createGame();
+    Object.assign(game.s, { zl: 1000, total: 150, fil: 350, spoolG: 5000, warn: true });
+    const price = spoolPrice(game.s, MATERIAL.petg);
+    expect(game.act('spool:resin')).toBe(false);
+    expect(game.act('spool:unknown')).toBe(false);
+    expect(game.s.zl).toBe(1000);
+
+    expect(game.act('spool:petg')).toBe(true);
+    expect(game.s.zl).toBeCloseTo(1000 - price);
+    expect(game.s.materialId).toBe('pla');
+    expect(game.s.fil).toBe(350);
+    expect(game.s.warn).toBe(true);
+    expect(game.s.finance[0].cash.filament).toBe(price);
+    const resumed = createGame({ state: importSave(exportSave(game.s))! });
+    expect(materialStock(resumed.s, 'petg')).toBe(5000);
+    expect(resumed.act('material:petg')).toBe(true);
+    expect(resumed.s.fil).toBe(5000);
   });
 
   it('bonuses apply only to matching models', () => {
