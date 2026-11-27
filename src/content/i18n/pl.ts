@@ -1,5 +1,6 @@
 /* UI strings. Keys must match across languages (enforced by the Dict type). */
 export const pl = {
+priceApply:'Ustaw',priceInvalid:'Wpisz cenę od 0,01 zł z maksymalnie dwoma miejscami po przecinku.',priceRelative:'Zmiana procentowa ceny',priceFixed:'Zmiana ceny o stałą kwotę',priceMinor:'{0} gr',priceMajor:'{0} zł',priceDecrease:'Obniż cenę o {0}',priceIncrease:'Podnieś cenę o {0}',
 dismissHint:'Zamknij wskazówkę',
 popClose:'Zamknij okno',popStock:'Na stanie według projektów',popFil:'Filament według rodzajów',popFilActive:'w drukarce',popStockNone:'Brak figurek na stanie.',linePlaytime:'Czas linii',totalPlaytime:'Łączny czas gry',
 qualityTitle:'Jakość druku',calibrateBed:'Kalibracja stołu',calibrateHint:'Zapobiega odklejaniu wydruków i spaghetti.',filamentDryer:'Suszarka do filamentu',dryerHint:'Zapobiega problemom z wilgotnym filamentem.',precisionTitle:'Druk dokładny',precisionHint:'Tempo −{0}% · cena nowych wydruków +{1}% w zwykłej sprzedaży.',qualityOn:'Włączony',qualityOff:'Wyłączony',qualityInstalled:'Gotowe',qualityPrice:'Średnia cena sprzedaży z premią: {0}.',
