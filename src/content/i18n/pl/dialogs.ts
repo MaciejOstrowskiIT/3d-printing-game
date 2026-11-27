@@ -1,5 +1,17 @@
 /** UI texts: dialogs. One key per line, so parallel PRs rarely collide. */
 export const dialogsTexts = {
+  setOpen: 'Ustawienia',
+  setTitle: 'Ustawienia',
+  setSound: 'Dźwięk',
+  setVolume: 'Głośność',
+  setLanguage: 'Język',
+  setNotation: 'Zapis dużych liczb',
+  setNotationShort: 'Skrócony',
+  setNotationScientific: 'Naukowy',
+  setNotationFull: 'Pełny',
+  setMotion: 'Ogranicz animacje',
+  setMotionHint: 'Zatrzymuje animację drukarki i ruchome elementy. Dopóki tego nie zmienisz, ustawienie podąża za systemem.',
+  setHints: 'Pokazuj wskazówki na początku gry',
   rOpen: 'Zgłoś błąd',
   rTitle: 'Zgłoś błąd',
   rHint: 'Opisz, co poszło nie tak i co robiłeś(-aś) w tym momencie.',

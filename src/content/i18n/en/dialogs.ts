@@ -1,5 +1,17 @@
 /** UI texts: dialogs. One key per line, so parallel PRs rarely collide. */
 export const dialogsTexts = {
+  setOpen: 'Settings',
+  setTitle: 'Settings',
+  setSound: 'Sound',
+  setVolume: 'Volume',
+  setLanguage: 'Language',
+  setNotation: 'Large number notation',
+  setNotationShort: 'Short',
+  setNotationScientific: 'Scientific',
+  setNotationFull: 'Full',
+  setMotion: 'Reduce motion',
+  setMotionHint: 'Stops the printer animation and moving elements. Until you change it, this follows your system setting.',
+  setHints: 'Show hints at the start of the game',
   rOpen: 'Report a bug',
   rTitle: 'Report a bug',
   rHint: 'Describe what went wrong and what you were doing at the time.',

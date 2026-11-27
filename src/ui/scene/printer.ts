@@ -1,6 +1,7 @@
 import { COLORS } from '../../content/colors';
 import { gpu, model, rate1 } from '../../core/formulas';
 import type { GameState } from '../../core/state';
+import { reducedMotion } from '../i18n';
 
 /** Printer close-up SVG. Elements tagged with data-p are driven by the animation. */
 export const PRINTER_SVG = `<rect x="18" y="224" width="284" height="10" rx="4" fill="#0003"/>
@@ -45,7 +46,6 @@ export function mountPrinter(svg: SVGSVGElement, getState: () => GameState) {
     layers = [...vase.children] as SVGElement[];
     A.layer = 0; A.x = 0; A.work = Math.min(A.work, NL); A.col = -1;
   };
-  const RM = matchMedia('(prefers-reduced-motion: reduce)');
   let raf = 0;
 
   const applyColor = (i: number) => {
@@ -64,6 +64,19 @@ export function mountPrinter(svg: SVGSVGElement, getState: () => GameState) {
     if (A.col !== s.col) { A.col = s.col; applyColor(s.col); }
     led.setAttribute('fill', s.brk > 0 ? '#ff4d3d' : '#3cc8e4');
 
+    if (reducedMotion()) {
+      // Static printer: finished piece, head parked, nothing moving.
+      A.work = 0; A.eject = 0; A.layer = NL; A.x = 0;
+      vase.removeAttribute('transform'); vase.setAttribute('opacity', '1');
+      layers.forEach((l, i) => { const w = VW[i]; l.setAttribute('x', (160 - w / 2).toFixed(1)); l.setAttribute('width', w.toFixed(1)); });
+      A.hx = 210; A.hy = 0;
+      gantry.setAttribute('transform', 'translate(0 0)');
+      head.setAttribute('transform', `translate(${(A.hx - 160).toFixed(1)} 0)`);
+      filpath.setAttribute('d', `M270 32 C 300 40, 300 70, ${A.hx.toFixed(1)} 58`);
+      glow.setAttribute('opacity', '0');
+      raf = requestAnimationFrame(frame);
+      return;
+    }
     const sp = s.ph === 2, auto = sp || (s.ph === 1 && rate1(s) > 0 && s.fil >= gpu(s));
     if (auto && A.work < NL) A.work = NL;
     const r = sp ? 1e6 : rate1(s);
@@ -98,7 +111,7 @@ export function mountPrinter(svg: SVGSVGElement, getState: () => GameState) {
       const w = VW[li], left = 160 - w / 2, p = li % 2 ? 1 - A.x : A.x;
       tx = left + w * p; ty = 83 - li * 8;
     } else { tx = 210; ty = Math.max(0, 83 - A.layer * 8 - 34); }
-    const f = RM.matches ? 1 : Math.min(1, dt * (printing ? 28 : 5));
+    const f = Math.min(1, dt * (printing ? 28 : 5));
     A.hx += (tx - A.hx) * f;
     A.hy += (ty - A.hy) * f;
     gantry.setAttribute('transform', `translate(0 ${A.hy.toFixed(1)})`);

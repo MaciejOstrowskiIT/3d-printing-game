@@ -14,7 +14,19 @@ import type { LogEntry } from '../core/state';
 import { platform } from './platform';
 
 export type Lang = 'pl' | 'en';
-export interface Prefs { lang: Lang; mute: boolean; view?: 'room' | 'close' }
+export type Notation = 'short' | 'scientific' | 'full';
+/** Player preferences, kept in the platform preferences (not in GameState). Missing optional fields use defaults. */
+export interface Prefs {
+  lang: Lang; mute: boolean; view?: 'room' | 'close';
+  /** Sound volume 0–1 (default 1). */
+  volume?: number;
+  /** How big numbers are written (default short: 1.2 M). */
+  notation?: Notation;
+  /** Reduced motion; undefined follows the system setting. */
+  motion?: boolean;
+  /** Show the onboarding hints (default on). */
+  hints?: boolean;
+}
 
 function loadPrefs(): Prefs {
   const base: Prefs = { lang: (navigator.language || 'pl').toLowerCase().startsWith('pl') ? 'pl' : 'en', mute: false };
@@ -42,14 +54,23 @@ const UNITS = {
   en: [[1e18, 'Qi'], [1e15, 'Qa'], [1e12, 'T'], [1e9, 'B'], [1e6, 'M'], [1e3, 'K']],
 } as const;
 
-/** Numbers: full below 10k, abbreviated above (tys., mln / K, M). */
-export function fmt(n: number, d = 0): string {
+/** Numbers in a given notation: short (below 10k in full, then tys., mln / K, M), scientific (1.23e6) or full. */
+export function fmtAs(n: number, notation: Notation, d = 0): string {
   n = Math.max(0, n);
   if (n >= 1e21) return n.toExponential(2);
   if (n < 1e4) return nf(n, d);
+  if (notation === 'scientific') return n.toExponential(2);
+  if (notation === 'full') return nf(n, d);
   for (const [v, u] of UNITS[prefs.value.lang]) if (n >= v) return nf(n / v, 2) + u;
   return nf(n, d);
 }
+
+/** Numbers as the player chose to read them (Settings → Number notation). Every number in the UI goes through here. */
+export const fmt = (n: number, d = 0): string => fmtAs(n, prefs.value.notation ?? 'short', d);
+
+/** Reduced motion: the player's choice, or the system setting until they choose. */
+export const reducedMotion = (): boolean =>
+  prefs.value.motion ?? (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches);
 
 /** Mass from grams in the largest sensible unit (850 g, 10 kg, 1.5 t). */
 export const mass = (g: number) => massText(g, prefs.value.lang, fmt);
