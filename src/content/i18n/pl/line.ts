@@ -5,7 +5,6 @@ export const lineTexts = {
   modelPiecePrice: '{0}/szt.',
   fleetRate: '{0} szt./min',
   investTitle: 'Inwestycje',
-  investAside: 'czarne = stać cię',
   salesOf: 'Sprzedaż: {0}',
   lineTitle: 'Linia produkcyjna',
   linePrinters: '{0} dodatkowych drukarek',
