@@ -1,10 +1,9 @@
 import { useEffect } from 'preact/hooks';
-import { dur, fmt, logText, money, playtime, prefs, t } from '../i18n';
-import { act, adPending, awayReport, dialog, mobileView, resetGame, screen, ui, useS, watchAdForOfflineBonus } from '../store';
-import { offlineBonusReady } from '../../systems/offlineBonus';
-import { platform } from '../platform';
+import { fmt, playtime, prefs, t } from '../i18n';
+import { act, dialog, mobileView, resetGame, screen, ui, useS } from '../store';
 import { Toasts } from './Achievements';
 import { AlphaBadge } from './AlphaBadge';
+import { AwayDialog } from './AwayDialog';
 import { ReportDialog } from './ReportDialog';
 import { SaveDialog } from './SaveDialog';
 import { Title } from './Title';
@@ -67,18 +66,6 @@ function End() {
   );
 }
 
-/** Rewarded ad offer on the away report: doubles what the shop earned while the player was away. */
-function OfflineBonusButton() {
-  const v = useS(s => (offlineBonusReady(s) ? { zl: s.offB, fig: s.offBi } : null));
-  if (!v || !platform.rewardedAvailable) return null;
-  const gain = v.zl ? money(v.zl) : t('figs', fmt(v.fig));
-  return (
-    <button class="btn-main ad-x2" disabled={adPending.value} onClick={() => void watchAdForOfflineBonus()}>
-      {t('offx2Btn', gain)}
-    </button>
-  );
-}
-
 export function App() {
   const tab = useS(s => s.tab);
   const sp = useS(s => s.ph === 2);
@@ -105,17 +92,13 @@ export function App() {
         <div class="main">
           <Hud />
           <div class="content">
-            {awayReport.value && <div class="away-report">
-              <span role="status">{logText(awayReport.value)}{awayReport.value.idle ? ' ' + t('offIdleTail', dur(awayReport.value.idle)) : ''}</span>
-              <OfflineBonusButton />
-              <button aria-label={t('sClose')} onClick={() => { awayReport.value = undefined; }}>×</button>
-            </div>}
             {tab === 'r' ? <Research /> : tab === 'a' ? <AchievementsCard /> : <Workshop />}
             <Settings class="mset" />
           </div>
         </div>
       </div>
       <Dock />
+      <AwayDialog />
       <Toasts />
       <End />
       <SaveDialog />
