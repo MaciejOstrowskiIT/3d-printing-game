@@ -1,5 +1,6 @@
 import { useState } from 'preact/hooks';
-import { fmt, t } from '../i18n';
+import { t } from '../i18n';
+import { CountUp, countText } from './hud/countUp';
 import { useS } from '../store';
 import { Goal } from './side/goal';
 import { Log } from './side/log';
@@ -10,13 +11,13 @@ import { StationReadout } from './side/station';
 
 export function Side() {
   const [expand, setExpand] = useState(false);
-  const total = useS(s => fmt(Math.floor(s.total)));
+  const total = useS(s => Math.floor(s.total));
   return (
     <aside class={'side' + (expand ? ' expand' : '')}>
       <div class="brand">
         <Picture onToggleExpand={() => setExpand(!expand)} />
         <h1>{t('title')}</h1>
-        <div class="count"><span class="num">{total}</span><small>{t('printed')}</small></div>
+        <div class="count"><span class="num"><CountUp value={total} format={countText} /></span><small>{t('printed')}</small></div>
         <PrintProgress />
         <StationReadout />
       </div>

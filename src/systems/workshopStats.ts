@@ -29,6 +29,10 @@ export const expenses = ({ cash }: CashPeriod) => cash.filament + cash.equipment
 // The live counter is transient. Saved finance periods do not have second-by-second data.
 const latestIncome = new WeakMap<GameState, { second: number; amount: number }>();
 
+// Running total of money earned since the state was loaded; the HUD turns its growth into "+$12.50" floats.
+const incomeTotal = new WeakMap<GameState, number>();
+export const incomeSinceLoad = (s: GameState): number => incomeTotal.get(s) ?? 0;
+
 export function currentSecondIncome(s: GameState): number {
   const entry = latestIncome.get(s);
   return entry?.second === Math.floor(s.financeTime) ? entry.amount : 0;
@@ -76,6 +80,7 @@ export function bookCash(s: GameState, kind: CashKind, amount: number, sale?: { 
   s.zl += incoming ? amount : -amount;
   if (!amount || s.ph !== 1) return;
   if (incoming) {
+    incomeTotal.set(s, incomeSinceLoad(s) + amount);
     latestIncome.set(s, { second: Math.floor(s.financeTime), amount: currentSecondIncome(s) + amount });
   }
   currentPeriod(s).cash[kind] += amount;
