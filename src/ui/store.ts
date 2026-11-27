@@ -97,6 +97,9 @@ export async function watchAd(placement: string, reward: Action, failed?: Action
 }
 
 export const watchAdForBoost = () => watchAd('boost', 'boost', 'adfail');
+/** "Instant delivery" of the accepted special order, and "Skip breakdown". */
+export const watchAdForOrder = () => watchAd('order', 'adorder', 'adfail');
+export const watchAdForRepair = () => watchAd('repair', 'adrepair', 'adfail');
 /** "Watch an ad: ×2" on the away report. */
 export const watchAdForOfflineBonus = () => watchAd('offline', 'offx2');
 

@@ -7,7 +7,7 @@ import { modelStock, putPieces } from './inventory';
 import { log, sfx, type Ctx } from '../core/ctx';
 import { gpu, model, rate1, spoolPrice, unitCost } from '../core/formulas';
 import { has, type GameState } from '../core/state';
-import { pickOrderCooldown } from './orders';
+import { completeOrder } from './orders';
 import { stockedAlternative } from './filament';
 import { addMaterial } from './materials';
 
@@ -31,17 +31,7 @@ export function make(s: GameState, ctx: Ctx, n: number, premium = s.precision ? 
     if (m.id !== 'fig') s.orderStock[m.id] = (s.orderStock[m.id] ?? 0) + k / m.seconds;
     o.got += k;
     n -= k;
-    if (o.got >= o.n) {
-      bookCash(s, 'orders', o.pay);
-      s.ordDone++;
-      log(s, ctx, 'oOk', '$' + o.pay);
-      ctx.emit({ type: 'order', result: 'delivered' });
-      s.ord = null;
-      s.orderStock = {};
-      for (const stock of Object.values(s.modelStock)) delete stock.reservedCost;
-      s.ordT = pickOrderCooldown(ctx);
-      sfx(ctx, 'goal');
-    }
+    if (o.got >= o.n) completeOrder(s, ctx);
   }
   putPieces(s, m.id, n / m.seconds, premium, cost);
   if (n > 0) recordStockOutput(s, m.id, n / m.seconds);

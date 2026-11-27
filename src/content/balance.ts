@@ -83,6 +83,9 @@ export const BAL = {
   boostSeconds: 300,
   boostMultiplier: 2,
   boostCooldown: 600,       // seconds from activation until the next ad can be watched
+  // more rewarded placements (systems/rewarded.ts): cooldown after watching, in game seconds
+  adOrderCooldown: 900,     // instant delivery of the accepted special order
+  adRepairCooldown: 600,    // skip a breakdown (repair every printer at once)
 
   // prestige: patents = floor(scale * log10(total / base)^1.5)
   prestigeBase: 1e5,
