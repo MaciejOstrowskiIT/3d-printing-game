@@ -20,6 +20,7 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 
 | Card | Branch | Owner |
 |---|---|---|
+| **QA3: Full-game bot playthrough in Chromium** | `test/qa3-browser-playthrough` | Codex |
 
 ## 🚦 Next up
 
@@ -35,7 +36,6 @@ Every prompt below implicitly starts with: *"Read `AGENTS.md` and `README.md` fi
 
 | # | Card | Effort | Prompt |
 |---|---|---|---|
-| QA3 | **Full-game bot playthrough in the real UI** | M | Using the QA2 hook, add `e2e/playthrough.spec.ts`: drive the bot logic from `tests/bot.ts` (extract the decision step into a function reusable by both the unit test and the browser, without changing balance) through the whole game in the browser, advancing with `step()`. At every goal change, liftoff, phase change and prestige, run `expectHealthy` and take a screenshot into `e2e/out/` (git-ignored). Fail if the game does not reach the end screen. Run once for PL and once for EN. |
 | QA4 | **Layout stability check ("nothing jumps")** | M | Add `e2e/layout.spec.ts`. For each stage fixture (QA2) at 1280×800 and 390×844: (1) collect Cumulative Layout Shift with a `PerformanceObserver` over 20 s of live ticking and assert it stays below 0.02; (2) every 1 s record the bounding boxes of the main cards, tab bar, HUD, Print button and buy buttons, and assert none moves by more than 2 px vertically while the player does nothing (unlock/purchase moments excluded, list them explicitly); (3) assert no horizontal scrollbar (`scrollWidth <= clientWidth`) and that no element overflows the viewport. Fix the layout bugs you find in small commits (`font-variant-numeric: tabular-nums`, min-widths, reserved space for toasts and event cards) or, if a fix is big, add a Backlog card instead of fixing it. |
 | QA5 | **Component render tests without a browser** | S | Add `jsdom` + `@testing-library/preact` and `tests/ui.render.test.tsx`. Using `playthrough(..., observe)` from `tests/bot.ts`, snapshot the game state at about 15 moments (every goal, liftoff, after prestige) and render `<App/>` for each in PL and EN. Assert it renders without throwing, has no `NaN`/`undefined`/`Infinity`/raw i18n keys in the text, and that every `<button>` has a non-empty accessible name. Keep it fast (under 20 s). |
 | QA6 | **i18n and content integrity tests** | S | Add `tests/i18n.test.ts`: PL and EN dictionaries have exactly the same keys, no empty values, the same `{placeholders}` in both, and every key used in `src/` via `t('...')` exists (grep the sources in the test). Also check that every goal, achievement, tree node, model, material and event has texts in both languages, and fix whatever it finds. |
