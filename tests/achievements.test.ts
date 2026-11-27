@@ -57,3 +57,15 @@ describe('Clicker achievement', () => {
     expect(() => migrate({ ...oldSave, manualWork: -1 })).toThrow('Invalid saved progress');
   });
 });
+
+describe('Quantum investor achievement', () => {
+  it('unlocks on the first research node bought with quantum points, not before', () => {
+    const g = createGame({ state: { ...createState(), qOn: true, qLvl: 1, qp: 100, mem: 5, rep: 5 }, rng: () => 0.5 });
+    g.tick(1);
+    expect(g.s.ach).not.toContain('qspent');
+    g.act('t:qstart');
+    g.tick(1);
+    expect(g.s.done).toContain('qstart');
+    expect(g.s.ach).toContain('qspent');
+  });
+});

@@ -5,6 +5,8 @@ import { createGame, type Game } from '../src/core/game';
 import { applyStartBonuses } from '../src/core/prestige';
 import type { GameState, Meta } from '../src/core/state';
 import { has } from '../src/core/state';
+import { BAL } from '../src/content/balance';
+import { quantumUpgradeCost } from '../src/systems/quantum';
 import { nodeStatus, reserveWyd } from '../src/systems/research';
 import { MODELS } from '../src/content/models';
 import { bestModel, designCost, designVisible } from '../src/systems/models';
@@ -12,11 +14,18 @@ import { autoPrice, savingForLiftoff } from '../src/systems/automation';
 
 export { bestModel } from '../src/systems/models';
 
+export interface BotOptions { quantum?: boolean }
+
 export interface BotResult { ended: boolean; minutes: number; goalMinutes: number[]; ordersDone: number; ordersFailed: number }
 
 /** Apply the bot's decisions for one simulated second. */
-export function botDecision(game: Pick<Game, 's' | 'act'>, t: number) {
+export function botDecision(game: Pick<Game, 's' | 'act'>, t: number, opts: BotOptions = {}) {
   const s = game.s;
+  // Opt-in: switch on and upgrade the quantum computer once compute is plentiful (the default bot ignores it, so the balance baseline stays as is).
+  if (opts.quantum && !savingForLiftoff(s)) {
+    if (!s.qOn) { if (s.ops >= BAL.quantumCost) game.act('qbuy'); }
+    else if (s.ops >= quantumUpgradeCost(s) * 2) game.act('qup');
+  }
   if (s.msg) game.act('msgok'); // reads story messages in any phase
   if (s.ph === 1) {
     if (s.auto < 15) for (let i = 0; i < 4; i++) game.act('print');
@@ -55,14 +64,14 @@ export function botDecision(game: Pick<Game, 's' | 'act'>, t: number) {
 }
 
 /** Bot that plays like a skilled player: clicks early, watches filament and price, buys sensibly, takes orders. */
-export function playthrough(seed = 1, maxHours = 6, dt = 0.25, meta?: Partial<Meta>, observe?: (s: GameState, t: number) => void, init?: Partial<GameState>): BotResult {
+export function playthrough(seed = 1, maxHours = 6, dt = 0.25, meta?: Partial<Meta>, observe?: (s: GameState, t: number) => void, init?: Partial<GameState>, opts?: BotOptions): BotResult {
   const game = createGame({ rng: seededRng(seed) });
   if (init) Object.assign(game.s, init);
   if (meta) { Object.assign(game.s.meta, meta); applyStartBonuses(game.s); }
   const goalMinutes: number[] = [];
   let t = 0;
   while (t < maxHours * 3600 && !game.s.end) {
-    if (Math.abs(t - Math.round(t)) < 1e-6) botDecision(game, t);
+    if (Math.abs(t - Math.round(t)) < 1e-6) botDecision(game, t, opts);
     const before = game.s.goal;
     game.tick(dt);
     t = Math.round((t + dt) * 100) / 100;

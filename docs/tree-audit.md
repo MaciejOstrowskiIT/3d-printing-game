@@ -6,10 +6,10 @@ The bot only buys when it is ready and, close to liftoff, only the liftoff node,
 
 ## Summary
 
-- 69 nodes, 8 branches, 7 roots.
+- 79 nodes, 9 branches, 8 roots.
 - 12 nodes bought less than 1 min after their last prerequisite.
-- 6 nodes have exactly one prerequisite and no `need`.
-- 20 nodes have 2+ prerequisites (3 with an alternative route); 20 link to another branch.
+- 10 nodes have exactly one prerequisite and no `need`.
+- 25 nodes have 2+ prerequisites (3 with an alternative route); 23 link to another branch.
 - 0 nodes whose `row` is above their depth (must be 0: rows only grow downwards).
 - Cycles or missing ids: none.
 
@@ -44,6 +44,10 @@ Gated only by compute (and money when listed). Compare with section 1: these are
 | `sondy` (Space) | `nano` | 1.9 | 150000 ops, 2e+9 fig |
 | `grawi` (Space) | `sondy` | 6.2 | 250000 ops, 2e+10 fig |
 | `hotend` (Production) | `shaping` | 1.7 | 3900 ops, 15000 zl |
+| `qdemand` (Quantum) | `qstart` | n/a | 0 ops |
+| `qspeed` (Quantum) | `qstart` | n/a | 0 ops |
+| `qorders` (Quantum) | `qdemand` | n/a | 0 ops |
+| `qcompute` (Quantum) | `qspeed` | n/a | 0 ops |
 
 ## 3. Branch shape
 
@@ -56,7 +60,8 @@ Gated only by compute (and money when listed). Compare with section 1: these are
 | Materials & quality | 7 | 5 | 2 | 1 | 2 | 0 | no |
 | Design | 6 | 5 | 2 | 1 | 1 | 2 | no |
 | Orders & logistics | 7 | 8 | 2 | 1 | 2 | 2 | no |
-| Energy & computing | 7 | 4 | 1 | 2 | 1 | 5 | no |
+| Energy & computing | 7 | 4 | 1 | 2 | 1 | 8 | no |
+| Quantum | 10 | 6 | 5 | 4 | 3 | 0 | no |
 
 ## 4. Cross-branch links
 
@@ -82,11 +87,14 @@ Gated only by compute (and money when listed). Compare with section 1: these are
 | `agencja` (Sales) | `paczkomaty` (Orders & logistics) |
 | `autodaily` (Automation) | `dronydost` (Orders & logistics) |
 | `kamera` (Automation) | `offline` (Energy & computing) |
+| `chmura` (Energy & computing) | `qoffline` (Quantum) |
+| `baterie` (Energy & computing) | `qpower` (Quantum) |
+| `neuro` (Energy & computing) | `qrep` (Quantum) |
 
 ## 5. Structure problems
 
 - Cycles or missing prerequisites: none.
-- Never bought by the bot in any seed: none.
+- Never bought by the bot in any seed: `qstart`, `qdemand`, `qspeed`, `qorders`, `qcompute`, `qoffline`, `qpower`, `qrep`, `qlogi`, `qtop`.
 
 Nodes whose layout `row` is above their graph depth (a node must sit below everything it needs; empty is good):
 
@@ -166,6 +174,16 @@ Nodes whose layout `row` is above their graph depth (a node must sit below every
 | `baterie` (Energy & computing) | 4 | 5 | `taryfa` | 2 farms | 5800 ops | 51.0 | 1.9 |
 | `neuro` (Energy & computing) | 4 | 6 | `chmura` | 100K figurines | 13000 ops | 55.8 | 9.1 |
 | `offline` (Energy & computing) | 4 | 7 | any of `chmura` / `kamera` | 50K figurines | 6500 ops | 44.4 | 40.4 |
+| `qstart` (Quantum) | 1 | 1 | - | quantum computer | 0 ops | n/a | n/a |
+| `qdemand` (Quantum) | 2 | 2 | `qstart` | - | 0 ops | n/a | n/a |
+| `qspeed` (Quantum) | 2 | 3 | `qstart` | - | 0 ops | n/a | n/a |
+| `qorders` (Quantum) | 3 | 4 | `qdemand` | - | 0 ops | n/a | n/a |
+| `qcompute` (Quantum) | 3 | 5 | `qspeed` | - | 0 ops | n/a | n/a |
+| `qoffline` (Quantum) | 4 | 6 | `qcompute`, `chmura` | - | 0 ops | n/a | n/a |
+| `qlogi` (Quantum) | 4 | 9 | `qorders`, `qcompute` | - | 0 ops | n/a | n/a |
+| `qpower` (Quantum) | 5 | 7 | `qspeed`, `baterie` | - | 0 ops | n/a | n/a |
+| `qrep` (Quantum) | 5 | 8 | `qdemand`, `neuro` | - | 0 ops | n/a | n/a |
+| `qtop` (Quantum) | 6 | 10 | `qlogi`, `qpower` | - | 0 ops | n/a | n/a |
 
 
 <!-- PROPOSALS: hand-written, kept by `npm run treeaudit` -->

@@ -149,11 +149,11 @@ To add a print model, append an entry to `MODELS`: print time (`seconds`), `valu
 - Filament colours and a trending colour (+30% customers).
 - Special orders, printer breakdowns, power for farms.
 - Computer: reputation points, processors, memory, compute.
-- Research tree: Production, Sales, Automation, Space and more, plus an optional Quantum branch paid in quantum points.
+- Research tree: Production, Sales, Automation, Space and more, plus an optional Quantum branch (10 nodes, paid only in quantum points from the quantum computer). Nothing in it is needed to finish the game; `balance.sim.test.ts` checks that a bot using it stays in the same pacing range.
 - 17 goals guiding the player through the whole game.
 - Space phase: drones, orbital factories, asteroid belt.
 - Isometric scene (garage → workshop → factory floor → orbit) with a printer close-up inset and layer-by-layer animation.
-- 20 achievements (one hidden) with toasts; older saves unlock earned ones silently.
+- 25 achievements (one hidden) with toasts; older saves unlock earned ones silently.
 - Prestige: after liftoff, start a new production line for patents (`floor(2 · log10(total / 1e5)^1.5)`), spent on 9 permanent upgrades in `content/patents.ts`.
 - Title screen (continue, new game, load a save) and a Save dialog: export as a `DRK1:` text code (copy or download) and import from text or a file.
 - PL / EN, sound (WebAudio), offline progress up to 8 h.
