@@ -3,7 +3,8 @@ import { COLORS } from '../../content/colors';
 import type { GameState } from '../../core/state';
 
 /** Isometric scene. Instead of drawing every printer it changes scale: garage, workshop, factory floor, orbit.
- *  It draws at most a few dozen objects and reports the rest as a "hidden" count. */
+ *  It draws at most a few dozen objects and reports the rest as a "hidden" count. Moving parts (.hd print heads,
+ *  .bl lights, .orb drones) carry their timing in data attributes; scene/roomMotion.ts animates them. */
 
 const TW = 32, TH = 16, OX = 160, OY = 70;
 type P = [number, number];
@@ -26,22 +27,30 @@ function printerU(gx: number, gy: number, z: number, sz: number, h: number, k: n
   s += `<polygon points="${pts([Pf(0.4, 0.12), Pf(0.6, 0.12), Pf(0.6, 0.42), Pf(0.4, 0.42)])}" fill="${col}"/>`;
   const a = Pf(0.18, 0.7), b = Pf(0.62, 0.7);
   const q = [Pf(0.18, 0.76), Pf(0.34, 0.76), Pf(0.34, 0.64), Pf(0.18, 0.64)];
-  s += `<g class="hd" style="--dx:${(b[0] - a[0]).toFixed(1)}px;--dy:${(b[1] - a[1]).toFixed(1)}px;animation-delay:-${((k * 0.37) % 1.1).toFixed(2)}s"><polygon points="${pts(q)}" fill="#ff6a1f"/></g>`;
+  s += `<g class="hd" data-dx="${(b[0] - a[0]).toFixed(1)}" data-dy="${(b[1] - a[1]).toFixed(1)}" data-t="${((k * 0.37) % 1.1).toFixed(2)}"><polygon points="${pts(q)}" fill="#ff6a1f"/></g>`;
   const l = iso(x0 + sz, y0 + sz * 0.92, z + h * 0.93);
-  s += `<circle cx="${l[0].toFixed(1)}" cy="${l[1].toFixed(1)}" r="${sz > 1 ? 1.8 : 1.1}" fill="#3cc8e4" class="bl" style="animation-delay:-${((k * 0.29) % 1.6).toFixed(2)}s"/>`;
+  s += `<circle cx="${l[0].toFixed(1)}" cy="${l[1].toFixed(1)}" r="${sz > 1 ? 1.8 : 1.1}" fill="#3cc8e4" class="bl" data-t="${((k * 0.29) % 1.6).toFixed(2)}"/>`;
   return s;
 }
+
+/** A farm's status lights blink in a few shared phases: one animated group per phase instead of one per light
+ *  (48 per farm). */
+const FARM_PHASES = 4;
 
 function farmU(gx: number, gy: number, k: number, r: () => number) {
   let s = cub(gx + 0.1, gy + 0.1, 1.8, 1.8, 46, 0, '#4a4f5c', '#30343d', '#262930');
   const PR = (u: number, v: number) => iso(gx + 1.9, gy + 0.1 + 1.8 * u, 46 * v);
   const PL = (u: number, v: number) => iso(gx + 0.1 + 1.8 * u, gy + 1.9, 46 * v);
+  const phases: string[] = Array(FARM_PHASES).fill('');
   for (const Pf of [PR, PL])
     for (let row = 0; row < 4; row++)
       for (let c = 0; c < 6; c++) {
         const p = Pf(0.1 + (0.8 * (c + 0.5)) / 6, 0.1 + (0.66 * (row + 0.5)) / 4);
-        s += `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="1.4" fill="${(row + c + k) % 7 ? '#ffb37a' : '#3cc8e4'}" class="bl" style="animation-delay:-${(r() * 1.6).toFixed(2)}s"/>`;
+        phases[Math.min(FARM_PHASES - 1, Math.floor(r() * FARM_PHASES))] += `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="1.4" fill="${(row + c + k) % 7 ? '#ffb37a' : '#3cc8e4'}"/>`;
       }
+  phases.forEach((lights, i) => {
+    if (lights) s += `<g class="bl" data-t="${((i * 1.6) / FARM_PHASES).toFixed(2)}">${lights}</g>`;
+  });
   s += `<polygon points="${pts([PL(0.06, 0.93), PL(0.94, 0.93), PL(0.94, 0.84), PL(0.06, 0.84)])}" fill="#ff6a1f"/>`;
   s += `<polygon points="${pts([PR(0.06, 0.93), PR(0.94, 0.93), PR(0.94, 0.84), PR(0.06, 0.84)])}" fill="#e2560f"/>`;
   return s;
@@ -79,7 +88,7 @@ export function buildRoom(svg: SVGSVGElement, s: GameState): RoomInfo {
     const nd = Math.min(s.drones, 28), nf = Math.min(s.fabs, 10);
     for (let i = 0; i < nd; i++) {
       const rr = 58 + (i % 4) * 14, d = (14 + (i % 5) * 5) / (1 + Math.log10(s.dMul));
-      h += `<g class="orb" style="animation-duration:${d.toFixed(1)}s;animation-delay:-${(r() * d).toFixed(1)}s"><circle cx="${160 + rr}" cy="120" r="2.4" fill="#cfd6e6"/><circle cx="${160 + rr}" cy="120" r="1" fill="#3cc8e4"/></g>`;
+      h += `<g class="orb" data-dur="${d.toFixed(1)}" data-t="${(r() * d).toFixed(1)}"><circle cx="${160 + rr}" cy="120" r="2.4" fill="#cfd6e6"/><circle cx="${160 + rr}" cy="120" r="1" fill="#3cc8e4"/></g>`;
     }
     let ast = '';
     for (let i = 0; i < 14; i++) { const a = (i / 14) * Math.PI * 2, rr = 40 + r() * 9; ast += (160 + Math.cos(a) * rr).toFixed(1) + ',' + (120 + Math.sin(a) * rr * 0.86).toFixed(1) + ' '; }

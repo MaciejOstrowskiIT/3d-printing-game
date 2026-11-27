@@ -3,20 +3,26 @@ import { useS } from '../../store';
 import { fmt, money, reducedMotion } from '../../i18n';
 import { incomeSinceLoad } from '../../../systems/workshopStats';
 import { GAIN_GAP_MS, countValue, gainQueue, takeGain } from '../../gainFloats';
+import { frameGate } from '../../frameCap';
 
 /** A number that slides to its new value instead of jumping; jumps straight there with Reduce motion. */
 export function CountUp({ value, format }: { value: number; format: (n: number) => string }) {
   const [shown, setShown] = useState(value);
-  const anim = useRef({ from: value, to: value, start: 0, frame: 0 });
+  const anim = useRef({ from: value, to: value, start: 0, frame: 0, shown: value });
+  const fmtRef = useRef(format);
+  fmtRef.current = format;
   useEffect(() => {
     const a = anim.current;
     if (value === a.to) return;
     cancelAnimationFrame(a.frame);
-    if (reducedMotion() || typeof requestAnimationFrame !== 'function') { a.from = a.to = value; setShown(value); return; }
+    if (reducedMotion() || typeof requestAnimationFrame !== 'function') { a.from = a.to = a.shown = value; setShown(value); return; }
     a.from = shownNow(a); a.to = value; a.start = performance.now();
-    const step = () => {
+    const gate = frameGate();
+    const step = (now: number) => {
+      if (!gate(now)) { a.frame = requestAnimationFrame(step); return; }
       const v = countValue(a.from, a.to, performance.now() - a.start);
-      setShown(v);
+      // Re-render only when the text changes: a frame that would print the same digits costs a layout for nothing.
+      if (v === a.to || fmtRef.current(v) !== fmtRef.current(a.shown)) { a.shown = v; setShown(v); }
       if (v !== a.to) a.frame = requestAnimationFrame(step);
     };
     a.frame = requestAnimationFrame(step);

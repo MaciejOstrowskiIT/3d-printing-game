@@ -1,6 +1,7 @@
 import { COLORS } from '../../content/colors';
 import { gpu, model, rate1 } from '../../core/formulas';
 import type { GameState } from '../../core/state';
+import { frameGate } from '../frameCap';
 import { reducedMotion } from '../i18n';
 
 /** Printer close-up SVG. Elements tagged with data-p are driven by the animation. */
@@ -31,6 +32,9 @@ export const PRINTER_SVG = `<rect x="18" y="224" width="284" height="10" rx="4" 
 <g data-p="spool"><circle cx="292" cy="40" r="6" fill="var(--frame)"/><rect x="290.5" y="22" width="3" height="10" rx="1.5" fill="var(--frame)" opacity=".55"/><rect x="290.5" y="48" width="3" height="10" rx="1.5" fill="var(--frame)" opacity=".55"/></g>`;
 
 
+/** Writes an attribute only when its value changes: an unchanged write still invalidates style and paint. */
+const put = (el: Element, name: string, value: string) => { if (el.getAttribute(name) !== value) el.setAttribute(name, value); };
+
 /** Layer-by-layer print animation. Independent of game ticks: rAF reads the state and draws smoothly. */
 export function mountPrinter(svg: SVGSVGElement, getState: () => GameState) {
   svg.innerHTML = PRINTER_SVG;
@@ -47,33 +51,43 @@ export function mountPrinter(svg: SVGSVGElement, getState: () => GameState) {
     A.layer = 0; A.x = 0; A.work = Math.min(A.work, NL); A.col = -1;
   };
   let raf = 0;
+  // Off screen (scrolled away on a phone) the animation pauses; it picks up where it was when it comes back.
+  let onScreen = true;
+  const io = typeof IntersectionObserver === 'function'
+    ? new IntersectionObserver(entries => { onScreen = entries[entries.length - 1].isIntersecting; })
+    : null;
+  io?.observe(svg);
 
   const applyColor = (i: number) => {
     const C = COLORS[i] ?? COLORS[0];
-    layers.forEach((l, k) => { l.setAttribute('fill', k % 2 ? C.c2 : C.c); l.setAttribute('stroke', C.st); });
-    spoolBody.setAttribute('fill', C.c);
-    filpath.setAttribute('stroke', C.c);
+    layers.forEach((l, k) => { put(l, 'fill', k % 2 ? C.c2 : C.c); put(l, 'stroke', C.st); });
+    put(spoolBody, 'fill', C.c);
+    put(filpath, 'stroke', C.c);
   };
 
+  const gate = frameGate();
   const frame = (now: number) => {
+    // Capped frame rate (ui/frameCap.ts); skipped frames leave A.last alone, so the next step covers the whole gap.
+    if (!gate(now)) { raf = requestAnimationFrame(frame); return; }
     const s = getState();
-    const dt = Math.min(0.05, (now - A.last) / 1000);
+    const dt = Math.min(0.1, (now - A.last) / 1000);
     A.last = now;
+    if (!onScreen) { raf = requestAnimationFrame(frame); return; }
     const m = model(s);
     if (m.id !== mdl) applyShape(m.id, m.shape);
     if (A.col !== s.col) { A.col = s.col; applyColor(s.col); }
-    led.setAttribute('fill', s.brk > 0 ? '#ff4d3d' : '#3cc8e4');
+    put(led, 'fill', s.brk > 0 ? '#ff4d3d' : '#3cc8e4');
 
     if (reducedMotion()) {
       // Static printer: finished piece, head parked, nothing moving.
       A.work = 0; A.eject = 0; A.layer = NL; A.x = 0;
-      vase.removeAttribute('transform'); vase.setAttribute('opacity', '1');
-      layers.forEach((l, i) => { const w = VW[i]; l.setAttribute('x', (160 - w / 2).toFixed(1)); l.setAttribute('width', w.toFixed(1)); });
+      vase.removeAttribute('transform'); put(vase, 'opacity', '1');
+      layers.forEach((l, i) => { const w = VW[i]; put(l, 'x', (160 - w / 2).toFixed(1)); put(l, 'width', w.toFixed(1)); });
       A.hx = 210; A.hy = 0;
-      gantry.setAttribute('transform', 'translate(0 0)');
-      head.setAttribute('transform', `translate(${(A.hx - 160).toFixed(1)} 0)`);
-      filpath.setAttribute('d', `M270 32 C 300 40, 300 70, ${A.hx.toFixed(1)} 58`);
-      glow.setAttribute('opacity', '0');
+      put(gantry, 'transform', 'translate(0 0)');
+      put(head, 'transform', `translate(${(A.hx - 160).toFixed(1)} 0)`);
+      put(filpath, 'd', `M270 32 C 300 40, 300 70, ${A.hx.toFixed(1)} 58`);
+      put(glow, 'opacity', '0');
       raf = requestAnimationFrame(frame);
       return;
     }
@@ -85,9 +99,9 @@ export function mountPrinter(svg: SVGSVGElement, getState: () => GameState) {
     if (A.eject > 0) {
       A.eject -= dt;
       const k = Math.max(0, A.eject / 0.4);
-      vase.setAttribute('transform', `translate(${(1 - k) * 70} 0)`);
-      vase.setAttribute('opacity', k.toFixed(2));
-      if (A.eject <= 0) { A.layer = 0; A.x = 0; vase.removeAttribute('transform'); vase.setAttribute('opacity', '1'); }
+      put(vase, 'transform', `translate(${(1 - k) * 70} 0)`);
+      put(vase, 'opacity', k.toFixed(2));
+      if (A.eject <= 0) { A.layer = 0; A.x = 0; vase.removeAttribute('transform'); put(vase, 'opacity', '1'); }
     } else if (A.work > 0) {
       printing = true;
       A.x += v * dt;
@@ -102,8 +116,8 @@ export function mountPrinter(svg: SVGSVGElement, getState: () => GameState) {
       let x = 160, wd = 0;
       if (i < A.layer) { x = left; wd = w; }
       else if (i === A.layer && A.eject <= 0 && A.x > 0) { wd = w * A.x; x = i % 2 ? left + w - wd : left; }
-      layers[i].setAttribute('x', x.toFixed(1));
-      layers[i].setAttribute('width', wd.toFixed(1));
+      put(layers[i], 'x', x.toFixed(1));
+      put(layers[i], 'width', wd.toFixed(1));
     }
     let tx: number, ty: number;
     const li = Math.min(A.layer, NL - 1);
@@ -114,12 +128,12 @@ export function mountPrinter(svg: SVGSVGElement, getState: () => GameState) {
     const f = Math.min(1, dt * (printing ? 28 : 5));
     A.hx += (tx - A.hx) * f;
     A.hy += (ty - A.hy) * f;
-    gantry.setAttribute('transform', `translate(0 ${A.hy.toFixed(1)})`);
-    head.setAttribute('transform', `translate(${(A.hx - 160).toFixed(1)} 0)`);
-    filpath.setAttribute('d', `M270 32 C 300 40, 300 ${(70 + A.hy).toFixed(1)}, ${A.hx.toFixed(1)} ${(58 + A.hy).toFixed(1)}`);
-    glow.setAttribute('opacity', printing ? (0.5 + 0.3 * Math.sin(now / 60)).toFixed(2) : '0');
+    put(gantry, 'transform', `translate(0 ${A.hy.toFixed(1)})`);
+    put(head, 'transform', `translate(${(A.hx - 160).toFixed(1)} 0)`);
+    put(filpath, 'd', `M270 32 C 300 40, 300 ${(70 + A.hy).toFixed(1)}, ${A.hx.toFixed(1)} ${(58 + A.hy).toFixed(1)}`);
+    put(glow, 'opacity', printing ? (0.5 + 0.3 * Math.sin(now / 60)).toFixed(2) : '0');
     if (printing) A.rot = (A.rot + v * dt * 14) % 360;
-    spool.setAttribute('transform', `rotate(${A.rot.toFixed(1)} 292 40)`);
+    put(spool, 'transform', `rotate(${A.rot.toFixed(1)} 292 40)`);
     raf = requestAnimationFrame(frame);
   };
   raf = requestAnimationFrame(frame);
@@ -128,6 +142,6 @@ export function mountPrinter(svg: SVGSVGElement, getState: () => GameState) {
     /** A click queues its share of a piece (1 = a whole piece) in the animation. */
     feed(share = 1) { A.work = Math.min(A.work + NL * share, NL * 3); },
     isBusy() { return A.work > 0; },
-    destroy() { cancelAnimationFrame(raf); },
+    destroy() { cancelAnimationFrame(raf); io?.disconnect(); },
   };
 }

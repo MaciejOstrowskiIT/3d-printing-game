@@ -48,8 +48,10 @@ export const Item = ({ name, sub, children, className }: { name: string; sub: st
   <div class={className ? 'item ' + className : 'item'}><div class="it"><b>{name}</b><small>{sub}</small></div>{children}</div>
 );
 
+/** Progress bar. The fill is scaled, not resized: its slide then runs on the compositor instead of laying out and
+ *  repainting the page every frame (meters move on every tick). */
 export const Meter = ({ pct, tone, style }: { pct: number; tone?: 'or' | 'bad'; style?: Record<string, string> }) => (
-  <div class={'meter' + (tone ? ' ' + tone : '')} style={style}><i style={{ width: Math.max(0, Math.min(100, pct)) + '%' }} /></div>
+  <div class={'meter' + (tone ? ' ' + tone : '')} style={style}><i style={{ transform: `scaleX(${Math.max(0, Math.min(100, pct || 0)) / 100})` }} /></div>
 );
 
 export const CardHead = ({ title, aside }: { title: string; aside?: string }) => (

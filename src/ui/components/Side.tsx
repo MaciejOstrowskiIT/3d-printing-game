@@ -9,15 +9,20 @@ import { PrintButton, PrintProgress } from './side/printControls';
 import { Settings } from './side/settings';
 import { StationReadout } from './side/station';
 
+/** Pieces printed. Its own component, so the count changing every tick does not re-render the whole sidebar. */
+function PrintedCount() {
+  const total = useS(s => Math.floor(s.total));
+  return <span class="num"><CountUp value={total} format={countText} /></span>;
+}
+
 export function Side() {
   const [expand, setExpand] = useState(false);
-  const total = useS(s => Math.floor(s.total));
   return (
     <aside class={'side' + (expand ? ' expand' : '')}>
       <div class="brand">
         <Picture onToggleExpand={() => setExpand(!expand)} />
         <h1>{t('title')}</h1>
-        <div class="count"><span class="num"><CountUp value={total} format={countText} /></span><small>{t('printed')}</small></div>
+        <div class="count"><PrintedCount /><small>{t('printed')}</small></div>
         <PrintProgress />
         <StationReadout />
       </div>

@@ -33,12 +33,45 @@ export function loadSavedGame() {
 export const ver = signal(0);
 const bump = () => { ver.value++; };
 
-/** State selector: the component re-renders only when the returned value changes. */
+/** State selector: the component re-renders only when the returned value changes. A fresh object or array counts as
+ *  unchanged when it holds the same values (see sameValue), so selectors may return `{ a, b }` without re-rendering
+ *  every tick. */
 export function useS<T>(fn: (s: GameState) => T): T {
   const ref = useRef(fn);
   ref.current = fn;
-  const c = useComputed(() => { void ver.value; void prefs.value; return ref.current(game.s); });
+  const last = useRef<{ v: T } | null>(null);
+  const c = useComputed(() => {
+    void ver.value; void prefs.value;
+    const next = ref.current(game.s);
+    const prev = last.current;
+    if (prev && sameValue(prev.v, next)) return prev.v;
+    last.current = { v: next };
+    return next;
+  });
   return c.value;
+}
+
+/** Structural equality for selector results: primitives by value (NaN equals NaN), plain arrays and objects by their
+ *  entries. A nested object that is the very same reference is treated as changed, because it may be game state that
+ *  was mutated in place since the last tick; selectors that want to skip re-renders return copies or primitives. */
+export function sameValue(a: unknown, b: unknown, nested = false): boolean {
+  if (a === b) return !nested || a === null || typeof a !== 'object';
+  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) {
+    return typeof a === 'number' && typeof b === 'number' && Number.isNaN(a) && Number.isNaN(b);
+  }
+  if (Array.isArray(a)) {
+    if (!Array.isArray(b) || a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) if (!sameValue(a[i], b[i], true)) return false;
+    return true;
+  }
+  if (Array.isArray(b) || Object.getPrototypeOf(a) !== Object.prototype || Object.getPrototypeOf(b) !== Object.prototype) return false;
+  const ka = Object.keys(a), kb = Object.keys(b);
+  if (ka.length !== kb.length) return false;
+  for (const k of ka) {
+    if (!Object.prototype.hasOwnProperty.call(b, k)) return false;
+    if (!sameValue((a as Record<string, unknown>)[k], (b as Record<string, unknown>)[k], true)) return false;
+  }
+  return true;
 }
 
 let debugStateLoaded = false;
