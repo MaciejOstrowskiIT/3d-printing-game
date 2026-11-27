@@ -20,6 +20,7 @@ Planned work and its order: `ROADMAP.md` (task board). Pick cards from "Next up"
 ## In flight
 | PR / branch | Agent | Touches |
 |---|---|---|
+| #82 / `fix/order-card-height` | Codex | Special order card layout and Playwright acceptance coverage |
 | `feat/game-pace` | Claude | `BAL.pace` / `SPEED` in `balance.ts`, `formulas.ts`, orders, daily order, market offers, `tests/setup.ts`, balance sim, README |
 | #75 / `feat/skywalker-playtime` | Codex | SkyWalker achievement, play time across lines, HUD and end screen |
 | #76 / `feat/three-crowns` | Codex | Completion tracking, save validation and achievement tests |
