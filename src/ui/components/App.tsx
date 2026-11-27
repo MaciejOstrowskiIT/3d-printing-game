@@ -11,6 +11,7 @@ import { Title } from './Title';
 import { PrestigeButton } from './Prestige';
 import { Hud, Tabs, useBadges, useResearchUnlocked } from './Hud';
 import { Research } from './Research';
+import { AchievementsCard } from './Achievements';
 import { PrintButton, Settings, Side } from './Side';
 import { Workshop } from './Workshop';
 
@@ -38,6 +39,10 @@ function Dock() {
       <button class="tab" role="tab" aria-selected={v.tab === 'r'} disabled={!research} onClick={() => { ui(s => { s.tab = 'r'; }); window.scrollTo({ top: 0 }); }}>
         <NavIcon d="M6 3.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 1 0 0-5M18 3.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 1 0 0-5M12 15.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 1 0 0-5M7.5 8l3.5 8M16.5 8 13 16" />
         <span>{t('tabR')}</span>{b.research > 0 && <span class="dot" key={b.research}>{b.research}</span>}
+      </button>
+      <button class="tab" role="tab" aria-selected={v.tab === 'a'} onClick={() => { ui(s => { s.tab = 'a'; }); window.scrollTo({ top: 0 }); }}>
+        <NavIcon d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z" />
+        <span>{t('tabA')}</span>
       </button>
     </nav>
   );
@@ -105,7 +110,7 @@ export function App() {
               <OfflineBonusButton />
               <button aria-label={t('sClose')} onClick={() => { awayReport.value = undefined; }}>×</button>
             </div>}
-            {tab === 'r' ? <Research /> : <Workshop />}
+            {tab === 'r' ? <Research /> : tab === 'a' ? <AchievementsCard /> : <Workshop />}
             <Settings class="mset" />
           </div>
         </div>
