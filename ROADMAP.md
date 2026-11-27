@@ -17,6 +17,7 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 | **Three Crowns achievement** | #76 | Unlocks after three completed games (#72) |
 | **Much harder realistic line** | #71 | Costs, demand, breakdowns and printer speed; bot needs about 5 h instead of 3 h |
 | **Order text jitter and countdown badge** | #78 | Tabular digits on event cards; stopwatch badge (m:ss) instead of "N s left" |
+| **Filament in kg and t** | #79 | `1 500 g` shows as `1,5 kg`, millions of grams as tonnes |
 | **R7: Rebalance and QA of the new tree** | #69 | Quantum bot option and pacing test, "Quantum investor" achievement, audit and README refreshed |
 | **QA6: i18n and content integrity tests** | #67 | `tests/i18n.test.ts`: same keys, placeholders and texts in PL and EN; no content gaps found |
 | **Clicker achievement** | #64 | Unlocks at 1,000 figurines of manual work (#59) |

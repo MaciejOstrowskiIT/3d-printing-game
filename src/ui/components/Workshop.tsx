@@ -25,7 +25,7 @@ import { autobuyOn, filamentRunway, stockedAlternative } from '../../systems/fil
 import { designCost, designVisible } from '../../systems/models';
 import { platform } from '../platform';
 import { act, game, adPending, mobileView, useS, watchAdForBoost } from '../store';
-import { clock, colorName, dict, dur, fmt, li, money, nf, t } from '../i18n';
+import { clock, colorName, dict, dur, fmt, li, mass, money, nf, t } from '../i18n';
 import { BuyButton, CardHead, Item, Meter, Tile, useHold } from './common';
 import { WorkshopStats } from './WorkshopStats';
 import { PrestigeCard } from './Prestige';
@@ -200,7 +200,7 @@ function FilamentAlert() {
   return (
     <div class={'fil-alert' + (v.out ? ' out' : '')} role="status">
       <span>{v.out ? t('filOut', v.mat) : t('filLow', dur(Math.max(1, Math.round(v.runway))))}</span>
-      {v.alt && <button onClick={() => act(`material:${v.alt}`)}>{t('filSwitch', MATERIAL[v.alt].name[li()], fmt(v.altG))}</button>}
+      {v.alt && <button onClick={() => act(`material:${v.alt}`)}>{t('filSwitch', MATERIAL[v.alt].name[li()], mass(v.altG))}</button>}
     </div>
   );
 }
@@ -458,7 +458,7 @@ function Materials() {
       <AutoMaterialToggle />
       {rows.map(({ material: m, selected, stock, price, bonus }) => (
         <Item key={m.id} name={m.name[li()]} sub={[
-          t('materialStock', fmt(stock)),
+          t('materialStock', mass(stock)),
           t('materialPrice', money(price)),
           t('materialDurability', m.durability),
           bonus > 1 ? t('materialMatch', Math.round((bonus - 1) * 100)) : '',
