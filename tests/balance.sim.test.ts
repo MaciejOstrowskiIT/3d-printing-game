@@ -1,35 +1,39 @@
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { BAL, setPace } from '../src/content/balance';
 import { GOALS } from '../src/content/goals';
 import { NODE } from '../src/content/tree';
 import type { GameState } from '../src/core/state';
-import { BAL } from '../src/content/balance';
 import { playthrough } from './bot';
 
 const LIFTOFF = GOALS.findIndex(g => g.t[1] === 'Leave Earth');
 
 /** Pacing guard. If a change in balance.ts or in a system breaks pacing, this test catches it.
- *  Thresholds are for the bot, which plays faster than a human (a human takes roughly 2× longer). */
+ *  Thresholds are for the bot, which plays faster than a human (a human takes roughly 2× longer).
+ *  Minutes are written for pace 1 and multiplied by BAL.pace, so changing the knob keeps the test meaningful. */
 describe('balance: bot finishes the game', () => {
+  beforeAll(() => setPace(BAL.pace));
+  afterAll(() => setPace(1));
+  const P = () => BAL.pace;
   for (const seed of [1, 7, 42]) {
-    it(`seed ${seed}: ends in 50–150 min, liftoff in 25–75 min`, () => {
+    it(`seed ${seed}: ends in 50–150 min × pace, liftoff in 25–75 min × pace`, () => {
       let firstPrinter = 0;
       let twentyPrinters = 0;
-      const r = playthrough(seed, undefined, undefined, undefined, (s, t) => {
+      const r = playthrough(seed, 6 * P(), Math.max(0.25, Math.min(1, P() / 10)), undefined, (s, t) => {
         if (!firstPrinter && s.auto >= 1) firstPrinter = t / 60;
         if (!twentyPrinters && s.auto >= 20) twentyPrinters = t / 60;
       });
       // Keep manual play short and leave room to expand before the farm unlock.
-      expect(firstPrinter).toBeGreaterThan(2 / 3);
-      expect(firstPrinter).toBeLessThan(1.5);
-      expect(twentyPrinters).toBeGreaterThan(8);
-      expect(twentyPrinters).toBeLessThan(15);
+      expect(firstPrinter).toBeGreaterThan(P() * 2 / 3);
+      expect(firstPrinter).toBeLessThan(P() * 1.5);
+      expect(twentyPrinters).toBeGreaterThan(P() * 8);
+      expect(twentyPrinters).toBeLessThan(P() * 15);
       expect(r.ended).toBe(true);
-      expect(r.minutes).toBeGreaterThan(50);
-      expect(r.minutes).toBeLessThan(150);
-      expect(r.goalMinutes[LIFTOFF]).toBeGreaterThan(25);
-      expect(r.goalMinutes[LIFTOFF]).toBeLessThan(75);
+      expect(r.minutes).toBeGreaterThan(P() * 50);
+      expect(r.minutes).toBeLessThan(P() * 150);
+      expect(r.goalMinutes[LIFTOFF]).toBeGreaterThan(P() * 25);
+      expect(r.goalMinutes[LIFTOFF]).toBeLessThan(P() * 75);
       expect(r.ordersDone).toBeGreaterThan(5);
-    }, 60_000);
+    }, 300_000);
   }
 });
 

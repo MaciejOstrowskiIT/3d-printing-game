@@ -1,6 +1,6 @@
 import { bookCash } from './workshopStats';
 import { takeStockWork } from './inventory';
-import { BAL } from '../content/balance';
+import { BAL, SPEED } from '../content/balance';
 import { log, sfx, type Ctx } from '../core/ctx';
 import { boostMul, rateBase } from '../core/formulas';
 import { calendarOn } from '../content/calendar';
@@ -31,8 +31,9 @@ export function newDay(s: GameState, ctx: Ctx, day: number): boolean {
   // The streak continues only if yesterday's order was delivered.
   if (!(s.dord?.done && s.dord.day === day - 1)) s.dstreak = 0;
   s.dday = day;
-  const rate = Math.max(1, rateBase(s) / boostMul(s));
-  const n = Math.max(BAL.dailyMinSize, Math.round((rate * BAL.dailySeconds) / 10) * 10);
+  const rate = Math.max(SPEED, rateBase(s) / boostMul(s));
+  const unit = Math.max(1, Math.round(10 * SPEED));
+  const n = Math.max(BAL.dailyMinSize / 10 * unit, Math.round((rate * BAL.dailySeconds) / unit) * unit);
   const c = Math.floor(ctx.rng() * CLIENTS);
   const streak = s.dstreak + 1;
   s.dord = { day, n, c, done: false, pay: Math.round(n * s.price * BAL.dailyPayMultiplier * streakMul(streak) * mod(s, 'dailyPay') * 100) / 100 };

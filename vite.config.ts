@@ -18,5 +18,5 @@ export default defineConfig({
   // Relative base so the build works under /3d-printing-game/ on GitHub Pages and from a plain file.
   base: './',
   build: { target: 'es2020', assetsInlineLimit: 100_000_000 },
-  test: { environment: 'node', include: ['tests/**/*.test.ts'] },
+  test: { environment: 'node', include: ['tests/**/*.test.ts'], setupFiles: ['tests/setup.ts'] },
 });

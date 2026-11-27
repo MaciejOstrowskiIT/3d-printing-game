@@ -1,6 +1,6 @@
 import { MODEL } from '../content/models';
 import { putPieces } from './inventory';
-import { BAL } from '../content/balance';
+import { BAL, SPEED } from '../content/balance';
 import { log, pick, sfx, type Ctx } from '../core/ctx';
 import { boostMul, rateBase } from '../core/formulas';
 import { has, type GameState } from '../core/state';
@@ -12,8 +12,10 @@ export const pickOrderCooldown = (ctx: Ctx) => pick(ctx, BAL.orderEvery);
 
 function spawnOrder(s: GameState, ctx: Ctx) {
   // Size orders on the un-boosted rate so a boost does not leave the player with an impossible order.
-  const cap = Math.max(1.5, rateBase(s) / boostMul(s));
-  const n = Math.max(15, Math.round((cap * (20 + ctx.rng() * 20)) / 5) * 5);
+  // The floors and rounding step shrink with the game pace (SPEED), or a slow shop could never finish an order.
+  const cap = Math.max(1.5 * SPEED, rateBase(s) / boostMul(s));
+  const unit = Math.max(1, Math.round(5 * SPEED));
+  const n = Math.max(3 * unit, Math.round((cap * (20 + ctx.rng() * 20)) / unit) * unit);
   const time = Math.ceil(((n / cap) * 1.6 + 20) * mod(s, 'orderTime'));
   const c = Math.floor(ctx.rng() * CLIENTS);
   s.ord = { n, got: 0, time, left: time, offer: BAL.orderOffer, acc: false, c, pay: n * s.price * BAL.orderPayMultiplier * (has(s, 'b2b') ? BAL.b2bBonus : 1) * mod(s, 'orderPay') };
