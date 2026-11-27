@@ -1,8 +1,10 @@
 /* alpha badge: translucent, never blocks clicks */
 .alpha-badge{position:fixed;top:4px;right:6px;z-index:30;pointer-events:none;user-select:none;font:700 10px/1 'Barlow Condensed',system-ui,sans-serif;letter-spacing:.14em;color:var(--mute);opacity:.55;border:1px solid currentColor;border-radius:4px;padding:2px 5px}
 
-.material-actions{display:grid;flex:0 0 126px;gap:4px}
+.material-actions{display:grid;grid-auto-rows:1fr;flex:0 0 126px;gap:4px}
 .material-actions button{padding-inline:6px}
+.material-actions button[aria-pressed=false]{background:var(--sub);border-color:var(--acc);color:var(--ink)}
+.material-actions button[aria-pressed=false]:hover{background:var(--accS)}
 
 /* Report dialog: counter sits under the field, actions are separated and right-aligned */
 .count-row{display:flex;justify-content:flex-end;margin-top:4px}
