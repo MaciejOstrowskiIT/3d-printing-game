@@ -1,0 +1,62 @@
+import { expect, type Locator } from '@playwright/test';
+import { createState } from '../src/core/state';
+import { expectHealthy, test } from './helpers';
+
+test('starts a fresh workshop, prints and switches game tabs', async ({ page, isMobile }) => {
+  const nav = page.locator(isMobile ? '.dock' : '.hud');
+  const print = isMobile
+    ? nav.getByRole('button', { name: 'Print', exact: true })
+    : page.getByRole('button', { name: /^Print a figurine/ });
+  const printed = page.locator('.count .num');
+  const press = (control: Locator) => isMobile ? control.tap() : control.click();
+  const production = page.getByRole('heading', { name: 'Investments', exact: true });
+
+  await page.goto('/');
+  const play = page.getByRole('button', { name: 'Play', exact: true });
+  await expect(play).toBeVisible();
+  await expectHealthy(page);
+  await play.click();
+  await press(print);
+  await expect(printed).toHaveText('1');
+
+  // The title only offers New game after there is progress to replace.
+  await page.reload();
+  await page.getByRole('button', { name: 'New game', exact: true }).click();
+  await page.getByRole('button', { name: 'Sure? Your progress will be lost' }).click();
+  await expect(printed).toHaveText('0');
+
+  for (let i = 0; i < 3; i++) await press(print);
+  await expect(printed).toHaveText('3');
+  await expectHealthy(page);
+
+  // Research unlocks later. Reach it via the normal save import UI.
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  const save = page.getByRole('dialog', { name: 'Saved game' });
+  await save.getByRole('textbox', { name: 'Load a save' }).fill(JSON.stringify({ ...createState(), goal: 5 }));
+  await save.getByRole('button', { name: 'Load', exact: true }).click();
+  await save.getByRole('button', { name: 'This replaces your current game. Click again' }).click();
+  await expect(save.getByRole('status')).toHaveText('Save loaded.');
+  await save.getByRole('button', { name: 'Close', exact: true }).click();
+  await expect(production).toBeVisible();
+  await expectHealthy(page);
+
+  if (isMobile) {
+    const sales = nav.getByRole('tab', { name: 'Sales', exact: true });
+    await press(sales);
+    await expect(sales).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByRole('heading', { name: 'Sales', exact: true })).toBeVisible();
+    await expectHealthy(page);
+  }
+
+  const research = nav.getByRole('tab', { name: /^Research/ });
+  await press(research);
+  await expect(research).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('heading', { name: 'Computer', exact: true })).toBeVisible();
+  await expectHealthy(page);
+
+  const workshop = nav.getByRole('tab', { name: isMobile ? /^Production/ : /^Workshop/ });
+  await press(workshop);
+  await expect(workshop).toHaveAttribute('aria-selected', 'true');
+  await expect(production).toBeVisible();
+  await expectHealthy(page);
+});

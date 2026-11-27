@@ -17,6 +17,20 @@ npm run build:crazygames   # dist-crazygames/index.html with the CrazyGames SDK
 npm run build:poki         # dist-poki/index.html with the Poki SDK
 ```
 
+### Browser smoke tests
+
+After `npm install`, install Playwright's Chromium and run the suite:
+
+```bash
+npx playwright install chromium
+npm run e2e
+```
+
+Playwright builds the game, serves `dist/` with Vite Preview, and checks the title screen,
+manual printing and navigation on desktop and at 390×844 with touch enabled. Add
+`-- --headed` to watch the tests or `-- --project=chromium-mobile` to run only the phone
+scenario. Failure traces are written to `e2e/out/`.
+
 ### Portals and rewarded ads
 
 The platform is chosen at build time (`--mode crazygames|poki`, see `.env.*`); unused adapters are tree-shaken out. Each adapter loads its SDK, reports loading/gameplay events, mutes audio and pauses the game during ads, and exposes `showRewardedAd()`.
