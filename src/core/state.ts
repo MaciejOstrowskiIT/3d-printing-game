@@ -87,6 +87,8 @@ export interface GameState {
   qOn: boolean; qLvl: number; qp: number;
   /** Figurine-equivalent work done by hand across all production lines. */
   manualWork: number;
+  /** Active play seconds accumulated before the current production line. */
+  priorPlay: number;
   /** Finished games before the current production line. */
   priorCompletions: number;
 }
@@ -130,6 +132,7 @@ export const createState = (): GameState => ({
   fleet: {},
   qOn: false, qLvl: 0, qp: 0,
   manualWork: 0,
+  priorPlay: 0,
   priorCompletions: 0,
 });
 

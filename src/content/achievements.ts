@@ -42,6 +42,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'threeCrowns', n: ['Trzy Korony', 'Three Crowns'], d: ['Ukończ grę trzy razy.', 'Finish the game three times.'], check: s => s.priorCompletions + Number(s.end) >= 3 },
   { id: 'patents20', n: ['Kancelaria patentowa', 'Patent office'], d: ['Zdobądź łącznie 20 patentów.', 'Earn 20 patents in total.'], check: s => s.meta.earned >= 20 },
   { id: 'qspent', n: ['Kwantowy inwestor', 'Quantum investor'], d: ['Wydaj punkty kwantowe na pierwszy węzeł badań.', 'Spend quantum points on your first research node.'], check: s => s.done.some(id => !!NODE[id]?.qp) },
+  { id: 'skywalker', n: ['SkyWalker', 'SkyWalker'], d: ['Ukończ grę w mniej niż 30 minut aktywnej gry.', 'Finish the game in under 30 minutes of active play.'], check: s => s.end && s.play > 0 && s.play < 30 * 60 },
   { id: 'end', n: ['Wszystko jest figurką', 'Everything is a figurine'], d: ['Ukończ grę.', 'Finish the game.'], hidden: true, check: s => s.end },
 ];
 
