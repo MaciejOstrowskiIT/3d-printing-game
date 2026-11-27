@@ -59,15 +59,15 @@ export function Workshop() {
       <div class="workshop-board">
         <div class="workshop-core">
           <ProductionLine />
-          <div class="core-pair">
-            {v.sales && <Sales />}
+          {v.sales && <Sales />}
+        </div>
+        <div class="workshop-tools v-p">
+          <div class="workshop-stack">
+            {v.designs && <Materials />}
             <Investments />
           </div>
-        </div>
-        {(v.designs || support) && <div class="workshop-tools v-p">
-          {v.designs && <div class="workshop-stack"><Materials /></div>}
           {support && <WorkshopSupport research={research} farm={v.farm} />}
-        </div>}
+        </div>
       </div>
     </div>
   );
