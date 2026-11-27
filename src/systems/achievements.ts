@@ -2,11 +2,11 @@ import { ACHIEVEMENTS } from '../content/achievements';
 import { log, sfx, type Ctx } from '../core/ctx';
 import type { GameState } from '../core/state';
 
-/** Checks achievements twice a second and unlocks the ones whose condition holds. */
+/** Checks achievements twice a second and on the final tick. */
 export function achievementsSystem(s: GameState, dt: number, ctx: Ctx) {
   s.colorsUsed |= 1 << s.col;
   s.achT += dt;
-  if (s.achT < 0.5) return;
+  if (!s.end && s.achT < 0.5) return;
   s.achT = 0;
   for (const a of ACHIEVEMENTS) {
     if (s.ach.includes(a.id) || !a.check(s)) continue;

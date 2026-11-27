@@ -64,6 +64,7 @@ export function validSave(s: GameState, defaults: GameState) {
       [s.ord.n, s.ord.got, s.ord.time, s.ord.left, s.ord.offer, s.ord.pay].every(v => Number.isFinite(v) && v >= 0) &&
       integer(s.ord.c, 0, 6) && s.ord.got <= s.ord.n)) return false;
   if (!validPatents(s.meta)) return false;
+  if (!integer(s.priorCompletions)) return false;
   const kept = KEPT_AUTOMATION[s.meta.pat.keep ?? 0];
   if (s.done.some(id => !kept.includes(id) && savedPrereqMissing(s.done, NODE[id]))) return false;
   if (!validMarketState(s) || !validModelState(s) || !validInventory(s) || !validFleet(s) || !validMaterialState(s) || !validOfflineBonus(s) || ![1, BAL.realisticSlow].includes(s.slow) || !validDailyState(s) || !validStoryState(s) || s.play < 0) return false;

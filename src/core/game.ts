@@ -167,7 +167,13 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
       return { ...s.log[0], idle: idleNote };
     },
     load(next) { s = next; },
-    reset(logKey = 'fresh') { s = createState(); log(s, ctx, logKey); },
+    reset(logKey = 'fresh') {
+      const next = createState();
+      next.priorCompletions = s.priorCompletions + Number(s.end);
+      if (s.ach.includes('threeCrowns')) next.ach.push('threeCrowns');
+      s = next;
+      log(s, ctx, logKey);
+    },
     on(fn) { listeners.add(fn); return () => listeners.delete(fn); },
   };
   return game;

@@ -87,6 +87,8 @@ export interface GameState {
   qOn: boolean; qLvl: number; qp: number;
   /** Figurine-equivalent work done by hand across all production lines. */
   manualWork: number;
+  /** Finished games before the current production line. */
+  priorCompletions: number;
 }
 
 export const SAVE_VERSION = 7;
@@ -128,6 +130,7 @@ export const createState = (): GameState => ({
   fleet: {},
   qOn: false, qLvl: 0, qp: 0,
   manualWork: 0,
+  priorCompletions: 0,
 });
 
 export const has = (s: GameState, id: string) => s.done.includes(id);

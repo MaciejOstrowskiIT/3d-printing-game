@@ -47,6 +47,7 @@ export function prestige(s: GameState, ctx: Ctx, realistic = false): GameState |
   next.meta = { ...s.meta, pat: { ...s.meta.pat }, patents: s.meta.patents + gain, earned: s.meta.earned + gain, runs: s.meta.runs + 1 };
   next.ach = [...s.ach];
   next.manualWork = s.manualWork;
+  next.priorCompletions = s.priorCompletions + Number(s.end);
   next.colorsUsed = s.colorsUsed;
   next.col = s.col;
   next.slow = realistic ? BAL.realisticSlow : 1;
