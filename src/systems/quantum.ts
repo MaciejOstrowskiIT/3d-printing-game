@@ -4,7 +4,7 @@ import { eff, opsCap } from '../core/formulas';
 import type { GameState } from '../core/state';
 
 /** Quantum computer: bought once with compute (ops), then upgraded with compute too. It makes quantum points (QP),
- *  which advanced research (the Quantum branch, a later card) will spend. It draws power from the same supply as the farms
+ *  which the Quantum branch of the research tree spends. It draws power from the same supply as the farms
  *  and runs slower when power is short. It starts over with a new production line, like compute itself. */
 
 export const quantumLevelMax = BAL.quantumMaxLevel;

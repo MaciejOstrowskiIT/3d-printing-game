@@ -14,7 +14,7 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 |---|---|---|
 | **Clicker achievement** | #64 | Unlocks at 1,000 figurines of manual work (#59) |
 | **Explain when the next daily order is available** | #62 | Clarifies the calendar-day limit and streak in PL/EN (#58) |
-| **R5: Quantum computer** | #61 | Machine, QP, qubit upgrades, power draw, Research panel; QP sink comes in R6 |
+| **R6: Quantum branch** | #65 | Ninth branch of 10 nodes paid in QP, 2 joins, 3 links to regular nodes |
 | **R4: Tree view shows the connections** | #60 | Requires chips with jump, path highlight, dotted alternative routes (stacked on #57) |
 | **R1: Tech tree audit** | #54 | `npm run treeaudit` and `docs/tree-audit.md`; findings for R2 and R3 |
 | **R2: Step-by-step progression** | #55 | Stage needs on 19 nodes, rows follow the graph (stacked on #54) |

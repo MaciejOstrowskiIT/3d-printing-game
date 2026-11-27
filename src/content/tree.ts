@@ -11,6 +11,8 @@ export interface TreeNode {
   n: L;
   d: L;
   ops: number;
+  /** Cost in quantum points (only the quantum computer makes them). */
+  qp?: number;
   zl?: number;
   /** Cost in figurines (space phase). */
   wyd?: number;
@@ -40,10 +42,14 @@ export const BRANCHES: [L, L][] = [
   [['Projekty', 'lepsze modele'], ['Design', 'better models']],
   [['Zamówienia i logistyka', 'więcej z każdego zlecenia'], ['Orders & logistics', 'more from every order']],
   [['Energia i komputer', 'prąd i moc obliczeniowa'], ['Energy & computing', 'power and compute']],
+  [['Kwantowe', 'za punkty kwantowe'], ['Quantum', 'paid in quantum points']],
 ];
 
+/** The Quantum branch (index into BRANCHES): optional, paid in quantum points, shown once the machine is within reach. */
+export const QUANTUM_BRANCH = 8;
+
 /** Branches shown together on one page of the tree view. */
-export const TREE_PAGES: number[][] = [[0, 1, 2, 3], [4, 5, 6, 7]];
+export const TREE_PAGES: number[][] = [[0, 1, 2, 3], [4, 5, 6, 7], [8]];
 
 const auto = (id: string) => (s: GameState) => { s.amOn[id] = true; };
 
@@ -136,6 +142,18 @@ export const TREE: TreeNode[] = [
   { id: 'chmura', col: 7, row: 4, n: ['Moc w chmurze', 'Cloud compute'], d: ['Moc rośnie +50% szybciej, pamięć +50%.', 'Compute +50% faster, memory +50%.'], ops: 7800, req: ['serwer'], need: { label: ['20 tys. figurek', '20K figurines'], value: s => s.total, target: 2e4 }, mods: { ops: 1.5, opsCap: 1.5 } },
   { id: 'neuro', col: 7, row: 6, n: ['Sieci neuronowe', 'Neural networks'], d: ['Punkty reputacji przychodzą 15% szybciej.', 'Reputation points come 15% sooner.'], ops: 13000, req: ['chmura'], need: { label: ['100 tys. figurek', '100K figurines'], value: s => s.total, target: 1e5 }, mods: { rep: 0.85 } },
   { id: 'offline', col: 7, row: 7, n: ['Zdalny nadzór', 'Remote monitoring'], d: ['Postęp offline trwa 50% dłużej.', 'Offline progress lasts 50% longer.'], ops: 6500, reqAny: ['chmura', 'kamera'], need: { label: ['50 tys. figurek', '50K figurines'], value: s => s.total, target: 5e4 }, mods: { offline: 1.5 } },
+
+  // ---- Quantum (col 8): optional, paid in quantum points only. Joins: qlogi, qtop. Links to regular nodes: qoffline, qpower, qrep. ----
+  { id: 'qstart', col: 8, row: 1, n: ['Kwantowy optymalizator', 'Quantum optimiser'], d: ['Druk +25% szybciej.', 'Printing +25% faster.'], ops: 0, qp: 15, need: { label: ['komputer kwantowy', 'quantum computer'], value: s => (s.qOn ? 1 : 0), target: 1 }, mods: { speed: 1.25 } },
+  { id: 'qdemand', col: 8, row: 2, n: ['Prognozy kwantowe', 'Quantum forecasts'], d: ['Popyt +50%.', 'Demand +50%.'], ops: 0, qp: 40, req: ['qstart'], mods: { demand: 1.5 } },
+  { id: 'qspeed', col: 8, row: 3, n: ['Harmonogram kubitów', 'Qubit scheduling'], d: ['Druk +30% szybciej, filamentu 10% mniej.', 'Printing +30% faster, 10% less filament.'], ops: 0, qp: 50, req: ['qstart'], mods: { speed: 1.3, filament: 0.9 } },
+  { id: 'qorders', col: 8, row: 4, n: ['Optymalizator zamówień', 'Order optimiser'], d: ['Zamówienia płacą +50%, zamówienie dnia +30%.', 'Orders pay +50%, order of the day +30%.'], ops: 0, qp: 80, req: ['qdemand'], mods: { orderPay: 1.5, dailyPay: 1.3 } },
+  { id: 'qcompute', col: 8, row: 5, n: ['Splątane procesory', 'Entangled processors'], d: ['Moc obliczeniowa 2× szybciej, pamięć 2× większa.', 'Compute 2× faster, memory 2× larger.'], ops: 0, qp: 100, req: ['qspeed'], mods: { ops: 2, opsCap: 2 } },
+  { id: 'qoffline', col: 8, row: 6, n: ['Kriostat zdalny', 'Remote cryostat'], d: ['Postęp offline trwa 2× dłużej.', 'Offline progress lasts 2× longer.'], ops: 0, qp: 120, req: ['qcompute', 'chmura'], mods: { offline: 2 } },
+  { id: 'qpower', col: 8, row: 7, n: ['Nadprzewodniki', 'Superconductors'], d: ['Prąd +50%, awarie 30% rzadziej.', 'Power +50%, breakdowns 30% less often.'], ops: 0, qp: 120, req: ['qspeed', 'baterie'], mods: { power: 1.5, breakdown: 0.7 } },
+  { id: 'qrep', col: 8, row: 8, n: ['Wgląd kwantowy', 'Quantum insight'], d: ['Punkty reputacji przychodzą 25% szybciej.', 'Reputation points come 25% sooner.'], ops: 0, qp: 150, req: ['qdemand', 'neuro'], mods: { rep: 0.75 } },
+  { id: 'qlogi', col: 8, row: 9, n: ['Logistyka wyżarzana', 'Annealed logistics'], d: ['Zamówienia mają 50% więcej czasu, kara za spóźnienie trwa o połowę krócej.', 'Orders get 50% more time; late-order penalties last half as long.'], ops: 0, qp: 200, req: ['qorders', 'qcompute'], mods: { orderTime: 1.5, penalty: 0.5 } },
+  { id: 'qtop', col: 8, row: 10, n: ['Przewaga kwantowa', 'Quantum advantage'], d: ['Popyt +50%, druk +25% szybciej.', 'Demand +50%, printing +25% faster.'], ops: 0, qp: 400, req: ['qlogi', 'qpower'], mods: { demand: 1.5, speed: 1.25 } },
 ];
 
 /** Every node this one depends on, from `req` and `reqAny`. */
