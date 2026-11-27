@@ -1,6 +1,6 @@
 import { ACH, ACHIEVEMENTS } from '../../content/achievements';
 import { li, t } from '../i18n';
-import { toasts, useS } from '../store';
+import { notifRequest, toasts, useS } from '../store';
 import { CardHead } from './common';
 
 export function AchievementsCard() {
@@ -29,10 +29,15 @@ export function Toasts() {
   if (!list.length) return null;
   return (
     <div class="toasts" aria-live="polite">
-      {list.map(x => (
+      {list.map(x => x.note ? (
+        <button key={x.key} type="button" class="toast note" title={t('notifOpen')} onClick={() => { notifRequest.value++; }}>
+          <span class="ach-ico" aria-hidden="true">{x.note.icon}</span>
+          <span><small>{x.note.title}</small><b>{x.note.body}</b></span>
+        </button>
+      ) : (
         <div key={x.key} class="toast">
           <span class="ach-ico" aria-hidden="true">★</span>
-          <span><small>{t('achToast')}</small><b>{ACH[x.id]?.n[li()]}</b></span>
+          <span><small>{t('achToast')}</small><b>{x.id ? ACH[x.id]?.n[li()] : ''}</b></span>
         </div>
       ))}
     </div>

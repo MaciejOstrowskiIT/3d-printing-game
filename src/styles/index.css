@@ -14,3 +14,4 @@
 @import './12-workshop-line.css'; /* Workshop redesign: production line, investments, events, HUD, mobile nav */
 @import './13-extras.css'; /* Alpha badge, materials row, report dialog, report button */
 @import './14-settings.css'; /* Settings dialog and the reduced-motion switch (wins over everything above) */
+@import './15-notifications.css'; /* Notification centre: HUD button and panel, clickable toasts */

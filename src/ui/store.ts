@@ -61,14 +61,20 @@ export function resetGame(logKey?: string) {
   bump();
 }
 
-/** Achievement toasts currently on screen. */
-export const toasts = signal<{ id: string; key: number }[]>([]);
+/** Toasts currently on screen: achievements and new notifications. */
+export interface Toast { key: number; id?: string; note?: { icon: string; title: string; body: string } }
+export const toasts = signal<Toast[]>([]);
 let toastKey = 0;
-function pushToast(id: string) {
+function addToast(toast: Omit<Toast, 'key'>, ms: number) {
   const key = ++toastKey;
-  toasts.value = [...toasts.value, { id, key }].slice(-3);
-  setTimeout(() => { toasts.value = toasts.value.filter(x => x.key !== key); }, 4200);
+  toasts.value = [...toasts.value, { ...toast, key }].slice(-3);
+  setTimeout(() => { toasts.value = toasts.value.filter(x => x.key !== key); }, ms);
 }
+function pushToast(id: string) { addToast({ id }, 4200); }
+/** A notification arrived (message, order, breakdown...): a toast the player can click to open the notification panel. */
+export const pushNote = (note: NonNullable<Toast['note']>) => addToast({ note }, 6500);
+/** Bumped to ask the HUD to open the notification panel (a toast was clicked). */
+export const notifRequest = signal(0);
 
 /** True while a rewarded ad is being requested or shown. */
 export const adPending = signal(false);

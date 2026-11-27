@@ -6,9 +6,10 @@ import { piecesInStock } from '../../systems/inventory';
 import { eff, gpu, opsCap } from '../../core/formulas';
 import { dur, fmt, mass, money, playtime, t } from '../i18n';
 import { currentSecondIncome } from '../../systems/workshopStats';
-import { useS } from '../store';
+import { notifRequest, useS } from '../store';
 import { WorkshopStats } from './WorkshopStats';
 import { Chip, PopControl, PopId } from './hud/chip';
+import { NotificationPanel, NotificationsButton } from './hud/notifications';
 import { FilamentPanel, StockPanel } from './hud/panels';
 import { Tabs, useResearchUnlocked } from './hud/tabs';
 
@@ -32,7 +33,7 @@ export function Hud() {
     clearTimeout(timer.current);
     const bar = hud.current?.getBoundingClientRect(), chip = el.getBoundingClientRect();
     if (!bar) return;
-    const width = Math.min(id === 'funds' ? 640 : 320, bar.width - 16);
+    const width = Math.min(id === 'funds' ? 640 : id === 'notif' ? 440 : 320, bar.width - 16);
     setPop({ id, left: Math.max(8, Math.min(chip.left - bar.left, bar.width - width - 8)) });
   };
   const control: PopControl = {
@@ -49,8 +50,16 @@ export function Hud() {
     document.addEventListener('pointerdown', away);
     return () => { document.removeEventListener('keydown', key); document.removeEventListener('pointerdown', away); };
   }, [pop?.id]);
-  useEffect(() => { if (v.sp || v.g < 1) close(); }, [v.sp, v.g < 1]);
+  useEffect(() => { if ((v.sp && pop?.id !== 'notif') || (v.g < 1 && pop?.id !== 'notif')) close(); }, [v.sp, v.g < 1]);
+  // A click on a notification toast opens the panel.
+  const request = notifRequest.value;
+  useEffect(() => {
+    // Two buttons exist (in the bar on desktop, floating on a phone); use the one that is on screen.
+    const el = [...document.querySelectorAll<HTMLElement>('.hud-notif .chip, .notif-fab .chip')].find(e => e.getClientRects().length > 0);
+    if (request > 0 && el) show('notif', el);
+  }, [request]);
   return (
+    <>
     <nav class="hud" ref={hud}>
       <div class="chips">
         <Chip show={!v.sp && v.g >= 1} big label={t('funds')} value={v.zl} pop={control} popId="funds"
@@ -65,14 +74,17 @@ export function Hud() {
         <Chip show={v.real} label={t('realBadge')} value={t('realBadgeV')} />
         <PlaytimeChip />
       </div>
-      <div class="tabs" role="tablist"><Tabs /></div>
+      <div class="hud-notif"><NotificationsButton pop={control} /></div>
+      <div class="hud-tabs"><div class="tabs" role="tablist"><Tabs /></div></div>
       {pop && (
-        <div class={'hud-pop pop-' + pop.id} role="dialog" aria-label={t(pop.id === 'funds' ? 'statsTitle' : pop.id === 'stock' ? 'popStock' : 'popFil')}
+        <div class={'hud-pop pop-' + pop.id} role="dialog" aria-label={t(pop.id === 'funds' ? 'statsTitle' : pop.id === 'stock' ? 'popStock' : pop.id === 'notif' ? 'notifTitle' : 'popFil')}
           style={{ left: pop.left + 'px' }} onPointerEnter={() => clearTimeout(timer.current)} onPointerLeave={e => { if (e.pointerType === 'mouse') control.hideSoon(); }}>
           <button class="pop-x" aria-label={t('popClose')} onClick={close}>×</button>
-          {pop.id === 'funds' ? <WorkshopStats /> : pop.id === 'stock' ? <StockPanel /> : <FilamentPanel />}
+          {pop.id === 'funds' ? <WorkshopStats /> : pop.id === 'stock' ? <StockPanel /> : pop.id === 'notif' ? <NotificationPanel /> : <FilamentPanel />}
         </div>
       )}
     </nav>
+    <div class="notif-fab"><NotificationsButton pop={control} /></div>
+    </>
   );
 }

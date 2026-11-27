@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
 import { BAL } from '../../src/content/balance';
 import { createState } from '../../src/core/state';
-import { test } from '../helpers';
+import { openNotifications, test } from '../helpers';
 
 const languages = [
   {
@@ -37,6 +37,7 @@ for (const { locale, ship, streak, limit, next } of languages) {
         return today;
       }, state);
 
+      await openNotifications(page);
       const shipButton = page.getByRole('button', { name: ship });
       await expect(page.getByText(limit, { exact: false })).toBeVisible();
       await expect(page.getByText(`${streak} 1`, { exact: true })).toBeVisible();
