@@ -16,6 +16,8 @@ assign yourself, and open the PR with `Closes #<issue>`.
   bump `SAVE_VERSION` and append a migration; never edit old ones.
 - Do not reorder `SYSTEMS`, rename existing state fields or change log-arg prefixes (`@ $ # % ~ & ! ^ * + = /`):
   old saves depend on them.
+- **Styles** live in `src/styles/NN-area.css`, entered through `src/styles/index.css`. The file number is the cascade
+  order; put new rules in the file for their area, so parallel PRs rarely touch the same file.
 - One feature per branch, branched from the latest `main`; rebase before opening the PR.
 
 ## In flight

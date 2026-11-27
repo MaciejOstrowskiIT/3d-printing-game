@@ -1,0 +1,18 @@
+/* alpha badge: translucent, never blocks clicks */
+.alpha-badge{position:fixed;top:4px;right:6px;z-index:30;pointer-events:none;user-select:none;font:700 10px/1 'Barlow Condensed',system-ui,sans-serif;letter-spacing:.14em;color:var(--mute);opacity:.55;border:1px solid currentColor;border-radius:4px;padding:2px 5px}
+
+/* Materials: a fixed button width keeps the row text from re-wrapping when the selected material changes. */
+.materials .item>button{flex:0 0 112px}
+.materials .it small{display:block;min-block-size:2lh}
+
+/* Report dialog: counter sits under the field, actions are separated and right-aligned */
+.count-row{display:flex;justify-content:flex-end;margin-top:4px}
+.chars{font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--mute)}
+.chars.near{color:var(--bad);font-weight:700}
+.report-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.report-actions .btn-main{min-width:120px}
+.report-note{margin-top:12px}
+/* "Report a bug" stands out from the neutral settings buttons */
+.settings button.report-btn{border:1.5px dashed var(--bad);color:var(--bad);background:var(--badS)}
+.settings button.report-btn:hover:not(:disabled){background:var(--badS);border-color:var(--bad);filter:brightness(.97)}
+.title-settings button.report-btn{color:#ffb4a8;background:#ff6b5a22;border-color:#ffb4a8}
