@@ -9,7 +9,7 @@ import { currentSecondIncome } from '../../systems/workshopStats';
 import { notifRequest, useS } from '../store';
 import { WorkshopStats } from './WorkshopStats';
 import { Chip, PopControl, PopId } from './hud/chip';
-import { NotificationPanel, NotificationsButton } from './hud/notifications';
+import { NoteToasts, NotificationPanel, NotificationsButton } from './hud/notifications';
 import { FilamentPanel, StockPanel } from './hud/panels';
 import { Tabs, useResearchUnlocked } from './hud/tabs';
 
@@ -76,6 +76,7 @@ export function Hud() {
       </div>
       <div class="hud-notif"><NotificationsButton pop={control} /></div>
       <div class="hud-tabs"><div class="tabs" role="tablist"><Tabs /></div></div>
+      <NoteToasts hidden={pop?.id === 'notif'} />
       {pop && (
         <div class={'hud-pop pop-' + pop.id} role="dialog" aria-label={t(pop.id === 'funds' ? 'statsTitle' : pop.id === 'stock' ? 'popStock' : pop.id === 'notif' ? 'notifTitle' : 'popFil')}
           style={{ left: pop.left + 'px' }} onPointerEnter={() => clearTimeout(timer.current)} onPointerLeave={e => { if (e.pointerType === 'mouse') control.hideSoon(); }}>

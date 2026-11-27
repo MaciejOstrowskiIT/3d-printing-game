@@ -1,12 +1,13 @@
 // @vitest-environment jsdom
 import { fireEvent, waitFor } from '@testing-library/preact';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { createState, type GameState } from '../src/core/state';
 import { notifications } from '../src/ui/notifications';
-import { loadDebugState } from '../src/ui/store';
+import { clearAllNotes, inbox, loadDebugState } from '../src/ui/store';
 import { renderHealthyApp, setupAppRenderTests } from './uiHarness';
 
 setupAppRenderTests();
+afterEach(() => clearAllNotes());
 
 const order = { n: 20, got: 0, time: 100, left: 100, offer: 30, acc: false, c: 1, pay: 120 };
 const shop = (over: Partial<GameState> = {}): GameState => ({ ...createState(), goal: 4, auto: 3, fil: 1e6, total: 1000, ...over });
@@ -56,14 +57,61 @@ describe('notification centre in the HUD', () => {
   it('says so when nothing is open', () => {
     const c = renderHealthyApp(shop(), 'en');
     fireEvent.click(c.querySelector('.hud-notif .chip')!);
-    expect(c.querySelector('.hud-pop.pop-notif')?.textContent).toContain('No active events');
+    expect(c.querySelector('.hud-pop.pop-notif')?.textContent).toContain('No notifications');
     expect(c.querySelector('.hud-notif .chip')!.textContent).toContain('0');
   });
 
   it('shows a toast when something new arrives, but not for what was already open on load', async () => {
     const c = renderHealthyApp(shop({ msg: 'mum' }), 'en');
-    expect(c.querySelector('.toast.note')).toBeNull();
+    expect(c.querySelector('.note-toast')).toBeNull();
     loadDebugState(structuredClone(shop({ msg: 'mum', ord: { ...order } })));
-    await waitFor(() => expect(c.querySelector('.toast.note')?.textContent).toContain('New order'));
+    await waitFor(() => expect(c.querySelector('.hud .note-toasts .note-toast')?.textContent).toContain('New order'));
+  });
+});
+
+/** jsdom has no pointer events and Preact keeps the camel-cased name there, so send both spellings. */
+function pointer(el: Element, type: 'Down' | 'Move' | 'Up', x: number) {
+  for (const name of [`pointer${type.toLowerCase()}`, `Pointer${type}`]) {
+    const e = new Event(name, { bubbles: true });
+    Object.defineProperties(e, { clientX: { value: x }, pointerId: { value: 1 }, pointerType: { value: 'touch' } });
+    fireEvent(el, e);
+  }
+}
+
+describe('toasts and the notification inbox', () => {
+  const arrive = async (c: Element) => {
+    loadDebugState(structuredClone(shop({ msg: 'mum' })));
+    await waitFor(() => expect(c.querySelector('.note-toast')).not.toBeNull());
+  };
+
+  it('swiping a toast away hides only the toast; the notification stays in the panel until cleared there', async () => {
+    const c = renderHealthyApp(shop(), 'en');
+    await arrive(c);
+    expect(inbox.value).toHaveLength(1);
+    const toast = c.querySelector('.note-toast')!;
+    pointer(toast, 'Down', 200); pointer(toast, 'Move', 330); pointer(toast, 'Up', 330);
+    await waitFor(() => expect(c.querySelector('.note-toast')).toBeNull());
+    expect(inbox.value).toHaveLength(1);
+    expect(c.querySelector('.hud-notif .chip')!.textContent).toContain('1');
+
+    fireEvent.click(c.querySelector('.hud-notif .chip')!);
+    const panel = c.querySelector('.hud-pop.pop-notif')!;
+    expect(panel.querySelectorAll('.notif-list li')).toHaveLength(1);
+    fireEvent.click(panel.querySelector('.notif-clear')!);
+    await waitFor(() => expect(inbox.value).toHaveLength(0));
+    expect(c.querySelector('.hud-notif .chip')!.textContent).toContain('0');
+  });
+
+  it('a short drag does not hide the toast, and Clear all empties the panel', async () => {
+    const c = renderHealthyApp(shop(), 'en');
+    await arrive(c);
+    const toast = c.querySelector('.note-toast')!;
+    pointer(toast, 'Down', 200); pointer(toast, 'Move', 230); pointer(toast, 'Up', 230);
+    expect(c.querySelector('.note-toast')).not.toBeNull();
+    loadDebugState(structuredClone(shop({ msg: 'mum', ord: { ...order } })));
+    await waitFor(() => expect(inbox.value.length).toBeGreaterThan(0)); // loading a state starts a fresh inbox
+    fireEvent.click(c.querySelector('.hud-notif .chip')!);
+    fireEvent.click([...c.querySelectorAll('.notif-panel button')].find(b => b.textContent === 'Clear all')!);
+    await waitFor(() => expect(inbox.value).toHaveLength(0));
   });
 });

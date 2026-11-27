@@ -2,6 +2,11 @@
 export const hudTexts = {
   notifTitle: 'Powiadomienia',
   notifOpen: 'Otwórz powiadomienia',
+  notifNow: 'Wymaga uwagi',
+  notifReceived: 'Odebrane',
+  notifClearAll: 'Wyczyść wszystko',
+  notifDismiss: 'Usuń powiadomienie',
+  notifNone: 'Brak powiadomień.',
   toastStory: 'Nowa wiadomość',
   toastOrder: 'Nowe zamówienie',
   toastDaily: 'Zamówienie dnia',
