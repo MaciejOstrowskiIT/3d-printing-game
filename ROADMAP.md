@@ -12,6 +12,7 @@ the card to **Done**. Agents: see `AGENTS.md` for the files each open PR touches
 
 | Card | PR | Notes |
 |---|---|---|
+| **Report moderation with Workers AI** | #72 | Llama Guard in the worker instead of a word list; supersedes #70 |
 | **R7: Rebalance and QA of the new tree** | #69 | Quantum bot option and pacing test, "Quantum investor" achievement, audit and README refreshed |
 | **QA6: i18n and content integrity tests** | #67 | `tests/i18n.test.ts`: same keys, placeholders and texts in PL and EN; no content gaps found |
 | **Clicker achievement** | #64 | Unlocks at 1,000 figurines of manual work (#59) |

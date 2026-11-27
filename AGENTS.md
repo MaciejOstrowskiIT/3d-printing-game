@@ -27,6 +27,7 @@ Planned work and its order: `ROADMAP.md` (task board). Pick cards from "Next up"
 | #54 / `feat/tree-audit` | Claude | `tests/treeAudit.ts`, `scripts/treeaudit.ts`, `docs/tree-audit.md`, README |
 | #55 / `feat/tree-progression` | Claude | `content/tree.ts`, `tests/tree.test.ts`, `docs/tree-audit.md` (R2) |
 | #57 / `feat/tree-joins` | Claude | `content/tree.ts`, `systems/research.ts`, `core/saveValidation.ts`, `Research.tsx` lines, tests (R3) |
+| #72 / `feat/report-moderation` | Claude | `infra/report-worker/` (moderation, wrangler.toml, README), `tests/reportWorker.test.ts` |
 | #69 / `feat/quantum-rebalance` | Claude | `tests/bot.ts` (opt-in quantum), `balance.sim.test.ts`, `achievements.ts`, `docs/tree-audit.md`, README (R7) |
 | #67 / `test/qa6-i18n-integrity` | Claude | `tests/i18n.test.ts`, ROADMAP |
 | #65 / `feat/quantum-branch` | Claude | `content/tree.ts` (Quantum branch), `systems/research.ts`, `Research.tsx`, i18n, tests (R6) |
