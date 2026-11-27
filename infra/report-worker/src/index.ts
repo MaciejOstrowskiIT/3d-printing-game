@@ -1,6 +1,8 @@
 /** Cloudflare Worker: receives in-game bug reports (see src/platform/report.ts) and opens a GitHub issue.
  *  The GitHub token lives only here as a secret, never in the game build. Setup: infra/report-worker/README.md. */
 
+import { containsProfanity } from './profanity';
+
 export interface Env {
   GITHUB_TOKEN: string;
   /** "owner/repo" that receives the issues. */
@@ -23,7 +25,7 @@ export async function moderationOk(text: string, ai?: Env['AI']): Promise<boolea
   if (!ai) return true;
   try {
     const out = await Promise.race([
-      ai.run(MODERATION_MODEL, { messages: [{ role: 'user', content: text }] }),
+      ai.run(MODERATION_MODEL, { messages: [{ role: 'user', content: text }], temperature: 0 }),
       new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), MODERATION_TIMEOUT_MS)),
     ]) as { response?: unknown } | null;
     const r = out?.response;
@@ -111,7 +113,7 @@ export async function handle(req: Request, env: Env, fetchFn: typeof fetch = fet
   let report: Report | null = null;
   try { report = parseReport(JSON.parse(text)); } catch { /* falls through to 400 */ }
   if (!report) return reply(400);
-  if (!(await moderationOk(report.description, env.AI))) return reply(422);
+  if (containsProfanity(report.description) || !(await moderationOk(report.description, env.AI))) return reply(422);
 
   const res = await fetchFn(`https://api.github.com/repos/${env.GITHUB_REPO}/issues`, {
     method: 'POST',
