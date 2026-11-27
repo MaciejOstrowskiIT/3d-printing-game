@@ -2,6 +2,7 @@ import { bookCash } from '../systems/workshopStats';
 import { setFleet } from '../systems/fleet';
 import { BAL } from '../content/balance';
 import { achievementsSystem } from '../systems/achievements';
+import { dismissHint, hintsSystem } from '../systems/hints';
 import { automationSystem } from '../systems/automation';
 import { activateBoost, boostSystem } from '../systems/boost';
 import { breakdownsSystem, repair } from '../systems/breakdowns';
@@ -49,11 +50,12 @@ export const SYSTEMS: System[] = [
   storySystem,
   filamentSystem,
   quantumSystem,
+  hintsSystem,
 ];
 
 /** Player actions. The UI only sends these strings and never mutates game state itself. */
 export type Action =
-  | 'calibrate' | 'dryer' | 'precision' | 'automat'
+  | 'calibrate' | 'dryer' | 'precision' | 'automat' | 'hint-dismiss'
   | 'print' | 'spool' | 'auto' | 'farm' | 'panel' | 'mkt' | 'drone' | 'fab'
   | 'pminus' | 'pplus' | 'oacc' | 'odec' | 'fix' | 'mevyes' | 'mevno' | 'tool'
   | 'proc1' | 'procmax' | 'mem1' | 'memmax' | 'boost' | 'adfail' | 'prestige' | 'prestigeR' | 'offx2' | 'daily' | 'msgok' | 'qbuy' | 'qup'
@@ -94,6 +96,7 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
       for (const sys of SYSTEMS) sys(s, dt, ctx);
     },
     act(a) {
+      if (a === 'hint-dismiss') return dismissHint(s);
       if (a === 'calibrate' || a === 'dryer' || a === 'precision') return setQualityAction(s, a);
       if (a === 'print') return printManual(s, ctx);
       if (a === 'spool') { const ok = buySpool(s); if (ok) sfx(ctx, 'buy'); return ok; }
@@ -171,6 +174,7 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
       const next = createState();
       next.priorPlay = s.priorPlay + s.play;
       next.priorCompletions = s.priorCompletions + Number(s.end);
+      next.hints = { seen: [...s.hints.seen], active: null, retired: s.hints.retired || s.meta.runs > 0 };
       if (s.ach.includes('threeCrowns')) next.ach.push('threeCrowns');
       s = next;
       log(s, ctx, logKey);

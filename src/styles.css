@@ -304,6 +304,8 @@ body.space .title-screen{background:#14122b}
 .away-report{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 12px;margin-bottom:12px;padding:8px 12px;background:var(--card);border:1px solid var(--line);border-radius:12px}
 .away-report span{flex:1 1 220px}
 .away-report .ad-x2{white-space:nowrap}
+.onboarding-hint{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;padding:8px 12px;background:var(--card);border:1px solid var(--line);border-radius:12px;font-size:14px}
+.onboarding-hint button{flex:none}
 .real-offer{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
 .real-offer .hint{margin:4px 0 8px}
 .fil-alert{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 10px;margin:0 0 10px;padding:8px 10px;border-radius:10px;background:var(--orS);border:1px solid var(--or);font-weight:600}

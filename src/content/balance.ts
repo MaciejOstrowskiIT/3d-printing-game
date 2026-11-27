@@ -5,6 +5,7 @@ export const BAL = {
    *  It divides every flow rate (printers, clicks, demand, compute, space), so money, research and the
    *  goals that depend on them stretch together. Real-time timers (events, offers, spool drift) are untouched. */
   pace: 50,
+  onboardingSeconds: 5 * 60, // at the baseline game pace
   startPrice: 5,
   startFilament: 1000,
   filamentPerFigurine: 20,

@@ -5,7 +5,7 @@ import { piecesInStock } from '../../systems/inventory';
 import { TREE } from '../../content/tree';
 import { eff, freePts, gpu, opsCap } from '../../core/formulas';
 import { has } from '../../core/state';
-import { nodeStatus } from '../../systems/research';
+import { nodeStatus, researchUnlocked } from '../../systems/research';
 import { dur, fmt, mass, money, playtime, t } from '../i18n';
 import { incomePerSecond } from '../../systems/workshopStats';
 import { ui, useS } from '../store';
@@ -20,7 +20,7 @@ const Chip = ({ label, value, warn, show = true, sub, meter, big }: { label: str
   ) : null;
 
 /** Whether the Research tab is unlocked yet. */
-export const useResearchUnlocked = () => useS(s => s.goal >= 5 || s.rep > 0 || s.done.length > 0 || s.meta.runs > 0 || s.meta.patents > 0);
+export const useResearchUnlocked = () => useS(researchUnlocked);
 
 /** Pending items in Research (buyable nodes + free points) and the Workshop alert flag. */
 export function useBadges() {

@@ -1,5 +1,6 @@
 import { useEffect } from 'preact/hooks';
-import { dur, fmt, logText, money, playtime, prefs, t } from '../i18n';
+import { HINTS } from '../../content/hints';
+import { dur, fmt, li, logText, money, playtime, prefs, t } from '../i18n';
 import { act, adPending, awayReport, dialog, mobileView, resetGame, screen, ui, useS, watchAdForOfflineBonus } from '../store';
 import { offlineBonusReady } from '../../systems/offlineBonus';
 import { platform } from '../platform';
@@ -79,6 +80,18 @@ function OfflineBonusButton() {
   );
 }
 
+function OnboardingHint() {
+  const active = useS(s => s.hints.active);
+  const hint = HINTS.find(item => item.id === active);
+  if (!hint) return null;
+  return (
+    <div class="onboarding-hint">
+      <span role="status">{hint.text[li()]}</span>
+      <button aria-label={t('dismissHint')} onClick={() => act('hint-dismiss')}>×</button>
+    </div>
+  );
+}
+
 export function App() {
   const tab = useS(s => s.tab);
   const sp = useS(s => s.ph === 2);
@@ -110,6 +123,7 @@ export function App() {
               <OfflineBonusButton />
               <button aria-label={t('sClose')} onClick={() => { awayReport.value = undefined; }}>×</button>
             </div>}
+            <OnboardingHint />
             {tab === 'r' ? <Research /> : tab === 'a' ? <AchievementsCard /> : <Workshop />}
             <Settings class="mset" />
           </div>
