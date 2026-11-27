@@ -16,6 +16,10 @@ assign yourself, and open the PR with `Closes #<issue>`.
   bump `SAVE_VERSION` and append a migration; never edit old ones.
 - Do not reorder `SYSTEMS`, rename existing state fields or change log-arg prefixes (`@ $ # % ~ & ! ^ * + = /`):
   old saves depend on them.
+- **Where things live (keeps parallel PRs apart):** UI cards are one file each: `ui/components/{workshop,research,side,hud}/`
+  (the folder's parent file only composes them). Texts: `content/i18n/{pl,en}/<area>.ts`, one key per line, new keys
+  next to related ones (the PL and EN area files have the same names). Add a new file for a new feature instead of
+  growing an existing one.
 - **Styles** live in `src/styles/NN-area.css`, entered through `src/styles/index.css`. The file number is the cascade
   order; put new rules in the file for their area, so parallel PRs rarely touch the same file.
 - One feature per branch, branched from the latest `main`; rebase before opening the PR.
