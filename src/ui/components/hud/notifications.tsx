@@ -12,8 +12,7 @@ export function NotificationsButton({ pop }: { pop: PopControl }) {
   const urgent = useS(s => notifications(s).some(n => n.urgent));
   const count = inbox.value.length;
   return (
-    <div class={'chip has-pop notif' + (urgent ? ' urgent' : '') + (count ? ' some' : '')} {...popHandlers(pop, 'notif')}
-      aria-label={t('notifTitle') + (count ? `: ${count}` : '')}>
+    <div class={'chip has-pop notif' + (urgent ? ' urgent' : '') + (count ? ' some' : '')} {...popHandlers(pop, 'notif')}>
       <small>{t('notifTitle')}</small>
       <b><span aria-hidden="true">🔔</span> {count}</b>
     </div>
@@ -95,7 +94,7 @@ function NoteToast({ note }: { note: Note }) {
   const moved = useRef(false);
   const out = Math.abs(dx) > 90;
   return (
-    <div class="note-toast" role="status" style={{ transform: `translateX(${dx}px)`, opacity: out ? 0.3 : Math.max(0.35, 1 - Math.abs(dx) / 220), transition: start.current ? 'none' : 'transform .2s, opacity .2s' }}
+    <div class="note-toast" style={{ transform: `translateX(${dx}px)`, opacity: out ? 0.3 : Math.max(0.35, 1 - Math.abs(dx) / 220), transition: start.current ? 'none' : 'transform .2s, opacity .2s' }}
       onPointerDown={e => { start.current = { x: e.clientX, id: e.pointerId }; moved.current = false; (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId); }}
       onPointerMove={e => { if (!start.current) return; const d = e.clientX - start.current.x; if (Math.abs(d) > 8) moved.current = true; setDx(d); }}
       onPointerUp={() => { const d = dx; start.current = null; if (Math.abs(d) > 90) hideNoteToast(note.key); else setDx(0); }}

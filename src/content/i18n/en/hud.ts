@@ -38,5 +38,9 @@ export const hudTexts = {
   tabW: 'Workshop',
   tabR: 'Research',
   tabA: 'Achievements',
+  tabsNav: 'Game views',
+  hudNav: 'Workshop status',
+  tabAlert: '(needs attention)',
+  tabReady: '({0} ready)',
   computer: 'Computer',
 };

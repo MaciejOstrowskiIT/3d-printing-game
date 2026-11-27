@@ -81,7 +81,7 @@
   .hud .chip small{font-size:11px}
   .dock.nav4{grid-template-columns:1fr 1fr 88px 1fr 1fr;align-items:center;gap:4px;padding:4px 8px calc(4px + env(safe-area-inset-bottom))}
   .dock.nav4 .tab{grid-column:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-height:56px;padding:4px;font-size:12px;font-weight:600;background:none;color:var(--mute);border-radius:12px}
-  .dock.nav4 .tab[aria-selected=true]{color:var(--or);background:none}
+  .dock.nav4 .tab[aria-current=page]{color:var(--orT);background:none}
   .dock.nav4 .tab:disabled{opacity:.35}
   .dock.nav4 .tab .dot{position:absolute;top:4px;right:calc(50% - 22px)}
   .dock.nav4 .pbtn{grid-column:3;width:76px;height:76px;min-height:76px;padding:0;margin:-30px auto 0;border-radius:50%;border:5px solid var(--bg);font-size:15px}

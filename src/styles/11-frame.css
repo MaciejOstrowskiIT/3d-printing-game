@@ -33,7 +33,7 @@ body.space .side{background-color:var(--bg);color:var(--ink)}
 .side-journal .log li{opacity:1;padding:4px 0}
 .side-journal .log li+li{border-top:1px solid var(--line)}
 .side-journal .log li:first-child{color:var(--ink)}
-.settings button{background:var(--card);border-color:var(--line)}
+.settings button{background:var(--card);border-color:var(--line);color:var(--ink)}
 .settings button:hover:not(:disabled){background:var(--sub);border-color:var(--acc)}
 .side .settings{padding-top:4px}
 .station-readout,.journal-toggle{display:none}

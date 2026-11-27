@@ -1,0 +1,10 @@
+/* Accessibility: text only screen readers hear, and a visible focus ring on everything the keyboard can reach
+   (buttons and inputs get theirs in 01-base; this covers role="button" chips, panels, selects, links, summaries). */
+.sr-only{position:absolute!important;top:0;left:0;width:1px;height:1px;padding:0;margin:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+:is(a,select,textarea,summary,[tabindex],[role=button]):focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.hud-pop:focus-visible{outline-offset:-3px}
+/* Windows high contrast: keep the focus ring and the selected tab visible when colours are forced. */
+@media (forced-colors:active){
+  :focus-visible{outline:3px solid CanvasText!important}
+  .tab:is([aria-selected=true],[aria-current=page]){border:2px solid Highlight}
+}

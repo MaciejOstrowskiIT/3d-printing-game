@@ -18,5 +18,6 @@ export default defineConfig({
   // Relative base so the build works under /3d-printing-game/ on GitHub Pages and from a plain file.
   base: './',
   build: { target: 'es2020', assetsInlineLimit: 100_000_000 },
-  test: { environment: 'node', include: ['tests/**/*.test.{ts,tsx}'], setupFiles: ['tests/setup.ts'] },
+  // css.include: tests/contrast.test.ts reads the colour tokens as raw text (CSS is stubbed out in tests otherwise).
+  test: { environment: 'node', include: ['tests/**/*.test.{ts,tsx}'], setupFiles: ['tests/setup.ts'], css: { include: [/01-base\.css/] } },
 });

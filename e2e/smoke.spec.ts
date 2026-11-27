@@ -10,6 +10,11 @@ test('starts a fresh workshop, prints and switches game tabs', async ({ page, is
   const printed = page.locator('.count .num');
   const press = (control: Locator) => isMobile ? control.tap() : control.click();
   const production = page.getByRole('heading', { name: 'Investments', exact: true });
+  // Desktop: tabs in the HUD. Phone: a navigation bar (with Print in the middle) that marks the current view.
+  const view = (name: string | RegExp) => nav.getByRole(isMobile ? 'button' : 'tab', { name, exact: typeof name === 'string' });
+  const expectCurrent = (control: Locator) => isMobile
+    ? expect(control).toHaveAttribute('aria-current', 'page')
+    : expect(control).toHaveAttribute('aria-selected', 'true');
 
   await page.goto('/');
   const play = page.getByRole('button', { name: 'Play', exact: true });
@@ -44,22 +49,22 @@ test('starts a fresh workshop, prints and switches game tabs', async ({ page, is
   await expectHealthy(page);
 
   if (isMobile) {
-    const sales = nav.getByRole('tab', { name: 'Sales', exact: true });
+    const sales = view('Sales');
     await press(sales);
-    await expect(sales).toHaveAttribute('aria-selected', 'true');
+    await expectCurrent(sales);
     await expect(page.getByRole('heading', { name: 'Sales', exact: true })).toBeVisible();
     await expectHealthy(page);
   }
 
-  const research = nav.getByRole('tab', { name: /^Research/ });
+  const research = view(/^Research/);
   await press(research);
-  await expect(research).toHaveAttribute('aria-selected', 'true');
+  await expectCurrent(research);
   await expect(page.getByRole('heading', { name: 'Computer', exact: true })).toBeVisible();
   await expectHealthy(page);
 
-  const workshop = nav.getByRole('tab', { name: isMobile ? /^Production/ : /^Workshop/ });
+  const workshop = view(isMobile ? /^Production/ : /^Workshop/);
   await press(workshop);
-  await expect(workshop).toHaveAttribute('aria-selected', 'true');
+  await expectCurrent(workshop);
   await expect(production).toBeVisible();
   await expectHealthy(page);
 });

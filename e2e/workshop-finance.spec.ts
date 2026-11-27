@@ -21,7 +21,7 @@ test('selects chart points and filters the workshop results by period', async ({
   await save.getByRole('button', { name: 'Close', exact: true }).click();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   if (isMobile) {
-    await page.getByRole('tab', { name: 'Sales', exact: true }).tap();
+    await page.locator('.dock').getByRole('button', { name: 'Sales', exact: true }).tap();
     await page.getByRole('button', { name: /^Workshop results/ }).tap();
   }
 

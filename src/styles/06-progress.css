@@ -21,4 +21,4 @@
 .card.prestige{border-color:#e0a82e;background:light-dark(#fffaf0,#2b2412)}
 .end-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}
 .end-actions button{margin:0}
-.end-actions .big{background:var(--or);border-color:var(--or);font-size:17px;padding:10px 22px}
+.end-actions .big{background:var(--or);border-color:var(--or);color:var(--onOr);font-size:17px;padding:10px 22px}

@@ -1,7 +1,5 @@
 import type { ComponentChildren } from 'preact';
 
-
-
 export type PopId = 'funds' | 'stock' | 'fil' | 'notif';
 
 /** Chip that can open a panel on hover (mouse), tap or Enter (touch and keyboard). */
@@ -13,7 +11,14 @@ export const popHandlers = (pop: PopControl, popId: PopId) => ({
   onPointerEnter: (e: PointerEvent) => { if (e.pointerType === 'mouse') pop.show(popId, e.currentTarget as HTMLElement); },
   onPointerLeave: (e: PointerEvent) => { if (e.pointerType === 'mouse') pop.hideSoon(); },
   onClick: (e: MouseEvent) => { if ((e as unknown as PointerEvent).pointerType !== 'mouse') pop.toggle(popId, e.currentTarget as HTMLElement); },
-  onKeyDown: (e: KeyboardEvent) => { if (e.key === 'Enter') pop.toggle(popId, e.currentTarget as HTMLElement); },
+  // Enter or Space, like a real button. A panel opened from the keyboard takes the focus, so Tab walks through it.
+  onKeyDown: (e: KeyboardEvent) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault();
+    const opening = pop.open !== popId;
+    pop.toggle(popId, e.currentTarget as HTMLElement);
+    if (opening) requestAnimationFrame(() => document.querySelector<HTMLElement>('.hud-pop')?.focus());
+  },
 });
 
 export const Chip = ({ label, value, warn, show = true, sub, meter, big, pop, popId, children }: { label: string; value: ComponentChildren; warn?: boolean; show?: boolean; sub?: ComponentChildren; meter?: number; big?: boolean; pop?: PopControl; popId?: PopId; children?: ComponentChildren }) =>

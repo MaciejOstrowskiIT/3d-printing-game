@@ -3,10 +3,12 @@
    PICTURE: drukarka w panelu bocznym, głowica jeździ w tempie produkcji; zakupy jako wiersze sklepu z paskiem postępu
    COLOUR and TYPE: pomarańcz PLA, grafit, turkus dla gotowych rzeczy; Barlow Condensed dla liczb, Barlow dla tekstu
    LAYOUT: desktop = panel boczny + pulpit z zakładkami; telefon = kompaktowy nagłówek + dolny dok z przyciskiem Drukuj */
+/* Text tokens keep 4.5:1 (tests/contrast.test.ts): --orT is orange for text, --onOr the text on orange buttons. */
 :root{color-scheme:light dark;
 --bg:light-dark(#f2f2f5,#111217);--card:light-dark(#fff,#1b1d24);--sub:light-dark(#f6f6f9,#22242c);--ink:light-dark(#1c1b22,#ecebf0);--mute:light-dark(#64636d,#a3a2ad);
 --line:light-dark(#e6e5eb,#2b2d36);--or:light-dark(#ff6a1f,#e0581a);--orD:light-dark(#e2560f,#ff7a3a);--orS:light-dark(#ffe9dc,#3b2114);--frame:#24252c;
---acc:light-dark(#008ba7,#3cc8e4);--accS:light-dark(#e2f5f9,#10303a);--bad:light-dark(#cf2f27,#ff6b61);--badS:light-dark(#fdecea,#3b1715);
+--orT:light-dark(#b0460c,#ff7a3a);--onOr:#1c1b22;
+--acc:light-dark(#00778f,#3cc8e4);--accS:light-dark(#e2f5f9,#10303a);--bad:light-dark(#c42a22,#ff6b61);--badS:light-dark(#fdecea,#3b1715);
 --sh:0 1px 2px rgb(0 0 0/.06),0 4px 14px rgb(0 0 0/.04)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
