@@ -1,8 +1,45 @@
 import { describe, expect, it } from 'vitest';
+import { ACHIEVEMENTS } from '../src/content/achievements';
+import { BAL } from '../src/content/balance';
 import { gpu } from '../src/core/formulas';
 import { createGame } from '../src/core/game';
 import { migrate, serialize } from '../src/core/save';
 import { createState } from '../src/core/state';
+import { playthrough } from './bot';
+
+/** Challenges outside the bot's scripted strategies or single-line runs. */
+const manualAchievements: Record<string, string> = {
+  auto50: 'Keep buying individual printers instead of moving on to farms.',
+  streak7: 'Ship orders on seven consecutive calendar days.',
+  sisyphus: 'Finish without letting Self-replication build mining drones.',
+  line2: 'Start a new production line through prestige.',
+  threeCrowns: 'Finish three games on the same save.',
+  patents20: 'Collect patents by prestiging.',
+  skywalker: 'Complete a speedrun under the active-time threshold.',
+  splitFleet: 'Assign a printer to a secondary model.',
+};
+
+describe('achievement registry', () => {
+  it('covers every achievement with a bot run or a manual challenge', () => {
+    const unlocked = new Set<string>();
+    for (const { seed, slow, quantum } of [
+      { seed: 1, slow: 1, quantum: false },
+      { seed: 7, slow: 1, quantum: true },
+      { seed: 1, slow: BAL.realisticSlow, quantum: false },
+    ]) {
+      const run = playthrough(seed, 12, 0.5, undefined, s => {
+        if (s.end) for (const id of s.ach) unlocked.add(id);
+      }, { slow }, { quantum });
+      expect(run.ended).toBe(true);
+    }
+
+    const ids = ACHIEVEMENTS.map(achievement => achievement.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const id of Object.keys(manualAchievements)) expect(ids).toContain(id);
+    const uncovered = ids.filter(id => !unlocked.has(id) && !Object.hasOwn(manualAchievements, id));
+    expect(uncovered).toEqual([]);
+  });
+});
 
 describe('SkyWalker and play time', () => {
   it.each([[1799.75, true], [1800, false], [1800.25, false]])(

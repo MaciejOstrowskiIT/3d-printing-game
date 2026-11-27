@@ -77,6 +77,42 @@ export const MARKET_EVENTS: MarketEvent[] = [
     offer: { seconds: 45, btn: ['Wynajmij stoisko', 'Rent a booth'] },
     when: s => s.goal >= 6,
   },
+  {
+    id: 'makerMeetup', weight: 1, seconds: 90, demand: 1.35,
+    name: ['Zlot majsterkowiczów', 'Maker meetup'],
+    desc: ['Uczestnicy zlotu kupują lokalne wydruki. Popyt ×1,35.', 'Meetup visitors are buying local prints. Demand ×1.35.'],
+  },
+  {
+    id: 'filamentSurplus', weight: 1, seconds: 100, spool: 0.85,
+    name: ['Nadwyżka filamentu', 'Filament surplus'],
+    desc: ['Dostawca zwalnia miejsce na nową dostawę. Szpule tanieją o 15%.', 'The supplier is making room for a new shipment. Spools are 15% cheaper.'],
+  },
+  {
+    id: 'postalDelay', weight: 1, seconds: 60, demand: 0.85,
+    name: ['Opóźnione przesyłki', 'Shipping delays'],
+    desc: ['Klienci odkładają zakupy, aż przesyłki znów będą dochodzić na czas. Popyt spada o 15%.', 'Customers hold off until deliveries are back on schedule. Demand drops by 15%.'],
+    when: s => s.goal >= 5,
+  },
+  {
+    id: 'giftGuide', weight: 1, seconds: 90, demand: 1.5,
+    name: ['Poradnik prezentowy', 'Gift guide'],
+    desc: ['Za {0} twoje wydruki trafią do poradnika prezentowego. Popyt ×1,5 przez 90 sekund.', 'For {0}, your prints get a spot in a gift guide. Demand ×1.5 for 90 seconds.'],
+    offer: { seconds: 18, btn: ['Wykup miejsce', 'Book a spot'] },
+    when: s => s.goal >= 5,
+  },
+  {
+    id: 'carrierSurcharge', weight: 1, seconds: 75, spool: 1.2, counter: true,
+    name: ['Dopłata za transport', 'Freight surcharge'],
+    desc: ['Szpule drożeją o 20%. Zmień przewoźnika za {0}, aby znieść dopłatę.', 'Spools cost 20% more. Switch carriers for {0} to remove the surcharge.'],
+    offer: { seconds: 12, btn: ['Zmień przewoźnika', 'Switch carriers'] },
+    when: s => s.goal >= 6,
+  },
+  {
+    id: 'sampleStock', weight: 1, seconds: 0, spools: 2,
+    name: ['Szpule pokazowe', 'Demo spools'],
+    desc: ['Dostawca sprzedaje dwie pokazowe szpule PLA za pół ceny. Zapłacisz {0}.', 'The supplier has two demo spools of PLA at half price, for {0}.'],
+    offer: { seconds: 0, btn: ['Kup szpule', 'Buy spools'] },
+  },
 ];
 
 export const MARKET_EVENT: Record<string, MarketEvent> = Object.fromEntries(MARKET_EVENTS.map(e => [e.id, e]));

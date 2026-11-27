@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { BAL } from '../src/content/balance';
-import { MARKET_EVENT } from '../src/content/events';
+import { MARKET_EVENT, MARKET_EVENTS } from '../src/content/events';
 import type { Ctx, GameEvent } from '../src/core/ctx';
 import { demand, marketMul, spoolPrice } from '../src/core/formulas';
 import { createGame } from '../src/core/game';
@@ -24,6 +24,18 @@ function offer(s: GameState, id: string) {
 }
 
 describe('market events', () => {
+  it('has unique IDs and localized text for each event and offer', () => {
+    expect(new Set(MARKET_EVENTS.map(event => event.id)).size).toBe(MARKET_EVENTS.length);
+    for (const event of MARKET_EVENTS) {
+      const pairs = event.offer ? [event.name, event.desc, event.offer.btn] : [event.name, event.desc];
+      for (const pair of pairs) {
+        expect(pair).toHaveLength(2);
+        for (const text of pair) expect(text.trim()).not.toBe('');
+      }
+      for (const text of event.desc) expect(text.includes('{0}')).toBe(!!event.offer);
+    }
+  });
+
   it('appear only after goal 3, only online, and not in space', () => {
     const early = { ...createState(), goal: 2, mevT: 0 };
     marketEventsSystem(early, 1, ctx().c);
@@ -79,6 +91,15 @@ describe('market events', () => {
     const fil = s.fil;
     acceptMarketEvent(s, ctx().c);
     expect(s.fil).toBe(fil + 5 * s.spoolG);
+  });
+
+  it('switching carriers removes the spool surcharge', () => {
+    const s = midGame();
+    const price = spoolPrice(s);
+    offer(s, 'carrierSurcharge');
+    expect(spoolPrice(s)).toBeCloseTo(price * 1.2);
+    expect(acceptMarketEvent(s, ctx().c)).toBe(true);
+    expect(spoolPrice(s)).toBeCloseTo(price);
   });
 
   it('an offer costs seconds of income, and an unaffordable one cannot be taken', () => {
