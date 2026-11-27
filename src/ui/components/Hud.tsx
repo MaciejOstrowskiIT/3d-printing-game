@@ -57,7 +57,7 @@ export function Hud() {
   return (
     <nav class="hud">
       <div class="chips">
-        <Chip show={!v.sp && v.g >= 1} big label={t('funds')} value={v.zl} sub={v.earn > 0 ? '+' + t('moneyRate', money(v.earn)) : undefined} />
+        <Chip show={!v.sp && v.g >= 1} big label={t('funds')} value={v.zl} sub={v.earn > 0 ? '+' + t('moneyRate', money(v.earn)) : '\u00a0'} />
         <Chip show={v.g >= 1} label={t('stock')} value={v.inv} />
         <Chip show={!v.sp} label={t('filament')} value={v.fil} warn={v.filWarn}
           sub={Number.isFinite(v.run) && !v.auto ? t('filLeft', dur(Math.round(v.run))) : undefined}

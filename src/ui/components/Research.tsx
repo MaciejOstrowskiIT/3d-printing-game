@@ -24,7 +24,7 @@ function Computer() {
           <button disabled={noPts} onClick={() => act('proc1')}>+1</button><button disabled={noPts} onClick={() => act('procmax')}>{t('all')}</button></span></div></div>
         <div class="cell"><small>{t('mem')}</small><div class="cv"><b>{fmt(v.mem)}</b><span class="pts">
           <button disabled={noPts} onClick={() => act('mem1')}>+1</button><button disabled={noPts} onClick={() => act('memmax')}>{t('all')}</button></span></div></div>
-        <div class="cell"><small>{t('compute')}</small><div class="cv"><b>{fmt(Math.floor(v.ops))} / {fmt(v.cap)}</b></div><Meter pct={(100 * v.ops) / v.cap} /></div>
+        <div class="cell compute-cell"><small>{t('compute')}</small><div class="cv"><b>{fmt(Math.floor(v.ops))} / {fmt(v.cap)}</b></div><Meter pct={(100 * v.ops) / v.cap} /></div>
       </div>
       <p class="hint">{t('repNext', fmt(v.next))}</p>
     </section>
@@ -49,21 +49,29 @@ export function ResearchPreview() {
       picks, fp: freePts(s), ready: TREE.filter(n => nodeStatus(s, n) === 'ready').length,
     };
   });
-  if (!v.picks.length && v.fp < 1) return null;
+  // Keep surviving suggestions in their previous slots as affordability changes.
+  const previousSlots = useRef<string[]>([]);
+  const remaining = [...v.picks];
+  const slots = Array.from({ length: v.picks.length }, (_, index) => {
+    const retained = remaining.findIndex(pick => pick.node.id === previousSlots.current[index]);
+    return retained < 0 ? undefined : remaining.splice(retained, 1)[0];
+  });
+  const picks = slots.map(pick => pick ?? remaining.shift()!);
+  useLayoutEffect(() => { previousSlots.current = picks.map(pick => pick.node.id); });
+
+  if (!picks.length && v.fp < 1) return null;
   return (
     <section class="card wide rprev">
       <div class="head rp-head">
-        <h2>{t('rpTitle')}{v.ready ? <span class="rp-badge">{t('rpReady', v.ready)}</span> : null}</h2>
+        <h2>{t('rpTitle')}<span class="rp-badge" aria-hidden={!v.ready}>{t('rpReady', v.ready)}</span></h2>
         <button class="rp-all" onClick={() => ui(s => { s.tab = 'r'; })}>{t('rpAll')} →</button>
       </div>
-      {v.fp >= 1 && (
-        <div class="rp-points">
-          <span>{t('rpPoints', fmt(v.fp))}</span>
-          <span class="pts"><button onClick={() => act('proc1')}>{t('rpProc')}</button><button onClick={() => act('mem1')}>{t('rpMemBtn')}</button></span>
-        </div>
-      )}
+      <div class="rp-points">
+        <span>{t('rpPoints', fmt(v.fp))}</span>
+        <span class="pts"><button disabled={v.fp < 1} onClick={() => act('proc1')}>{t('rpProc')}</button><button disabled={v.fp < 1} onClick={() => act('mem1')}>{t('rpMemBtn')}</button></span>
+      </div>
       <div class="rp-list">
-      {v.picks.map(({ node: n, status, ops, zl, need, memoryShort }) => {
+      {picks.map(({ node: n, status, ops, zl, need, memoryShort }) => {
         const val = n.need ? Math.floor(n.need.value(game.s)) : 0;
         const info = status === 'ready' ? costText(n)
           : status === 'need' && n.need ? t('needs', n.need.label[li()], fmt(val), fmt(n.need.target))
@@ -74,7 +82,7 @@ export function ResearchPreview() {
             <div class="it">
               <b>{n.n[li()]}</b>
               <small>{n.d[li()]}</small>
-              {status !== 'ready' && <Meter pct={pct} />}
+              <Meter pct={status === 'ready' ? 100 : pct} />
               <small class={'rp-info' + (memoryShort ? ' bad' : '')}>{info}</small>
             </div>
             {status === 'ready'
