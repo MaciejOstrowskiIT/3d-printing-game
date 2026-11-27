@@ -83,6 +83,7 @@ body.space .side .pbtn,body.space .dock .pbtn{display:none}
 .content{padding:18px 20px 30px;max-width:1180px}
 .events{display:grid;gap:10px;margin-bottom:14px}
 .ev{border:1.5px solid var(--or);background:var(--orS);border-radius:12px;padding:10px 12px 10px 14px;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.ev.maintenance{min-block-size:100px;background:var(--card);border-color:var(--line)}
 .ev.bad{border-color:var(--bad);background:var(--badS)}
 .ev .evt{flex:1 1 240px}
 .ev b{font:700 18px "Barlow Condensed",sans-serif}
@@ -199,6 +200,7 @@ h2{font-size:21px;margin:0;line-height:1.1}
   .chip{flex:none}
   .content{padding:12px 14px 110px}
   .comp{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .compute-cell b{white-space:nowrap;font-size:clamp(14px,4.4vw,20px)}
   .brsel{display:flex}
   .tree{grid-template-columns:minmax(0,1fr);min-width:0}
   .tree .node,.tree .bh{grid-column:1!important}
@@ -305,20 +307,23 @@ body.space .title-screen{background:#14122b}
 .rprev{margin-bottom:14px}
 .rprev .rp-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
 .rprev .rp-head h2{display:flex;align-items:center;gap:8px;margin:0}
-.rprev .rp-badge{font:600 12px Barlow,sans-serif;color:#fff;background:var(--or);border-radius:999px;padding:2px 9px}
+.rprev .rp-badge{white-space:nowrap;font-variant-numeric:tabular-nums;font:600 12px Barlow,sans-serif;color:#fff;background:var(--or);border-radius:999px;padding:2px 9px}
+.rprev .rp-badge[aria-hidden=true]{visibility:hidden}
 .rprev .rp-all{min-height:32px;padding:4px 12px;background:transparent;font-size:14px}
 .rprev .rp-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
 .rprev .rp-row{display:flex;flex-direction:column;gap:8px;justify-content:space-between;padding:10px 12px;border:1.5px solid var(--line);border-radius:12px;background:var(--sub)}
 .rprev .rp-row.ready{border-color:var(--or);background:var(--orS)}
 .rprev .rp-row .it{min-width:0}
-.rprev .rp-row .it small{display:block}
+.rprev .rp-row .it b{display:block;min-block-size:2lh}
+.rprev .rp-row .it small{display:block;min-block-size:3lh}
 .rprev .rp-row .meter{margin:6px 0 2px}
 .rprev .rp-info{color:var(--mute);font-variant-numeric:tabular-nums}
 .rprev .rp-info.bad{color:var(--bad)}
-.rprev .rp-pct{align-self:flex-end;color:var(--mute);font-variant-numeric:tabular-nums;font-weight:600;font-size:13px}
+.rprev .rp-pct{display:flex;align-items:center;justify-content:flex-end;min-block-size:40px;color:var(--mute);font-variant-numeric:tabular-nums;font-weight:600;font-size:13px}
 .rprev .rp-row .buy{align-self:stretch}
 .rprev .rp-points{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px 10px;margin-bottom:10px;padding:8px 10px;border-radius:10px;background:var(--accS);font-weight:600}
 .rprev .rp-points .pts{display:flex;gap:6px}
+.space-belt .item .buy{min-block-size:47px}
 /* Finished tree nodes collapse to their name, so what you can still buy is easy to find. */
 .tree .node.done{padding-top:6px;padding-bottom:6px;min-height:0}
 .tree .node.done small,.tree .node.done .rq,.tree .node.done .cs{display:none}
@@ -539,8 +544,8 @@ body.space .side{background-color:var(--bg);color:var(--ink)}
 
 /* Sales and investments side by side under the production line */
 .core-pair{display:grid;gap:14px;align-items:start}
-@media(min-width:1020px){.core-pair:has(.workshop-sales){grid-template-columns:repeat(2,minmax(0,1fr))}}
-.workshop-core{grid-template-columns:minmax(0,1fr)}
+@container(min-width:560px){.core-pair:has(.workshop-sales){grid-template-columns:repeat(2,minmax(0,1fr))}}
+.workshop-core{grid-template-columns:minmax(0,1fr);container-type:inline-size}
 
 @media(max-width:820px){
   .core-pair{gap:10px}

@@ -119,23 +119,26 @@ function filamentNotice(s: GameState) {
 }
 
 function Events() {
+  const maintenance = useS(s => s.ph === 1 && s.farmOn);
   const o = useS(s => (s.ph === 1 && s.ord ? { ...s.ord } : null));
   const brk = useS(s => (s.ph === 1 && s.brk > 0 ? { brk: s.brk, c: s.brkC, fixT: s.fixT, cam: has(s, 'kamera') && !!s.amOn.kamera } : null));
   const market = useS(s => s.ph === 1 && (!!s.mev || s.mfx.length > 0 || calendarOn(s.today).length > 0));
   const daily = useS(s => s.ph === 1 && !!s.dord && s.dord.day === s.dday);
   const msg = useS(s => !!s.msg);
   const filament = useS(s => !!filamentNotice(s));
-  if (!o && !brk && !market && !daily && !msg && !filament) return null;
+  if (!o && !brk && !maintenance && !market && !daily && !msg && !filament) return null;
   return (
     <div class="events" aria-label={t('workshopNotices')} role="region">
       <FilamentAlert />
-      {brk && (
-        <div class="ev bad">
+      {(brk || maintenance) && (
+        <div class={`ev${brk ? ' bad' : ''}${maintenance ? ' maintenance' : ''}`}>
           <div class="evt">
-            <b>{t('brkTitle')}</b>
-            <p>{t('bDesc', Math.round(brk.brk * 100), dict().causes[brk.c])}{brk.cam ? ' ' + t('bAuto', Math.ceil(Math.max(0, brk.fixT))) : ''}</p>
+            <b>{t(brk ? 'brkTitle' : 'maintenanceTitle')}</b>
+            <p>{brk ? t('bDesc', Math.round(brk.brk * 100), dict().causes[brk.c]) : t('maintenanceReady')}
+              {brk?.cam ? ' ' + t('bAuto', Math.ceil(Math.max(0, brk.fixT))) : ''}
+            </p>
           </div>
-          {!brk.cam && <div class="evb"><button class="btn-main" onClick={() => act('fix')}>{t('repair')}</button></div>}
+          {brk && !brk.cam && <div class="evb"><button class="btn-main" onClick={() => act('fix')}>{t('repair')}</button></div>}
         </div>
       )}
       {o && (
@@ -485,7 +488,7 @@ function Space() {
   }));
   const pct = 100 * (1 - v.mat / v.mat0);
   return (
-    <section class="card">
+    <section class="card space-belt">
       <CardHead title={t('belt')} aside={t('pct', nf(pct, pct < 1 ? 3 : 1))} />
       <Meter tone="or" pct={pct} style={{ margin: '0 0 10px' }} />
       <div class="tiles">
