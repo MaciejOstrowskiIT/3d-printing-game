@@ -129,7 +129,7 @@ Content lives in `src/content/` as plain lists. Each list has one place that rea
 | Market events | `content/events.ts` | `tests/marketEvents.test.ts` |
 | Calendar events (real dates) | `content/calendar.ts` | `tests/calendar.test.ts` |
 | Story messages | `content/story.ts` | `tests/story.test.ts` (texts, and the bot sees every message in a full game) |
-| Achievements | `content/achievements.ts` | — |
+| Achievements | `content/achievements.ts` | `tests/achievements.test.ts` (bot coverage and manual challenges) |
 | Patents | `content/patents.ts` | `tests/prestige.test.ts` |
 | Research tree | `content/tree.ts` | `tests/systems.test.ts` |
 
@@ -153,7 +153,7 @@ To add a print model, append an entry to `MODELS`: print time (`seconds`), `valu
 - 17 goals guiding the player through the whole game.
 - Space phase: drones, orbital factories, asteroid belt.
 - Isometric scene (garage → workshop → factory floor → orbit) with a printer close-up inset and layer-by-layer animation.
-- 25 achievements (one hidden) with toasts; older saves unlock earned ones silently.
+- 38 achievements (one hidden) with toasts; older saves unlock earned ones silently.
 - Prestige: after liftoff, start a new production line for patents (`floor(2 · log10(total / 1e5)^1.5)`), spent on 9 permanent upgrades in `content/patents.ts`.
 - Title screen (continue, new game, load a save) and a Save dialog: export as a `DRK1:` text code (copy or download) and import from text or a file.
 - PL / EN, sound (WebAudio), offline progress up to 8 h.

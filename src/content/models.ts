@@ -66,6 +66,30 @@ export const MODELS: PrintModel[] = [
     desc: ['Godzina pracy farmy na sztukę. Mało klientów, ale płacą najwięcej.', 'An hour of farm time per piece. Few buyers, but they pay the most.'],
     shape: [92, 98, 102, 104, 104, 102, 98, 92, 84, 74, 60, 42, 24],
   },
+  {
+    id: 'cableComb', seconds: 2, value: 1.1, market: 0.85, material: 0.68, design: 340000, unlockAt: 240000,
+    name: ['Grzebień do kabli', 'Cable comb'],
+    desc: ['Praktyczny organizer do kabli. Niskie zużycie filamentu sprzyja dużym seriom.', 'A practical cable organizer. Low filament use suits large batches.'],
+    shape: [96, 96, 92, 80, 80, 76],
+  },
+  {
+    id: 'planter', seconds: 12, value: 1.3, market: 0.14, material: 0.92, design: 420000, unlockAt: 320000,
+    name: ['Żebrowana doniczka', 'Ribbed planter'],
+    desc: ['Lekka osłonka na biurko. Drukuje się dłużej, ale zużywa mniej filamentu niż figurka na sekundę pracy.', 'A lightweight desk planter. It takes longer to print but uses less filament per second than a figurine.'],
+    shape: [52, 58, 58, 64, 64, 70, 70, 76, 76, 82, 82, 80],
+  },
+  {
+    id: 'lunarBase', seconds: 40, value: 1.5, market: 0.055, material: 1.18, design: 540000, unlockAt: 450000,
+    name: ['Makieta bazy księżycowej', 'Moon base model'],
+    desc: ['Kopuły i lądowisko w miniaturze. Cierpliwi kolekcjonerzy dobrze płacą.', 'Miniature domes and a landing pad. Patient collectors pay well.'],
+    shape: [132, 132, 124, 112, 94, 86, 78, 62, 50, 36, 22, 16],
+  },
+  {
+    id: 'mechanicalOrrery', seconds: 90, value: 1.7, market: 0.023, material: 1.55, design: 720000, unlockAt: 650000,
+    name: ['Mechaniczny układ planet', 'Mechanical orrery'],
+    desc: ['Ruchome planety na wspólnej podstawie. Długi druk i wysoka cena dla nielicznych kupujących.', 'Moving planets on a shared base. A long print with a high price for a small market.'],
+    shape: [108, 108, 88, 68, 54, 120, 124, 84, 58, 90, 54, 34, 42, 32],
+  },
 ];
 
 export const MODEL: Record<string, PrintModel> = Object.fromEntries(MODELS.map(m => [m.id, m]));

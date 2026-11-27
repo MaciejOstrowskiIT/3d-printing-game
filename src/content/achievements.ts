@@ -45,6 +45,16 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'qspent', n: ['Kwantowy inwestor', 'Quantum investor'], d: ['Wydaj punkty kwantowe na pierwszy węzeł badań.', 'Spend quantum points on your first research node.'], check: s => s.done.some(id => !!NODE[id]?.qp) },
   { id: 'skywalker', n: ['SkyWalker', 'SkyWalker'], d: ['Ukończ grę w mniej niż 30 minut aktywnej gry.', 'Finish the game in under 30 minutes of active play.'], check: s => s.end && s.play > 0 && s.play < 30 * 60 },
   { id: 'end', n: ['Wszystko jest figurką', 'Everything is a figurine'], d: ['Ukończ grę.', 'Finish the game.'], hidden: true, check: s => s.end },
+  { id: 'firstDesign', n: ['Nowy wzór', 'New design'], d: ['Kup pierwszy projekt modelu.', 'Buy your first model design.'], check: s => MODELS.some(model => model.design > 0 && s.mdls.includes(model.id)) },
+  { id: 'toolbox', n: ['Wyposażony warsztat', 'Fully stocked toolbox'], d: ['Ulepsz narzędzia warsztatowe do poziomu 5.', 'Upgrade workshop tools to level 5.'], check: s => s.clk >= 5 },
+  { id: 'sales1000', n: ['Towar schodzi', 'Flying off the shelves'], d: ['Sprzedaj 1000 sztuk w sprzedaży detalicznej.', 'Sell 1,000 pieces through retail.'], check: s => s.sold >= 1000 },
+  { id: 'splitFleet', n: ['Druga kolejka druku', 'Second print queue'], d: ['Przydziel drukarkę automatyczną do dodatkowego modelu.', 'Assign an auto printer to a secondary model.'], check: s => Object.values(s.fleet).some(count => count > 0) },
+  { id: 'solar5', n: ['Słoneczny dach', 'Solar rooftop'], d: ['Zbuduj 5 paneli słonecznych.', 'Build 5 solar panels.'], check: s => s.panels >= 5 },
+  { id: 'research10', n: ['Dział rozwoju', 'Research department'], d: ['Odblokuj 10 projektów badawczych.', 'Unlock 10 research projects.'], check: s => s.done.length >= 10 },
+  { id: 'quantumBoot', n: ['Pierwszy kubit', 'First qubit'], d: ['Włącz komputer kwantowy.', 'Switch on the quantum computer.'], check: s => s.qOn },
+  { id: 'miningFleet', n: ['Flotylla wydobywcza', 'Mining flotilla'], d: ['Zgromadź 25 dronów wydobywczych.', 'Assemble 25 mining drones.'], check: s => s.drones >= 25 },
+  { id: 'orbital10', n: ['Przemysł na orbicie', 'Orbital industry'], d: ['Zbuduj 10 fabryk orbitalnych.', 'Build 10 orbital factories.'], check: s => s.fabs >= 10 },
+  { id: 'beltPercent', n: ['Pierwsza setna pasa', 'One percent of the belt'], d: ['Wydobądź 1% materii pasa asteroid.', 'Mine 1% of the asteroid belt’s matter.'], check: s => s.ph === 2 && s.mat <= s.mat0 * 0.99 },
 ];
 
 export const ACH: Record<string, Achievement> = Object.fromEntries(ACHIEVEMENTS.map(a => [a.id, a]));

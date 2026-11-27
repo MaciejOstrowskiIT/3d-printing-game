@@ -68,6 +68,21 @@ export const CALENDAR: CalendarEvent[] = [
     name: ['Halloween', 'Halloween'],
     desc: ['Hełmy i maski ×2, popiersia ×1,4, czarne wydruki ×1,3.', 'Helmets and masks ×2, busts ×1.4, black prints ×1.3.'],
   },
+  {
+    id: 'springGardening', active: range(3, 18, 3, 31), models: { planter: 1.6 }, colors: [4], colorMul: 1.2,
+    name: ['Wiosenne sadzenie', 'Spring planting'],
+    desc: ['Doniczki ×1,6, zielone wydruki ×1,2.', 'Planters ×1.6, green prints ×1.2.'],
+  },
+  {
+    id: 'moonLanding', active: range(7, 16, 7, 24), models: { lunarBase: 1.6, mechanicalOrrery: 1.4 },
+    name: ['Rocznica lądowania na Księżycu', 'Moon landing anniversary'],
+    desc: ['Bazy księżycowe ×1,6, mechaniczne układy planet ×1,4.', 'Moon bases ×1.6, mechanical orreries ×1.4.'],
+  },
+  {
+    id: 'deskReset', active: range(1, 2, 1, 12), models: { cableComb: 1.5 },
+    name: ['Noworoczne porządki', 'New Year desk reset'],
+    desc: ['Czas uporządkować biurko. Popyt na grzebienie do kabli ×1,5.', 'Time to tidy the desk. Demand for cable combs ×1.5.'],
+  },
 ];
 
 export const CALENDAR_EVENT: Record<string, CalendarEvent> = Object.fromEntries(CALENDAR.map(e => [e.id, e]));
