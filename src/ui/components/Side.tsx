@@ -4,12 +4,12 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { GOALS } from '../../content/goals';
 import { DEFAULT_MODEL, MODEL } from '../../content/models';
 import { gpu, model, rate1, spaceRate } from '../../core/formulas';
-import { rateOn } from '../../systems/fleet';
+import { printProgress, rateOn } from '../../systems/fleet';
 import { fmt, li, logText, prefs, setPrefs, t } from '../i18n';
 import { buildRoom, roomSignature, type Stage } from '../scene/room';
 import { mountPrinter } from '../scene/printer';
 import { dialog, game, printedListeners, resetGame, useS } from '../store';
-import { useHold } from './common';
+import { Meter, useHold } from './common';
 
 const STAGE_KEY = { garage: 'stGarage', shop: 'stShop', hall: 'stHall', space: 'stSpace' } as const;
 
@@ -66,6 +66,19 @@ function PrintButton({ short }: { short?: boolean }) {
     <button class="pbtn" disabled={disabled} {...hold}>
       {short ? t('printBtnS') : <><span>{label}</span><kbd>{t('kbd')}</kbd></>}
     </button>
+  );
+}
+
+/** Progress of the piece being printed. Only early on, while a piece takes a few seconds: once printing is fast
+ *  the bar would just flicker, so it hides (BAL.printProgressMinSeconds). */
+function PrintProgress() {
+  const v = useS(printProgress);
+  if (v === null) return null;
+  return (
+    <div class="print-progress" role="meter" aria-label={t('printProgress')} aria-valuenow={v} aria-valuemin={0} aria-valuemax={100}>
+      <span>{t('printProgress')}</span><b>{v}%</b>
+      <Meter pct={v} tone="or" />
+    </div>
   );
 }
 
@@ -153,6 +166,7 @@ export function Side() {
         <Picture onToggleExpand={() => setExpand(!expand)} />
         <h1>{t('title')}</h1>
         <div class="count"><span class="num">{total}</span><small>{t('printed')}</small></div>
+        <PrintProgress />
         <StationReadout />
       </div>
       <PrintButton />
