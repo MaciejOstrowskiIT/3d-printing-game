@@ -20,7 +20,7 @@ Planned work and its order: `ROADMAP.md` (task board). Pick cards from "Next up"
 ## In flight
 | PR / branch | Agent | Touches |
 |---|---|---|
-| `test/qa2-debug-hook` | Codex | `window.__drk` debug hook, `e2e/` fixtures |
+| #43 / `test/qa2-debug-hook` | Codex | Debug hook and store, Playwright QA projects and fixtures, workshop promo save, README |
 
 Merged: #8–#41 (see `ROADMAP.md` → Done).
 
