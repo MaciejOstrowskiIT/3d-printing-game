@@ -58,7 +58,9 @@ export const droneCost = (s: GameState) => BAL.droneCost * BAL.droneCostGrowth *
 export const fabCost = (s: GameState) => BAL.fabCost * BAL.fabCostGrowth ** s.fabs;
 
 export const supply = (s: GameState) => (BAL.garagePower + s.panels * BAL.panelPower) * mod(s, 'power');
-export const drawP = (s: GameState) => s.farm * BAL.farmDraw;
+/** Power the quantum computer draws while owned (shares the supply with the farms). */
+export const quantumDraw = (s: GameState) => (s.qOn ? s.qLvl * BAL.quantumDraw : 0);
+export const drawP = (s: GameState) => s.farm * BAL.farmDraw + quantumDraw(s);
 export const eff = (s: GameState) => (drawP(s) ? Math.min(1, supply(s) / drawP(s)) : 1);
 
 export const trendOn = (s: GameState) => s.goal >= 2;

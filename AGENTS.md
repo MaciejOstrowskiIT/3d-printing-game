@@ -24,6 +24,7 @@ Planned work and its order: `ROADMAP.md` (task board). Pick cards from "Next up"
 | #62 / `fix/daily-order-streak` | Codex | Daily order copy in PL/EN and Playwright coverage |
 | #51 / `fix/continuous-finance-line` | Codex | Live finance chart data, PL/EN tooltip, Playwright rollover coverage |
 | #56 / `test/qa4-layout-stability` | Codex | Playwright layout tests and config, workshop and research UI stability, PL/EN maintenance text, README |
+| #61 / `feat/quantum-computer` | Claude | `systems/quantum.ts`, `core/state.ts`, `core/formulas.ts` (drawP), `core/saveValidation.ts`, `Quantum.tsx`, balance, i18n, tests (R5) |
 | #54 / `feat/tree-audit` | Claude | `tests/treeAudit.ts`, `scripts/treeaudit.ts`, `docs/tree-audit.md`, README |
 | #55 / `feat/tree-progression` | Claude | `content/tree.ts`, `tests/tree.test.ts`, `docs/tree-audit.md` (R2) |
 | #57 / `feat/tree-joins` | Claude | `content/tree.ts`, `systems/research.ts`, `core/saveValidation.ts`, `Research.tsx` lines, tests (R3) |

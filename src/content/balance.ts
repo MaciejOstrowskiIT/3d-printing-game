@@ -126,4 +126,12 @@ export const BAL = {
   filamentWarnSeconds: 30,         // warn when the active spool lasts less than this
   filamentSwitchMinFigurines: 10,  // another material counts as "in stock" from this many figurines' worth
   offlineIdleNoteSeconds: 60,      // the away report mentions idle printers from this long
+
+  // quantum computer (systems/quantum.ts): bought with compute, makes quantum points (QP)
+  quantumCost: 60000,              // compute; above the 40,000 liftoff node, so it needs memory beyond the early game
+  quantumMaxLevel: 5,              // qubit levels
+  quantumUpgradeBase: 25000,       // compute for level 1 -> 2, then x quantumUpgradeGrowth per level
+  quantumUpgradeGrowth: 1.7,
+  quantumQpPerSecond: 0.02,        // per level, at full power (level 5 = 0.1/s = 360 QP per hour)
+  quantumDraw: 10,                 // power per level, shared with the farms (garage 40, panel 25)
 } as const;

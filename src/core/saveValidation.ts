@@ -31,12 +31,18 @@ function validPatents(meta: GameState['meta']) {
   return meta.patents + spent === meta.earned;
 }
 
-/** Check persisted data before any simulation, achievement lookup or offline reward. */
 /** A bought node must have its prerequisites. Joins added after a save was made (`reqNew`) are not required of old saves. */
 function savedPrereqMissing(done: string[], n: TreeNode) {
   return (n.req ?? []).some(r => !n.reqNew?.includes(r) && !done.includes(r)) || !!(n.reqAny?.length && !n.reqAny.some(r => done.includes(r)));
 }
 
+/** Quantum computer: bought flag and level agree, level within range, points finite. */
+function validQuantum(s: GameState) {
+  return typeof s.qOn === 'boolean' && integer(s.qLvl, 0, BAL.quantumMaxLevel) && (s.qOn ? s.qLvl >= 1 : s.qLvl === 0) &&
+    Number.isFinite(s.qp) && s.qp >= 0 && (s.qOn || s.qp === 0);
+}
+
+/** Check persisted data before any simulation, achievement lookup or offline reward. */
 export function validSave(s: GameState, defaults: GameState) {
   for (const key of Object.keys(defaults) as (keyof GameState)[]) {
     const value = s[key];
@@ -61,7 +67,7 @@ export function validSave(s: GameState, defaults: GameState) {
   const kept = KEPT_AUTOMATION[s.meta.pat.keep ?? 0];
   if (s.done.some(id => !kept.includes(id) && savedPrereqMissing(s.done, NODE[id]))) return false;
   if (!validMarketState(s) || !validModelState(s) || !validInventory(s) || !validFleet(s) || !validMaterialState(s) || !validOfflineBonus(s) || ![1, BAL.realisticSlow].includes(s.slow) || !validDailyState(s) || !validStoryState(s) || s.play < 0) return false;
-  if (!validWorkshopStats(s)) return false;
+  if (!validWorkshopStats(s) || !validQuantum(s)) return false;
   if (s.stockPremium < 0 || s.stockPremium > BAL.precisionPremium + 1e-9) return false;
   return s.boostT >= 0 && s.boostT <= BAL.boostSeconds &&
     s.boostCd >= s.boostT && s.boostCd <= BAL.boostCooldown;

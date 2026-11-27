@@ -15,6 +15,7 @@ import { buySpool, productionSystem } from '../systems/production';
 import { deliverDaily, newDay } from '../systems/dailyOrder';
 import { dismissMessage, storySystem } from '../systems/story';
 import { filamentSystem, idleForFilament, toggleAutoMaterial } from '../systems/filament';
+import { buyQuantum, quantumSystem, upgradeQuantum } from '../systems/quantum';
 import { claimOfflineBonus, grantOfflineBonus, offlineBonusSystem } from '../systems/offlineBonus';
 import { buyClickTool, buyDesign, printManual, selectModel } from '../systems/models';
 import { assignPoint, buyNode, computeSystem, goalsSystem, reputationSystem } from '../systems/research';
@@ -47,6 +48,7 @@ export const SYSTEMS: System[] = [
   offlineBonusSystem,
   storySystem,
   filamentSystem,
+  quantumSystem,
 ];
 
 /** Player actions. The UI only sends these strings and never mutates game state itself. */
@@ -54,7 +56,7 @@ export type Action =
   | 'calibrate' | 'dryer' | 'precision' | 'automat'
   | 'print' | 'spool' | 'auto' | 'farm' | 'panel' | 'mkt' | 'drone' | 'fab'
   | 'pminus' | 'pplus' | 'oacc' | 'odec' | 'fix' | 'mevyes' | 'mevno' | 'tool'
-  | 'proc1' | 'procmax' | 'mem1' | 'memmax' | 'boost' | 'adfail' | 'prestige' | 'prestigeR' | 'offx2' | 'daily' | 'msgok'
+  | 'proc1' | 'procmax' | 'mem1' | 'memmax' | 'boost' | 'adfail' | 'prestige' | 'prestigeR' | 'offx2' | 'daily' | 'msgok' | 'qbuy' | 'qup'
   | `t:${string}` | `col:${number}` | `material:${string}` | `price-up:${string}` | `price-down:${string}` | `fleet:${string}:${number}` | `mdl:${string}` | `stl:${string}` | `day:${number}` | `am:${string}:${0 | 1}` | `pat:${string}`;
 
 export interface Game {
@@ -121,6 +123,7 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
       if (a === 'adfail') { log(s, ctx, 'boostFail'); return true; }
       if (a === 'daily') return deliverDaily(s, ctx);
       if (a === 'msgok') return dismissMessage(s);
+      if (a === 'qbuy' || a === 'qup') { const ok = a === 'qbuy' ? buyQuantum(s, ctx) : upgradeQuantum(s, ctx); if (ok) sfx(ctx, 'buy'); return ok; }
       if (a === 'automat') return toggleAutoMaterial(s);
       if (a.startsWith('day:')) return newDay(s, ctx, Number(a.slice(4)));
       if (a === 'offx2') { const ok = claimOfflineBonus(s, ctx); if (ok) sfx(ctx, 'buy'); return ok; }
