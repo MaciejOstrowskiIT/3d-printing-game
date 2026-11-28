@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test';
+import { BAL } from '../src/content/balance';
 import { GOALS } from '../src/content/goals';
 import { en } from '../src/content/i18n/en';
 import { pl } from '../src/content/i18n/pl';
@@ -6,7 +7,9 @@ import { seededRng } from '../src/core/ctx';
 import { expectHealthy, test } from './helpers';
 
 const MAX_BATCH_SECONDS = 60;
-const MAX_GAME_TICKS = 6 * 60 * 60 * 4;
+// Six hours at pace 1, like the balance sim: BAL.pace stretches every flow rate, so the budget scales with it.
+const MAX_GAME_HOURS = 6 * BAL.pace;
+const MAX_GAME_TICKS = MAX_GAME_HOURS * 60 * 60 * 4;
 const languages = [
   { lang: 'pl', locale: 'pl-PL', dict: pl, textIndex: 0 },
   { lang: 'en', locale: 'en-US', dict: en, textIndex: 1 },
@@ -69,7 +72,7 @@ for (const { lang, locale, dict, textIndex } of languages) {
         if (milestone.length) await capture(milestone.join('-'));
       }
 
-      expect(checkpoint.end, `Expected an ending within six hours, reached goal ${checkpoint.goal}`).toBe(true);
+      expect(checkpoint.end, `Expected an ending within ${MAX_GAME_HOURS} hours, reached goal ${checkpoint.goal}`).toBe(true);
       expect(checkpoint.goal).toBe(GOALS.length);
       expect(liftedOff).toBe(true);
 

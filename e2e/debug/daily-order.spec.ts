@@ -9,18 +9,20 @@ const languages = [
     ship: /^Wyślij \(/,
     streak: 'dzień serii:',
     limit: 'To jedyne zamówienie na dziś.',
-    next: 'Kolejne zamówienie będzie dostępne jutro.',
+    log: 'Dziennik warsztatu',
+    shipped: /Zamówienie dnia wysłane: .+\. Dzień serii: 1\./,
   },
   {
     locale: 'en-US',
     ship: /^Ship \(/,
     streak: 'streak day',
     limit: 'This is today’s only order.',
-    next: 'The next order is available tomorrow.',
+    log: 'Workshop log',
+    shipped: /Order of the day shipped: .+\. Streak day 1\./,
   },
 ];
 
-for (const { locale, ship, streak, limit, next } of languages) {
+for (const { locale, ship, streak, limit, log, shipped } of languages) {
   test.describe(locale, () => {
     test.use({ locale });
 
@@ -42,8 +44,9 @@ for (const { locale, ship, streak, limit, next } of languages) {
       await expect(page.getByText(limit, { exact: false })).toBeVisible();
       await expect(page.getByText(`${streak} 1`, { exact: true })).toBeVisible();
       await shipButton.click();
-      await expect(page.getByText(next, { exact: false })).toBeVisible();
-      await expect(page.getByText(`${streak} 1`, { exact: true })).toBeVisible();
+      // A shipped order is no longer an open notification: its card leaves the panel and the log confirms the streak.
+      await expect(shipButton).toHaveCount(0);
+      await expect(page.getByRole('region', { name: log, exact: true })).toContainText(shipped);
 
       expect(await page.evaluate(today => window.__drk!.act(`day:${today}`), day)).toBe(false);
       await expect(shipButton).toHaveCount(0);
