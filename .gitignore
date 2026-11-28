@@ -7,5 +7,8 @@ dist-poki
 dist-qa
 promo/out
 e2e/out/
+# Visual baselines: only the Docker/CI ones (linux/) are committed.
+e2e/__screenshots__/*
+!e2e/__screenshots__/linux/
 playwright-report/
 __pycache__

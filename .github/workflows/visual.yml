@@ -1,0 +1,49 @@
+name: Visual regression
+
+# Opt-in screenshot comparison (e2e/visual, baselines in e2e/__screenshots__/linux). It runs in the Playwright Docker
+# image through scripts/visual-docker.mjs, the same command used locally, so the baselines match pixel for pixel.
+# - On a pull request: add the `visual` label (runs again on every push while the label is on).
+# - By hand: Actions -> Visual regression -> Run workflow; tick "update" to render new baselines and download them
+#   from the `visual-baselines` artifact.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+  workflow_dispatch:
+    inputs:
+      update:
+        description: Render new baselines (download them from the visual-baselines artifact)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: visual-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  visual:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'visual')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: node scripts/visual-docker.mjs ${{ inputs.update && '--update-snapshots' || '' }}
+      - name: Upload the new baselines
+        if: inputs.update
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-baselines
+          path: e2e/__screenshots__/linux/
+          retention-days: 7
+      - name: Upload the report with the screenshot diffs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-report
+          path: |
+            playwright-report/
+            e2e/out/visual/
+          retention-days: 7

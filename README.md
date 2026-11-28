@@ -50,6 +50,31 @@ The vertical position baseline resets only at goal or phase changes, research un
 or purchases of models, printers, farms, panels, drones and factories. Every reset
 is listed in the measurements. CLS and horizontal overflow cover the entire window.
 
+### Visual regression (opt-in)
+
+`e2e/visual/` screenshots each of the five promo saves on desktop (1280×800) and phone (390×844) and compares
+them with `toHaveScreenshot` against the baselines in `e2e/__screenshots__/linux/`. The game is frozen before the
+screenshot: the real-time loop is stopped before the save loads, `Math.random` is seeded, the date is fixed,
+`prefers-reduced-motion` is on (the printer is parked, counters do not roll), CSS animations are disabled and the
+fonts are the bundled ones. It is not part of `npm test`, `npm run e2e` or the CI `e2e` job.
+
+Text rendering differs between operating systems, so the committed baselines come only from the official
+Playwright Docker image (Linux, same version as `@playwright/test`). With Docker running:
+
+```bash
+npm run e2e:visual:docker                          # compare with the committed baselines
+npm run e2e:visual:docker -- --update-snapshots    # after an intended UI change: re-render them, then commit
+npm run e2e:visual:docker -- -g factory --project=mobile
+```
+
+Without Docker, use the **Visual regression** workflow: add the `visual` label to a pull request to run the check
+on every push, or start the workflow by hand with **update** ticked and commit the files from its
+`visual-baselines` artifact into `e2e/__screenshots__/linux/`. Failed runs upload the diffs as `visual-report`.
+
+`npm run e2e:visual` runs the same suite on your own machine against git-ignored baselines in
+`e2e/__screenshots__/local-<platform>/`. The first run writes them (and fails); later runs compare against them,
+which is handy for a before/after check of a change.
+
 ### Debugging game stages
 
 `npm run dev` exposes `window.__drk` after the game boots. To test a built version,
