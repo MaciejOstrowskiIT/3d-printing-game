@@ -13,6 +13,7 @@ npm install
 npm run dev        # dev server with hot reload
 npm test           # unit tests + a bot that plays the whole game
 npm run treeaudit  # research tree audit -> docs/tree-audit.md (about a minute, plays the bot)
+npm run pacing     # pacing report -> docs/pacing.md: time per goal, purchase gaps, dead zones, money/s (plays the bot)
 npm run build      # dist/index.html: one self-contained file (GitHub Pages)
 npm run build:crazygames   # dist-crazygames/index.html with the CrazyGames SDK
 npm run build:poki         # dist-poki/index.html with the Poki SDK
