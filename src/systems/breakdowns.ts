@@ -8,10 +8,17 @@ const SPAGHETTI = 5;
 const WET_FILAMENT = 6;
 const BASE_CAUSES = 5;
 
+/** Seconds until the next breakdown: research, a realistic line and hired technicians change how often they come. */
+const nextBreakdown = (s: GameState, ctx: Ctx) =>
+  pick(ctx, BAL.breakdownEvery) / (mod(s, 'breakdown') * ((s.slow || 1) > 1 ? BAL.realisticBreakdownMul : 1) * technicianMul(s));
+
+/** Breakdown frequency multiplier of the hired technicians (industrial printers, systems/printerTypes.ts). */
+export const technicianMul = (s: GameState) => BAL.technicianBreakdown ** (s.techs?.length ?? 0);
+
 export function repair(s: GameState, ctx: Ctx) {
   if (s.brk <= 0) return;
   s.brk = 0;
-  s.brkT = pick(ctx, BAL.breakdownEvery) / (mod(s, 'breakdown') * ((s.slow || 1) > 1 ? BAL.realisticBreakdownMul : 1));
+  s.brkT = nextBreakdown(s, ctx);
   log(s, ctx, 'fix');
 }
 
@@ -25,7 +32,7 @@ export function breakdownsSystem(s: GameState, dt: number, ctx: Ctx) {
       const cause = Math.floor(ctx.rng() * causeCount);
       if ((s.bedCalibrated && (cause === BED_ADHESION || cause === SPAGHETTI)) ||
           (s.dryerInstalled && cause === WET_FILAMENT)) {
-        s.brkT = pick(ctx, BAL.breakdownEvery) / (mod(s, 'breakdown') * ((s.slow || 1) > 1 ? BAL.realisticBreakdownMul : 1));
+        s.brkT = nextBreakdown(s, ctx);
         return;
       }
       s.brk = share;

@@ -23,6 +23,7 @@ export const logTexts = {
   mkt: 'Campaign launched. Marketing level {0}.',
   firstPr: 'Your first extra printer joined the garage.',
   ptFirst: 'A new kind of printer joined the line. It prints: {0}.',
+  ptTech: 'Technician hired. Breakdowns come {0}% less often.',
   farm: 'Farm #{0} online.',
   node: 'Unlocked: {0}.',
   board: 'The board bought: {0}.',

@@ -61,6 +61,7 @@ export const BAL = {
   breakdownEvery: [90, 170],
   breakdownShare: [0.2, 0.35],
   cameraFix: 5,
+  technicianBreakdown: 0.7,  // a hired technician (industrial printers): breakdowns come this much as often
 
   // print quality
   qualityUnlockGoal: 5,

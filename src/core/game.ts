@@ -21,7 +21,7 @@ import { buyQuantum, quantumSystem, upgradeQuantum } from '../systems/quantum';
 import { claimOfflineBonus, grantOfflineBonus, offlineBonusSystem } from '../systems/offlineBonus';
 import { buildAwaySummary, type AwaySummary } from '../systems/awaySummary';
 import { buyClickTool, buyDesign, printManual, selectModel } from '../systems/models';
-import { buyPrinter, printerTypesSystem } from '../systems/printerTypes';
+import { buyPrinter, hireTechnician, printerTypesSystem } from '../systems/printerTypes';
 import { assignPoint, buyNode, computeSystem, goalsSystem, reputationSystem } from '../systems/research';
 import { changePrice, editPiecePrice, salesSystem, type PriceEdit } from '../systems/sales';
 import { buyDrone, buyFab, spaceSystem } from '../systems/space';
@@ -65,7 +65,7 @@ export type Action =
   | `spool:${string}`
   | 'pminus' | 'pplus' | `price:${string}:${PriceEdit}:${number}` | 'oacc' | 'odec' | 'fix' | 'mevyes' | 'mevno' | 'tool'
   | 'proc1' | 'procmax' | 'mem1' | 'memmax' | 'boost' | 'adorder' | 'adrepair' | 'adfail' | 'prestige' | 'prestigeR' | 'offx2' | 'daily' | 'msgok' | 'qbuy' | 'qup'
-  | `t:${string}` | `col:${number}` | `material:${string}` | `price-up:${string}` | `price-down:${string}` | `fleet:${string}:${number}` | `printer:${string}` | `mdl:${string}` | `stl:${string}` | `day:${number}` | `am:${string}:${0 | 1}` | `pat:${string}`;
+  | `t:${string}` | `col:${number}` | `material:${string}` | `price-up:${string}` | `price-down:${string}` | `fleet:${string}:${number}` | `printer:${string}` | `tech:${string}` | `mdl:${string}` | `stl:${string}` | `day:${number}` | `am:${string}:${0 | 1}` | `pat:${string}`;
 
 export interface Game {
   readonly s: GameState;
@@ -130,6 +130,7 @@ export function createGame(opts: { state?: GameState; rng?: () => number } = {})
       if (a.startsWith('material:')) return selectMaterial(s, a.slice('material:'.length));
       if (a.startsWith('stl:')) { const ok = buyDesign(s, ctx, a.slice(4)); if (ok) sfx(ctx, 'buy'); return ok; }
       if (a.startsWith('printer:')) { const ok = buyPrinter(s, ctx, a.slice('printer:'.length)); if (ok) sfx(ctx, 'buy'); return ok; }
+      if (a.startsWith('tech:')) { const ok = hireTechnician(s, ctx, a.slice('tech:'.length)); if (ok) sfx(ctx, 'buy'); return ok; }
       if (a.startsWith('fleet:')) { const [, id, n] = a.split(':'); return setFleet(s, id, Number(n)); }
       if (a.startsWith('mdl:')) { const ok = selectModel(s, ctx, a.slice(4)); if (ok) sfx(ctx, 'buy'); return ok; }
       if (a === 'mevyes') { const ok = acceptMarketEvent(s, ctx); if (ok) sfx(ctx, 'buy'); return ok; }

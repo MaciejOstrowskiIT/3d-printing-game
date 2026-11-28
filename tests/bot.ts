@@ -8,15 +8,16 @@ import { has } from '../src/core/state';
 import { BAL } from '../src/content/balance';
 import { quantumUpgradeCost } from '../src/systems/quantum';
 import { nodeStatus, reserveWyd } from '../src/systems/research';
-import { MODELS } from '../src/content/models';
+import { MODEL, MODELS, type PrintModel } from '../src/content/models';
 import { MATERIAL } from '../src/content/materials';
-import { EXTRA_PRINTER_TYPES } from '../src/content/printerTypes';
-import { typeCost } from '../src/core/formulas';
-import { fleetFilamentPerSecond } from '../src/systems/fleet';
+import { EXTRA_PRINTER_TYPES, FDM, type PrinterType } from '../src/content/printerTypes';
+import { eff, typeCost, typeSpeed, unitCost } from '../src/core/formulas';
+import { fleetFilamentPerSecond, poolSize, printing } from '../src/systems/fleet';
 import { materialStock } from '../src/systems/materials';
-import { typeModels, typeVisible } from '../src/systems/printerTypes';
+import { typeMissing, typeModels, typeVisible } from '../src/systems/printerTypes';
 import { bestModel, designCost, designVisible } from '../src/systems/models';
 import { autoPrice, savingForLiftoff } from '../src/systems/automation';
+import { stockPrice } from '../src/systems/inventory';
 
 export { bestModel } from '../src/systems/models';
 
@@ -41,7 +42,8 @@ export function botDecision(game: Pick<Game, 's' | 'act'>, t: number, opts: BotO
     const reserve = spoolPrice(s) * 2;
     if (s.farmOn && supply(s) < drawP(s) + 20 && panelCost(s) < s.zl - reserve) game.act('panel');
     else if (!(has(s, 'slicer') && s.farm >= 5) && s.farmOn && farmCost(s) < (s.zl - reserve) * 0.7 && supply(s) >= drawP(s) + 20) game.act('farm');
-    else if (autoCost(s) < (s.zl - reserve) * 0.5) game.act('auto');
+    // A single FDM printer waits while another printer type returns more for the money.
+    else if (autoCost(s) < (s.zl - reserve) * 0.5 && !betterType(s)) game.act('auto');
     if (!(has(s, 'slicer') && s.farm >= 5) && mktCost(s) < (s.zl - reserve) * 0.3) game.act('mkt');
     if (s.ord && !s.ord.acc) game.act('oacc');
     // Market offers: take them when they cost under a third of what the bot has.
@@ -70,13 +72,37 @@ export function botDecision(game: Pick<Game, 's' | 'act'>, t: number, opts: BotO
   if (r) game.act(`t:${r.id}`);
 }
 
-/** Other printer types (resin): buy printers when cheap, keep their feedstock stocked, split them evenly between their models. */
+/** Profit per second of one printer of a type at today's prices and allocation (FDM counts farm printers too).
+ *  A type with no printers yet is valued as one printer on its first design. */
+export function profitPerPrinter(s: GameState, type: PrinterType) {
+  const fdm = type === FDM;
+  const n = fdm ? BAL.basePrinters + s.auto + s.farm * BAL.farmPrinters * eff(s) : poolSize(s, type);
+  const unit = (m: PrintModel) => stockPrice(s, m.id) / m.seconds - unitCost(s, m);
+  if (n <= 0) { const first = MODEL[typeModels(s, type)[0]]; return first ? typeSpeed(s, type) * unit(first) : 0; }
+  return printing(s, rate1(s), type).reduce((sum, { m, rate }) => sum + rate * unit(m), 0) / n;
+}
+
+/** Price of the next printer of a type; for FDM the cheaper of a single printer and a farm's share per printer. */
+export const printerPrice = (s: GameState, type: PrinterType) =>
+  type !== FDM ? typeCost(s, type) : Math.min(autoCost(s), s.farmOn ? farmCost(s) / BAL.farmPrinters : Infinity);
+
+/** Profit per second per unit of money for the next printer of a type: what the bot compares across types. */
+export const printerReturn = (s: GameState, type: PrinterType) => profitPerPrinter(s, type) / printerPrice(s, type);
+
+/** A printer type other than FDM that can be bought now and returns more per unit of money than the next FDM printer. */
+const betterType = (s: GameState) => EXTRA_PRINTER_TYPES.some(type =>
+  typeVisible(s, type) && !typeMissing(s, type) && printerReturn(s, type) > printerReturn(s, FDM));
+
+/** Other printer types (resin, industrial): hire the technician when cheap, buy a printer when it returns at least as
+ *  much per unit of money as the next FDM printer (panels follow the power draw above), keep their feedstock stocked,
+ *  split them evenly between their models. */
 function botPrinterTypes(game: Pick<Game, 's' | 'act'>, t: number, reserve: number) {
   const s = game.s;
   for (const type of EXTRA_PRINTER_TYPES) {
     const designs = typeModels(s, type);
     if (!designs.length || !typeVisible(s, type)) continue;
-    if (typeCost(s, type) < (s.zl - reserve) * 0.3) game.act(`printer:${type.id}`);
+    if (type.technician > 0 && !s.techs.includes(type.id) && type.technician < (s.zl - reserve) * 0.3) game.act(`tech:${type.id}`);
+    if (typeCost(s, type) < (s.zl - reserve) * 0.5 && printerReturn(s, type) >= printerReturn(s, FDM)) game.act(`printer:${type.id}`);
     const pool = s.printers[type.id] ?? 0;
     if (!pool) continue;
     const feed = MATERIAL[type.material];

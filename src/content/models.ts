@@ -69,6 +69,12 @@ export const MODELS: PrintModel[] = [
     shape: [40, 40, 24, 28, 34, 30, 22, 26, 30, 20, 14],
   },
   {
+    id: 'gardenStatue', seconds: 30, value: 1.5, market: 0.004, material: 1.3, design: 120000, unlockAt: 100000, printerType: 'industrial',
+    name: ['Rzeźba ogrodowa', 'Garden statue'],
+    desc: ['Posąg do ogrodu, wyższy niż krasnal. Mieści się tylko w drukarce przemysłowej.', 'A garden statue taller than any gnome. Only an industrial printer fits it.'],
+    shape: [150, 150, 136, 64, 58, 72, 82, 78, 70, 62, 68, 58, 42, 28],
+  },
+  {
     id: 'helmet', seconds: 60, value: 1.6, market: 0.04, material: 1.4, design: 300000, unlockAt: 200000,
     name: ['Hełm do cosplayu', 'Cosplay helmet'],
     desc: ['Godzina pracy farmy na sztukę. Mało klientów, ale płacą najwięcej.', 'An hour of farm time per piece. Few buyers, but they pay the most.'],
@@ -85,6 +91,12 @@ export const MODELS: PrintModel[] = [
     name: ['Wisior biżuteryjny', 'Jewellery pendant'],
     desc: ['Gładka żywica bez śladów warstw. Mały rynek, bardzo wysoka cena.', 'Smooth resin with no layer lines. A small market and a very high price.'],
     shape: [12, 22, 32, 40, 44, 44, 40, 32, 22, 14, 10],
+  },
+  {
+    id: 'giantDragon', seconds: 120, value: 1.8, market: 0.0016, material: 1.4, design: 450000, unlockAt: 300000, printerType: 'industrial',
+    name: ['Smok naturalnej wielkości', 'Life-size dragon'],
+    desc: ['Smok większy od klienta. Parki rozrywki i galerie płacą za każdą łuskę.', 'A dragon bigger than the buyer. Theme parks and malls pay for every scale.'],
+    shape: [176, 180, 172, 148, 118, 96, 110, 128, 140, 120, 90, 70, 52, 36],
   },
   {
     id: 'planter', seconds: 12, value: 1.3, market: 0.14, material: 0.92, design: 420000, unlockAt: 320000,

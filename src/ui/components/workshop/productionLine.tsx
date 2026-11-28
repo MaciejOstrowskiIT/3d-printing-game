@@ -14,9 +14,11 @@ import { salesPick } from './salesPick';
 /** Silhouette of a model, drawn from the same layer widths the printer animation uses. */
 function Shape({ m, size = 36 }: { m: PrintModel; size?: number }) {
   const h = m.shape.length * 8;
+  // Large models (industrial) widen the view so they are not clipped; the rest keep the 120 px view.
+  const vw = Math.max(120, Math.max(...m.shape) + 4);
   return (
-    <svg class="mshape" viewBox={`0 0 120 ${Math.max(h, 40)}`} width={size} height={size} aria-hidden="true">
-      {m.shape.map((w, i) => <rect key={i} x={60 - w / 2} y={Math.max(h, 40) - (i + 1) * 8} width={w} height={8.4} rx={2.5} />)}
+    <svg class="mshape" viewBox={`0 0 ${vw} ${Math.max(h, 40)}`} width={size} height={size} aria-hidden="true">
+      {m.shape.map((w, i) => <rect key={i} x={vw / 2 - w / 2} y={Math.max(h, 40) - (i + 1) * 8} width={w} height={8.4} rx={2.5} />)}
     </svg>
   );
 }

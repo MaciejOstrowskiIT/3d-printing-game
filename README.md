@@ -126,7 +126,7 @@ Content lives in `src/content/` as plain lists. Each list has one place that rea
 | Content | File | Checked by |
 |---|---|---|
 | Print models (figurine, bust, dragon…) | `content/models.ts` | `tests/models.test.ts` (numbers, shape fits the printer, PL/EN texts, unlock order) |
-| Printer types (FDM, resin…) | `content/printerTypes.ts` | `tests/printerTypes.test.ts` (numbers, feedstock, every model fits its type's build volume) |
+| Printer types (FDM, resin, industrial…) | `content/printerTypes.ts` | `tests/printerTypes.test.ts` (numbers, feedstock, every model fits its type's build volume); `tests/printerTradeoff.test.ts` (no type dominates another in the bot economy) |
 | Market events | `content/events.ts` | `tests/marketEvents.test.ts` |
 | Calendar events (real dates) | `content/calendar.ts` | `tests/calendar.test.ts` |
 | Story messages | `content/story.ts` | `tests/story.test.ts` (texts, and the bot sees every message in a full game) |
@@ -134,7 +134,7 @@ Content lives in `src/content/` as plain lists. Each list has one place that rea
 | Patents | `content/patents.ts` | `tests/prestige.test.ts` |
 | Research tree | `content/tree.ts` | `tests/systems.test.ts` |
 
-To add a print model, append an entry to `MODELS`: print time (`seconds`), `value` (pay per printer-second), `market` (how many buyers), `material` (filament per printer-second), `design` price, `unlockAt` and a `shape` (layer widths for the printer animation and the card silhouette). Ids go into saves, so never rename or remove one. Add `printerType: 'resin'` to make a model on resin printers instead of FDM (its shape must fit the type's `buildWidth`). The economy stays in figurines (one printer-second of work), so goals, stock and the space phase are unaffected by the selected model; see the comment at the top of `content/models.ts`.
+To add a print model, append an entry to `MODELS`: print time (`seconds`), `value` (pay per printer-second), `market` (how many buyers), `material` (filament per printer-second), `design` price, `unlockAt` and a `shape` (layer widths for the printer animation and the card silhouette). Ids go into saves, so never rename or remove one. Add `printerType: 'resin'` (or `'industrial'`) to make a model on that printer type instead of FDM (its widest layer must lie between the type's `minWidth` and `buildWidth`). The economy stays in figurines (one printer-second of work), so goals, stock and the space phase are unaffected by the selected model; see the comment at the top of `content/models.ts`.
 
 ### Rules
 
@@ -149,7 +149,7 @@ To add a print model, append an entry to `MODELS`: print time (`seconds`), `valu
 - Manual printing (click, hold or Space), sales with price and demand, filament price changing about every 10 s.
 - Filament colours and a trending colour (+30% customers).
 - Special orders, printer breakdowns, power for farms.
-- Printer types: next to the FDM line, resin printers print small, detailed models (miniature, pendant) from resin at half speed for double value; every piece waits for a wash and cure before it reaches stock.
+- Printer types: next to the FDM line, resin printers print small, detailed models (miniature, pendant) from resin at half speed for double value; every piece waits for a wash and cure before it reaches stock. Industrial printers (after the farm research brings power, and a hired technician who makes breakdowns rarer) print only large models (garden statue, life-size dragon) from PETG at triple speed; they draw power with the farms and cost the most.
 - Computer: reputation points, processors, memory, compute.
 - Research tree: Production, Sales, Automation, Space and more, plus an optional Quantum branch (10 nodes, paid only in quantum points from the quantum computer). Nothing in it is needed to finish the game; `balance.sim.test.ts` checks that a bot using it stays in the same pacing range.
 - 17 goals guiding the player through the whole game.

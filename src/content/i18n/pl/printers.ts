@@ -1,10 +1,18 @@
-/** UI texts: printer types (resin and later ones). One key per line, so parallel PRs rarely collide. */
+/** UI texts: printer types (resin, industrial and later ones). One key per line, so parallel PRs rarely collide. */
 export const printersTexts = {
   ptCount: 'drukarki: {0}',
-  ptStats: 'Detal ×{0} · prędkość ×{1} · mały stół roboczy',
+  ptStats: 'Detal ×{0} · prędkość ×{1} · {2}',
   ptBuy: 'Kolejna drukarka',
   ptOwned: 'posiadane: {0} · wolne: {1}',
   ptNeedDesign: 'Najpierw kup do niej projekt na linii produkcyjnej.',
+  ptNeedPower: 'Wymaga prądu: najpierw zbadaj {0}.',
+  ptNeedTech: 'Najpierw zatrudnij technika.',
+  ptPower: 'Prąd',
+  ptPowerSub: '{0} kW na drukarkę · teraz {1} kW',
+  ptPowerLow: 'praca na {0}%',
+  ptTech: 'Technik',
+  ptTechSub: 'Dogląda dużych maszyn. Awarie o {0}% rzadziej.',
+  ptHired: 'Zatrudniony',
   ptFeed: 'W magazynie {0} · starczy na {1}',
   ptFeedIdle: 'W magazynie {0}',
   ptCuring: 'Mycie i utwardzanie',

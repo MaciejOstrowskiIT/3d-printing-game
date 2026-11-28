@@ -53,6 +53,8 @@
 .mt-type{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:999px;font-size:11px;font-weight:600;line-height:1.4;font-style:normal;vertical-align:2px;color:var(--ink);background:color-mix(in srgb,var(--tone) 18%,transparent)}
 .mt-needs{margin:auto 0 0;font-size:12px;color:var(--mute);text-align:center}
 .printer-type .pt-stats{margin-top:-4px;font-weight:600}
+.printer-type .pt-hired{font-size:13px;font-weight:600;color:var(--acc);white-space:nowrap}
+.printer-type .pt-low .it small{color:var(--bad);font-weight:600}
 .mtile>button:not(.mt-head),.mtile .buy{width:100%;margin-top:auto}
 .mtile.next{border:1.5px dashed var(--line);background:transparent;justify-content:center;gap:6px;color:var(--mute);font-size:13px}
 .mtile.next b{color:var(--ink);font-size:15px}

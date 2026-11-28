@@ -18,6 +18,10 @@ export interface PrinterType {
   desc: Pair;
   /** Widest layer (px, see PrintModel.shape) the build volume takes. Models of this type must fit. */
   buildWidth: number;
+  /** Smallest widest layer a model of this type may have (large-format machines print large models only); 0 = any. */
+  minWidth: number;
+  /** Build volume line for the printer card. */
+  plate: Pair;
   /** Price multiplier buyers accept for the detail of this type (applied on top of the model's value). */
   detail: number;
   /** Work per printer-second relative to an FDM printer (research, boost and breakdowns apply on top). */
@@ -31,20 +35,34 @@ export interface PrinterType {
   costGrowth: number;
   /** Figurines printed (total) before the printer shows up in the shop. */
   unlockAt: number;
+  /** Power draw per printer (kW, shared with the farms). Above 0 the type needs power infrastructure (the farm
+   *  research, which brings panels) before its first printer, and prints slower when supply runs short. */
+  power: number;
+  /** Price of the technician the type needs before its first printer; 0 = none. A hired technician makes every
+   *  breakdown rarer (BAL.technicianBreakdown). */
+  technician: number;
 }
 
 export const PRINTER_TYPES: readonly PrinterType[] = [
   {
-    id: 'fdm', buildWidth: 188, detail: 1, speed: 1, material: '', cure: 0, cost: 0, costGrowth: 1, unlockAt: 0,
-    name: ['Drukarka FDM', 'FDM printer'], tag: ['FDM', 'FDM'],
+    id: 'fdm', buildWidth: 188, minWidth: 0, detail: 1, speed: 1, material: '', cure: 0, cost: 0, costGrowth: 1, unlockAt: 0, power: 0, technician: 0,
+    name: ['Drukarka FDM', 'FDM printer'], tag: ['FDM', 'FDM'], plate: ['średni stół roboczy', 'medium build plate'],
     desc: ['Topi filament warstwa po warstwie. Szybka i uniwersalna.', 'Melts filament layer by layer. Fast and versatile.'],
   },
   {
-    id: 'resin', buildWidth: 72, detail: 2, speed: 0.5, material: 'resin', cure: 45, cost: 4000, costGrowth: 1.3, unlockAt: 20000,
-    name: ['Drukarka żywiczna', 'Resin printer'], tag: ['Żywica', 'Resin'],
+    id: 'resin', buildWidth: 72, minWidth: 0, detail: 2, speed: 0.5, material: 'resin', cure: 45, cost: 4000, costGrowth: 1.3, unlockAt: 20000, power: 0, technician: 0,
+    name: ['Drukarka żywiczna', 'Resin printer'], tag: ['Żywica', 'Resin'], plate: ['mały stół roboczy', 'small build plate'],
     desc: [
       'Utwardza żywicę światłem. Mały stół i wolny druk, ale detal, za który kolekcjonerzy płacą podwójnie. Wydruk wymaga mycia i utwardzania.',
       'Cures resin with light. A small plate and slow prints, but detail collectors pay double for. Every print needs a wash and cure.',
+    ],
+  },
+  {
+    id: 'industrial', buildWidth: 188, minWidth: 120, detail: 1, speed: 3, material: 'petg', cure: 0, cost: 200000, costGrowth: 1.3, unlockAt: 100000, power: 5, technician: 100000,
+    name: ['Drukarka przemysłowa', 'Industrial printer'], tag: ['Przem.', 'Industrial'], plate: ['wielka komora, tylko duże modele', 'huge chamber, large models only'],
+    desc: [
+      'Wielkoformatowa maszyna na granulat PETG. Drukuje tylko duże modele, za to trzy razy szybciej niż drukarka FDM. Pobiera prąd i potrzebuje technika.',
+      'A large-format machine fed with PETG. It prints large models only, but three times faster than an FDM printer. It draws power and needs a technician.',
     ],
   },
 ];
