@@ -32,6 +32,10 @@ manual printing and navigation on desktop and at 390×844 with touch enabled. Ad
 `-- --headed` to watch the tests or `-- --project=chromium-mobile` to run only the phone
 scenario. Failure traces are written to `e2e/out/`.
 
+CI runs the whole suite (the `e2e` job in `.github/workflows/deploy.yml`) on every pull request and
+before each deploy. When it fails, the HTML report and the traces from `e2e/out/` are uploaded as the
+`playwright-report` artifact.
+
 ### Layout stability
 
 `npm run e2e:layout` checks all five promo saves in Chromium at 1280×800 and 390×844.

@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
 import { createState } from '../src/core/state';
 import { bookCash, PERIOD_SECONDS } from '../src/systems/workshopStats';
-import { expectHealthy, test } from './helpers';
+import { expectHealthy, openFundsPanel, test } from './helpers';
 
 test('selects chart points and filters the workshop results by period', async ({ page, isMobile }) => {
   const state = { ...createState(), total: 50, goal: 2 };
@@ -20,10 +20,8 @@ test('selects chart points and filters the workshop results by period', async ({
   await expect(save.getByRole('status')).toHaveText('Save loaded.');
   await save.getByRole('button', { name: 'Close', exact: true }).click();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  if (isMobile) {
-    await page.locator('.dock').getByRole('button', { name: 'Sales', exact: true }).tap();
-    await page.getByRole('button', { name: /^Workshop results/ }).tap();
-  }
+  // The results live in the pop-up of the HUD funds chip.
+  await openFundsPanel(page);
 
   const panel = page.getByRole('region', { name: /^Workshop results/ });
   const chart = panel.getByRole('group', { name: 'Income and spending in 30-second intervals' });
@@ -63,7 +61,16 @@ test('selects chart points and filters the workshop results by period', async ({
   await panel.getByRole('button', { name: 'Last 5 min', exact: true }).click();
   await expect(points).toHaveCount(4);
   await expect(modelSales).toContainText('4 pcs');
-  await page.getByRole('button', { name: 'Polski', exact: true }).click();
+  await expectHealthy(page);
+
+  // Close the pop-up, switch the language in Settings, then check the Polish labels.
+  await page.locator('.hud-pop').getByRole('button', { name: 'Close panel', exact: true }).click();
+  await expect(page.locator('.hud-pop')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  const settings = page.getByRole('dialog', { name: 'Settings' });
+  await settings.getByRole('button', { name: 'Polski', exact: true }).click();
+  await page.getByRole('dialog', { name: 'Ustawienia' }).getByRole('button', { name: 'Zamknij', exact: true }).click();
+  await openFundsPanel(page);
   const polishPanel = page.getByRole('region', { name: /^Wyniki warsztatu/ });
   await expect(polishPanel.getByRole('combobox', { name: 'Od', exact: true })).toBeVisible();
   await expect(polishPanel.getByRole('combobox', { name: 'Do', exact: true })).toBeVisible();
