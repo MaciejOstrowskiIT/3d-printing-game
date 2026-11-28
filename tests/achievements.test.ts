@@ -38,7 +38,7 @@ describe('achievement registry', () => {
     for (const id of Object.keys(manualAchievements)) expect(ids).toContain(id);
     const uncovered = ids.filter(id => !unlocked.has(id) && !Object.hasOwn(manualAchievements, id));
     expect(uncovered).toEqual([]);
-  });
+  }, 60_000); // several full bot games; the CI runner needs well over the 5 s default
 });
 
 describe('SkyWalker and play time', () => {
