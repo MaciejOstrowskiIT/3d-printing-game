@@ -107,6 +107,8 @@ export interface GameState {
   printers: Record<string, number>;
   /** Finished pieces in post-processing (wash and cure), oldest first (systems/printerTypes.ts). */
   curing: CuringBatch[];
+  /** Printer types whose technician is hired (content/printerTypes.ts `technician`), in hiring order. */
+  techs: string[];
 }
 
 /** Pieces of one model leaving post-processing together: work (figurines), seconds left, precision premium and filament cost (null = unknown). */
@@ -161,6 +163,7 @@ export const createState = (): GameState => ({
   goalAt: [],
   printers: {},
   curing: [],
+  techs: [],
 });
 
 export const has = (s: GameState, id: string) => s.done.includes(id);

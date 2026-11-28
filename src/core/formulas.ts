@@ -5,7 +5,7 @@ import { DEFAULT_MATERIAL, MATERIAL, materialDemand } from '../content/materials
 import { MARKET_EVENT } from '../content/events';
 import { calendarOn } from '../content/calendar';
 import { DEFAULT_MODEL, MODEL, type PrintModel } from '../content/models';
-import { typeOf, type PrinterType } from '../content/printerTypes';
+import { EXTRA_PRINTER_TYPES, typeOf, type PrinterType } from '../content/printerTypes';
 import { patLvl, type GameState } from './state';
 
 /** Pure formulas derived from state. No side effects: used by core, UI and tests. */
@@ -67,7 +67,9 @@ export const fabCost = (s: GameState) => BAL.fabCost * BAL.fabCostGrowth ** s.fa
 export const supply = (s: GameState) => (BAL.garagePower + s.panels * BAL.panelPower) * mod(s, 'power');
 /** Power the quantum computer draws while owned (shares the supply with the farms). */
 export const quantumDraw = (s: GameState) => (s.qOn ? s.qLvl * BAL.quantumDraw : 0);
-export const drawP = (s: GameState) => s.farm * BAL.farmDraw + quantumDraw(s);
+export const drawP = (s: GameState) => s.farm * BAL.farmDraw + quantumDraw(s) + typeDraw(s);
+/** Power the printers of other types draw (industrial printers), shared with the farms. */
+export const typeDraw = (s: GameState) => EXTRA_PRINTER_TYPES.reduce((sum, t) => sum + t.power * (s.printers?.[t.id] ?? 0), 0);
 export const eff = (s: GameState) => (drawP(s) ? Math.min(1, supply(s) / drawP(s)) : 1);
 
 export const trendOn = (s: GameState) => s.goal >= 2;
@@ -88,9 +90,10 @@ export const demand = (s: GameState, m = model(s), price = s.price) =>
 export const boostMul = (s: GameState) => (s.boostT > 0 ? BAL.boostMultiplier : 1);
 export const rateBase = (s: GameState) => (BAL.basePrinters + s.auto + s.farm * BAL.farmPrinters * eff(s)) * s.spd * boostMul(s) * (1 + 0.15 * patLvl(s, 'speed')) * precisionSpeed(s) * hard(s, BAL.realisticSpeedMul) * SPEED / (s.slow || 1) * mod(s, 'speed');
 export const rate1 = (s: GameState) => rateBase(s) * (1 - s.brk);
-/** Work per second of one printer of a type other than FDM: same research, boost and breakdown modifiers as FDM. */
+/** Work per second of one printer of a type other than FDM: same research, boost and breakdown modifiers as FDM.
+ *  Types that draw power slow down with the farms when supply runs short. */
 export const typeSpeed = (s: GameState, type: PrinterType) =>
-  type.speed * s.spd * boostMul(s) * (1 + 0.15 * patLvl(s, 'speed')) * precisionSpeed(s) * hard(s, BAL.realisticSpeedMul) * SPEED / (s.slow || 1) * mod(s, 'speed') * (1 - s.brk);
+  type.speed * (type.power > 0 ? eff(s) : 1) * s.spd * boostMul(s) * (1 + 0.15 * patLvl(s, 'speed')) * precisionSpeed(s) * hard(s, BAL.realisticSpeedMul) * SPEED / (s.slow || 1) * mod(s, 'speed') * (1 - s.brk);
 /** Price of the next printer of a type other than FDM. */
 export const typeCost = (s: GameState, type: PrinterType) =>
   type.cost * type.costGrowth ** (s.printers?.[type.id] ?? 0) * mod(s, 'printerCost') * hard(s, BAL.realisticCostMul);

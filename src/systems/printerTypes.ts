@@ -10,21 +10,47 @@ import { materialStock } from './materials';
 import { buySpool, deliver, printWork } from './production';
 import { bookCash } from './workshopStats';
 
-/** Printer types other than FDM (content/printerTypes.ts): buying printers, printing their models from their own
- *  feedstock, and the post-processing queue (wash and cure) between the printer and the stock. */
+/** Printer types other than FDM (content/printerTypes.ts): buying printers, the power and technician some types
+ *  need first, printing their models from their own feedstock, and the post-processing queue (wash and cure)
+ *  between the printer and the stock. */
 
 /** A type shows up in the shop once enough figurines have been printed. */
 export const typeVisible = (s: GameState, type: PrinterType) => s.ph === 1 && s.total >= type.unlockAt;
 /** Owned designs printed on a type. */
 export const typeModels = (s: GameState, type: PrinterType) => s.mdls.filter(id => MODEL[id] && typeOf(MODEL[id]) === type);
 
-/** Buys a printer of a type. It needs an owned design for that type; the new printer joins the model that already
- *  has the most printers of the type (the first design when none has any). */
+/** Power infrastructure for types that draw power: the farm research, which brings the power supply and panels. */
+export const powerReady = (s: GameState, type: PrinterType) => type.power <= 0 || s.farmOn;
+/** The type's technician is hired, or it needs none. */
+export const technicianReady = (s: GameState, type: PrinterType) => type.technician <= 0 || s.techs.includes(type.id);
+/** What a type still needs before its first printer: a design, power, a technician (null = ready). */
+export function typeMissing(s: GameState, type: PrinterType): 'design' | 'power' | 'technician' | null {
+  if (!typeModels(s, type).length) return 'design';
+  if (!powerReady(s, type)) return 'power';
+  return technicianReady(s, type) ? null : 'technician';
+}
+
+/** Hires the technician a type needs. One per type; every hired technician makes breakdowns rarer. */
+export function hireTechnician(s: GameState, ctx: Ctx, id: string): boolean {
+  if (!Object.hasOwn(EXTRA_PRINTER_TYPE, id)) return false;
+  const type = EXTRA_PRINTER_TYPE[id], cost = type.technician;
+  if (cost <= 0 || !typeVisible(s, type) || s.techs.includes(id) || s.zl < cost) return false;
+  bookCash(s, 'other', cost);
+  s.techs.push(id);
+  // The next breakdown, already scheduled, comes later too.
+  if (s.brk === 0) s.brkT /= BAL.technicianBreakdown;
+  log(s, ctx, 'ptTech', Math.round((1 - BAL.technicianBreakdown) * 100));
+  return true;
+}
+
+/** Buys a printer of a type. It needs an owned design for that type, and power and a technician when the type asks
+ *  for them; the new printer joins the model that already has the most printers of the type (the first design when
+ *  none has any). */
 export function buyPrinter(s: GameState, ctx: Ctx, id: string): boolean {
   if (!Object.hasOwn(EXTRA_PRINTER_TYPE, id)) return false;
   const type = EXTRA_PRINTER_TYPE[id], designs = typeModels(s, type);
   const cost = typeCost(s, type);
-  if (!typeVisible(s, type) || !designs.length || s.zl < cost) return false;
+  if (!typeVisible(s, type) || typeMissing(s, type) || s.zl < cost) return false;
   bookCash(s, 'equipment', cost);
   s.printers[id] = (s.printers[id] ?? 0) + 1;
   const target = designs.reduce((best, m) => (s.fleet[m] ?? 0) > (s.fleet[best] ?? 0) ? m : best, designs[0]);
@@ -56,11 +82,15 @@ export function printerTypesSystem(s: GameState, dt: number, ctx: Ctx) {
   }
 }
 
-/** Save validation for the printer pools and the post-processing queue (for core/saveValidation). */
+/** Save validation for the printer pools, the technicians and the post-processing queue (for core/saveValidation). */
 export function validPrinterTypes(s: GameState) {
-  const pools = s.printers, queue = s.curing;
+  const pools = s.printers, queue = s.curing, techs = s.techs;
   if (!pools || typeof pools !== 'object' || Array.isArray(pools) || !Array.isArray(queue)) return false;
   if (!Object.entries(pools).every(([id, n]) => Object.hasOwn(EXTRA_PRINTER_TYPE, id) && Number.isSafeInteger(n) && n >= 0)) return false;
+  if (!Array.isArray(techs) || new Set(techs).size !== techs.length ||
+      !techs.every(id => typeof id === 'string' && Object.hasOwn(EXTRA_PRINTER_TYPE, id) && EXTRA_PRINTER_TYPE[id].technician > 0)) return false;
+  // Printers of a type that needs a technician were bought with one.
+  if (!Object.entries(pools).every(([id, n]) => n === 0 || technicianReady(s, EXTRA_PRINTER_TYPE[id]))) return false;
   const maxCure = Math.max(0, ...EXTRA_PRINTER_TYPES.map(t => t.cure));
   return queue.length <= MODELS.length * (maxCure + 1) && queue.every(b =>
     !!b && typeof b === 'object' && typeof b.id === 'string' && Object.hasOwn(MODEL, b.id) && s.mdls.includes(b.id) &&

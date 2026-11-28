@@ -39,7 +39,10 @@ describe('printer type registry', () => {
     expect(type.costGrowth).toBeGreaterThanOrEqual(1);
     expect(type.cure).toBeGreaterThanOrEqual(0);
     expect(type.buildWidth).toBeLessThanOrEqual(188);
-    for (const pair of [type.name, type.tag, type.desc]) { expect(pair).toHaveLength(2); pair.forEach(x => expect(x.trim()).not.toBe('')); }
+    expect(type.minWidth).toBeGreaterThanOrEqual(0);
+    expect(type.minWidth).toBeLessThan(type.buildWidth);
+    for (const v of [type.power, type.technician]) { expect(Number.isFinite(v)).toBe(true); expect(v).toBeGreaterThanOrEqual(0); }
+    for (const pair of [type.name, type.tag, type.desc, type.plate]) { expect(pair).toHaveLength(2); pair.forEach(x => expect(x.trim()).not.toBe('')); }
     const feed = MATERIAL[type.material];
     expect(feed, 'feedstock must be a material').toBeDefined();
     expect(type.unlockAt).toBeGreaterThanOrEqual(feed.unlockAt);
@@ -52,6 +55,7 @@ describe('printer type registry', () => {
     for (const m of MODELS) {
       if (m.printerType !== undefined) expect(PRINTER_TYPE[m.printerType], m.id).toBeDefined();
       expect(Math.max(...m.shape), m.id).toBeLessThanOrEqual(typeOf(m).buildWidth);
+      expect(Math.max(...m.shape), m.id).toBeGreaterThanOrEqual(typeOf(m).minWidth);
     }
     // Something has to make the free default model and the starting printers.
     expect(MODELS.filter(m => m.design === 0).every(m => typeOf(m) === FDM)).toBe(true);
