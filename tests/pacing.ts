@@ -1,0 +1,144 @@
+/** Pacing report: plays the balance bot at the shipped pace and measures time per goal, the gaps between purchases
+ *  and money per second over time. `npm run pacing` (scripts/pacing.ts) writes the result to docs/pacing.md.
+ *  Findings only, it never changes balance. Kept free of Node imports so `tsc` can check it with the rest of tests/. */
+import { BAL, setPace } from '../src/content/balance';
+import { GOALS } from '../src/content/goals';
+import type { GameState } from '../src/core/state';
+import { playthrough } from './bot';
+
+export const SEEDS = [1, 7, 42, 13, 99];
+/** A gap between purchases longer than this (minutes of game time at the shipped pace) before liftoff is a dead zone. */
+export const DEAD_ZONE_MIN = 3;
+/** Width of the money-per-second windows, in minutes of game time. */
+export const INCOME_WINDOW_MIN = 30;
+export const LIFTOFF = GOALS.findIndex(g => g.t[1] === 'Leave Earth');
+
+/** Everything the player can buy, as one counter each: a purchase is any of them going up. Automation that buys on
+ *  its own (purchasing manager, Self-replication) counts too. Spools are upkeep, not progress, so they are left out. */
+export const purchaseCounters = (s: GameState): number[] => [
+  s.auto, s.farm, s.panels, s.mkt, s.clk, s.mdls.length, s.done.length, s.techs.length,
+  Object.values(s.printers).reduce((a, n) => a + n, 0), s.drones, s.fabs, s.qOn ? 1 + s.qLvl : 0,
+];
+
+export interface Gap { from: number; to: number; len: number; goal: number }
+
+/** Gaps between consecutive purchases (minutes), from the start of the game up to `until`; `goalAt` gives the goal the
+ *  player was working on at a minute. The stretch from the last purchase to `until` counts as a gap too. */
+export function purchaseGaps(purchases: number[], until: number, goalAt: (min: number) => number): Gap[] {
+  const marks = [0, ...purchases.filter(m => m < until), until];
+  const out: Gap[] = [];
+  for (let i = 1; i < marks.length; i++) {
+    const from = marks[i - 1], to = marks[i];
+    if (to > from) out.push({ from, to, len: to - from, goal: goalAt(from) });
+  }
+  return out;
+}
+
+export const deadZones = (gaps: Gap[], threshold = DEAD_ZONE_MIN) => gaps.filter(g => g.len > threshold);
+
+/** Goal index in progress at a minute, from the minutes at which each goal was reached. */
+export const goalIndexAt = (goalMinutes: number[]) => (min: number) => {
+  let k = 0;
+  while (k < goalMinutes.length && goalMinutes[k] !== undefined && goalMinutes[k] <= min) k++;
+  return k;
+};
+
+/** Average money per second in consecutive windows, from (minute, money earned so far) samples. */
+export function incomeWindows(samples: [number, number][], windowMin = INCOME_WINDOW_MIN): number[] {
+  const out: number[] = [];
+  let start = 0, earnedAtStart = 0, last = 0;
+  for (const [m, earned] of samples) {
+    while (m >= start + windowMin) {
+      const end = start + windowMin;
+      // Earned money at the window end: this sample when it sits on the boundary, else the last one before it.
+      const atEnd = m === end ? earned : last;
+      out.push((atEnd - earnedAtStart) / (windowMin * 60));
+      earnedAtStart = atEnd; start = end;
+    }
+    last = earned;
+  }
+  return out;
+}
+
+export interface SeedRun { seed: number; ended: boolean; minutes: number; goalMinutes: number[]; purchases: number[]; income: number[] }
+
+/** One bot game at the shipped pace, with the same step and time limit as tests/balance.sim.test.ts. */
+export function runSeed(seed: number): SeedRun {
+  const P = BAL.pace;
+  const purchases: number[] = [];
+  const earned: [number, number][] = [];
+  let prev: number[] | undefined;
+  const r = playthrough(seed, 6 * P, Math.max(0.25, Math.min(1, P / 10)), undefined, (s, t) => {
+    const now = purchaseCounters(s);
+    if (prev && now.some((n, i) => n > prev![i])) purchases.push(t / 60);
+    prev = now;
+    earned.push([t / 60, s.runEarned]);
+  });
+  return { seed, ended: r.ended, minutes: r.minutes, goalMinutes: r.goalMinutes, purchases, income: incomeWindows(earned) };
+}
+
+const median = (a: number[]) => { const s = a.filter(Number.isFinite).sort((x, y) => x - y); return s.length ? s[Math.floor(s.length / 2)] : NaN; };
+const fmt = (m: number) => (Number.isFinite(m) ? m.toFixed(1) : 'n/a');
+const money = (v: number) => (!Number.isFinite(v) ? 'n/a' : v >= 1e6 ? `${(v / 1e6).toFixed(2)}M` : v >= 1e3 ? `${(v / 1e3).toFixed(1)}K` : v.toFixed(1));
+const goalName = (k: number) => (k < GOALS.length ? `${k + 1}. ${GOALS[k].t[1]}` : 'after the last goal');
+
+/** Plays the bot and returns the report (markdown). */
+export function buildReport(seeds = SEEDS): string {
+  setPace(BAL.pace);
+  const runs = seeds.map(runSeed);
+  const liftoff = (r: SeedRun) => r.goalMinutes[LIFTOFF] ?? r.minutes;
+  const gapsOf = (r: SeedRun) => purchaseGaps(r.purchases, liftoff(r), goalIndexAt(r.goalMinutes));
+  const zones = runs.flatMap(r => deadZones(gapsOf(r)).map(g => ({ seed: r.seed, ...g })));
+  const out: string[] = [];
+
+  out.push('# Pacing report', '',
+    `Generated by \`npm run pacing\`. Bot: \`tests/bot.ts\`, pace ${BAL.pace} (the shipped value), seeds ${seeds.join(', ')} ` +
+    `(${runs.filter(r => r.ended).length}/${runs.length} finished the game). All times are minutes of game time.`,
+    'The bot plays faster than a human (roughly 2x), so a human feels every gap about twice as long.',
+    `A **purchase** is anything bought: a printer, farm, panel, campaign, click tool, design, research node, technician, drone, factory or quantum upgrade (spools are upkeep and do not count).`,
+    `A **dead zone** is a gap between purchases longer than ${DEAD_ZONE_MIN} min before liftoff (goal ${LIFTOFF + 1}, "${GOALS[LIFTOFF].t[1]}").`, '');
+
+  out.push('## Summary', '',
+    '| Seed | Finished | Game length | Liftoff | Purchases before liftoff | Median gap | Longest gap | Dead zones |', '|---|---|---|---|---|---|---|---|',
+    ...runs.map(r => {
+      const gaps = gapsOf(r);
+      const longest = gaps.reduce((a, g) => (g.len > a.len ? g : a), gaps[0]);
+      return `| ${r.seed} | ${r.ended ? 'yes' : 'no'} | ${fmt(r.minutes)} | ${fmt(liftoff(r))} | ${r.purchases.filter(m => m < liftoff(r)).length} | ` +
+        `${fmt(median(gaps.map(g => g.len)))} | ${longest ? `${fmt(longest.len)} (at ${fmt(longest.from)}, goal ${longest.goal + 1})` : '-'} | ${deadZones(gaps).length} |`;
+    }), '');
+
+  out.push('## Time per goal', '',
+    'Minutes spent on each goal (from reaching the previous one), per seed, and the median. The last column is the median minute at which the goal is reached.', '',
+    `| Goal | ${seeds.map(s => `Seed ${s}`).join(' | ')} | Median | Reached at |`, `|---|${seeds.map(() => '---|').join('')}---|---|`,
+    ...GOALS.map((g, k) => {
+      const spent = runs.map(r => (r.goalMinutes[k] ?? NaN) - (k ? r.goalMinutes[k - 1] ?? NaN : 0));
+      return `| ${goalName(k)} | ${spent.map(fmt).join(' | ')} | ${fmt(median(spent))} | ${fmt(median(runs.map(r => r.goalMinutes[k] ?? NaN)))} |`;
+    }), '');
+
+  out.push(`## Dead zones (gaps over ${DEAD_ZONE_MIN} min before liftoff)`, '',
+    zones.length ? 'A dead zone is a stretch in which the bot bought nothing; "Goal" is the goal it was working on when the stretch began.' : 'None.', '');
+  if (zones.length) {
+    const byGoal = new Map<number, typeof zones>();
+    for (const z of zones) byGoal.set(z.goal, [...(byGoal.get(z.goal) ?? []), z]);
+    /** Minutes all seeds together spent on a goal, to show how much of it is dead time. */
+    const goalTime = (k: number) => runs.reduce((a, r) => a + Math.max(0, Math.min(r.goalMinutes[k] ?? r.minutes, liftoff(r)) - (k ? r.goalMinutes[k - 1] ?? 0 : 0)), 0);
+    out.push('By goal (all seeds together):', '', '| Goal | Seeds hit | Dead zones | Longest | Total | Share of goal time |', '|---|---|---|---|---|---|',
+      ...[...byGoal].sort((a, b) => a[0] - b[0]).map(([k, zs]) => {
+        const total = zs.reduce((a, z) => a + z.len, 0);
+        return `| ${goalName(k)} | ${new Set(zs.map(z => z.seed)).size}/${runs.length} | ${zs.length} | ${fmt(Math.max(...zs.map(z => z.len)))} | ${fmt(total)} | ${Math.round(100 * total / goalTime(k))}% |`;
+      }), '');
+    out.push('<details><summary>Every dead zone</summary>', '', '| Seed | From | To | Length | Goal |', '|---|---|---|---|---|',
+      ...zones.map(z => `| ${z.seed} | ${fmt(z.from)} | ${fmt(z.to)} | ${fmt(z.len)} | ${goalName(z.goal)} |`), '', '</details>', '');
+  }
+
+  const windows = Math.max(...runs.map(r => r.income.length));
+  out.push('## Money per second over time', '',
+    `Average money earned per second in ${INCOME_WINDOW_MIN}-minute windows of game time (\`runEarned\`). After liftoff the space phase earns no money, so the rate drops to 0.`, '',
+    `| Minutes | ${seeds.map(s => `Seed ${s}`).join(' | ')} | Median |`, `|---|${seeds.map(() => '---|').join('')}---|`,
+    ...Array.from({ length: windows }, (_, i) => {
+      const v = runs.map(r => r.income[i] ?? NaN);
+      return `| ${i * INCOME_WINDOW_MIN}–${(i + 1) * INCOME_WINDOW_MIN} | ${v.map(money).join(' | ')} | ${money(median(v))} |`;
+    }), '');
+
+  return out.join('\n') + '\n';
+}
