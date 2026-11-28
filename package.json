@@ -14,6 +14,8 @@
     "test:watch": "vitest",
     "e2e": "playwright test",
     "e2e:layout": "playwright test e2e/layout.spec.ts",
+    "e2e:visual": "playwright test -c playwright.visual.config.ts",
+    "e2e:visual:docker": "node scripts/visual-docker.mjs",
     "typecheck": "tsc --noEmit",
     "treeaudit": "vite-node scripts/treeaudit.ts",
     "pacing": "vite-node scripts/pacing.ts",
